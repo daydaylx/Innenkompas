@@ -1,0 +1,58 @@
+name: innenkompass
+description: "Innenkompass - Lokal-first, regelbasiertes mobiles System zur situationsbasierten Selbstwahrnehmung und Selbstregulation"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # State Management
+  flutter_riverpod: ^2.4.9
+  riverpod_annotation: ^2.3.3
+
+  # Navigation
+  go_router: ^13.0.0
+
+  # Database
+  drift: ^2.14.1
+  sqlite3: ^2.4.0
+  path_provider: ^2.1.1
+
+  # Security
+  flutter_secure_storage: ^9.0.0
+
+  # Notifications
+  flutter_local_notifications: ^16.3.0
+
+  # Authentication
+  local_auth: ^2.1.6
+
+  # Code Generation
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+  # Code Generation
+  build_runner: ^2.4.7
+  freezed: ^2.4.6
+  json_serializable: ^6.7.1
+  riverpod_generator: ^2.3.9
+  drift_dev: ^2.14.1
+
+flutter:
+  uses-material-design: true
+
+  # Uncomment to add assets
+  # assets:
+  #   - assets/images/
+  #   - assets/icons/
