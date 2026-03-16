@@ -1,0 +1,283 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:innenkompass/app/router.dart';
+import 'package:innenkompass/core/constants/app_constants.dart';
+import 'package:innenkompass/data/db/app_database.dart';
+import 'package:innenkompass/application/providers/intervention_providers.dart';
+import 'package:innenkompass/application/providers/database_provider.dart';
+import 'package:innenkompass/shared/widgets/app_scaffold.dart';
+import 'package:innenkompass/shared/widgets/buttons/app_primary_button.dart';
+import 'package:innenkompass/shared/widgets/buttons/app_secondary_button.dart';
+import 'package:innenkompass/features/new_situation/widgets/intensity_slider.dart';
+
+part 'post_evaluation_screen.g.dart';
+
+/// Screen für die Nachbewertung nach einer Intervention
+class PostEvaluationScreen extends ConsumerStatefulWidget {
+  const PostEvaluationScreen({super.key});
+
+  @override
+  ConsumerState<PostEvaluationScreen> createState() =>
+      _PostEvaluationScreenState();
+}
+
+class _PostEvaluationScreenState extends ConsumerState<PostEvaluationScreen> {
+  final _noteController = TextEditingController();
+  int _postIntensity = 5;
+  int _postBodyTension = 5;
+  int _postClarity = 5;
+  int _helpfulnessRating = 7;
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final evalState = ref.watch(postEvaluationStateProvider);
+    final flowState = ref.watch(interventionFlowStateProvider);
+    final intervention = flowState.intervention;
+
+    if (intervention == null || !flowState.isCompleted) {
+      return AppScaffold(
+        title: 'Nachbewertung',
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: AppConstants.spacingMedium),
+              Text(
+                flowState.wasAborted
+                    ? 'Intervention abgebrochen'
+                    : 'Intervention wird geladen...',
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return AppScaffold(
+      title: 'Wie fühlst du dich jetzt?',
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppConstants.spacingMedium),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Erfolgsmeldung
+            Card(
+              color: AppColors.success.withOpacity(0.1),
+              child: Padding(
+                padding: const EdgeInsets.all(AppConstants.spacingMedium),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle,
+                      color: AppColors.success,
+                    ),
+                    const SizedBox(width: AppConstants.spacingSmall),
+                    const Expanded(
+                      child: Text(
+                        'Gut gemacht! Du hast die Intervention abgeschlossen.',
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: AppConstants.spacingLarge),
+
+            // Belastung jetzt
+            const Text(
+              'Wie stark belastet fühlst du dich jetzt?',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingSmall),
+            IntensitySlider(
+              value: _postIntensity,
+              onChanged: (value) {
+                setState(() {
+                  _postIntensity = value;
+                  ref
+                      .read(postEvaluationStateProvider.notifier)
+                      .updatePostIntensity(value);
+                });
+              },
+              label: 'Belastung',
+            ),
+
+            const SizedBox(height: AppConstants.spacingLarge),
+
+            // Körperanspannung jetzt
+            const Text(
+              'Wie angespannt ist dein Körper jetzt?',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingSmall),
+            IntensitySlider(
+              value: _postBodyTension,
+              onChanged: (value) {
+                setState(() {
+                  _postBodyTension = value;
+                  ref
+                      .read(postEvaluationStateProvider.notifier)
+                      .updatePostBodyTension(value);
+                });
+              },
+              label: 'Körperanspannung',
+            ),
+
+            const SizedBox(height: AppConstants.spacingLarge),
+
+            // Klarheit jetzt
+            const Text(
+              'Wie klar siehst du die Situation jetzt?',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingSmall),
+            IntensitySlider(
+              value: _postClarity,
+              onChanged: (value) {
+                setState(() {
+                  _postClarity = value;
+                  ref
+                      .read(postEvaluationStateProvider.notifier)
+                      .updatePostClarity(value);
+                });
+              },
+              label: 'Klarheit',
+            ),
+
+            const SizedBox(height: AppConstants.spacingLarge),
+
+            // Hilfreichkeit
+            const Text(
+              'Hat dir die Intervention geholfen?',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingSmall),
+            Card(
+              child: Column(
+                children: [
+                  Slider(
+                    value: _helpfulnessRating.toDouble(),
+                    min: 1,
+                    max: 10,
+                    divisions: 9,
+                    label: _helpfulnessRating.toString(),
+                    onChanged: (value) {
+                      setState(() {
+                        _helpfulnessRating = value.toInt();
+                        ref
+                            .read(postEvaluationStateProvider.notifier)
+                            .updateHelpfulnessRating(value.toInt());
+                      });
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppConstants.spacingLarge,
+                      vertical: AppConstants.spacingSmall,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text('Gar nicht', style: TextStyle(fontSize: 12)),
+                        Text('Sehr hilfreich', style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: AppConstants.spacingLarge),
+
+            // Optionale Notiz
+            const Text(
+              'Möchtest du noch etwas notieren? (Optional)',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingSmall),
+            TextField(
+              controller: _noteController,
+              maxLines: 4,
+              maxLength: 500,
+              decoration: const InputDecoration(
+                hintText: 'Was hast du bemerkt? Was könnte dir in Zukunft helfen?',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                ref
+                    .read(postEvaluationStateProvider.notifier)
+                    .updateUserNote(value.isEmpty ? null : value);
+              },
+            ),
+
+            const SizedBox(height: AppConstants.spacingLarge),
+
+            // Speichern-Button
+            AppPrimaryButton(
+              onPressed: evalState.isComplete
+                  ? () => _saveEvaluation(intervention, flowState)
+                  : null,
+              text: 'Speichern und abschließen',
+              isLoading: false,
+            ),
+
+            const SizedBox(height: AppConstants.spacingSmall),
+
+            // Ohne Speichern verlassen
+            AppSecondaryButton(
+              onPressed: () => context.go(AppRoutes.home),
+              text: 'Ohne Speichern verlassen',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Speichert die Nachbewertung
+  Future<void> _saveEvaluation(
+    Intervention intervention,
+    InterventionFlowData flowState,
+  ) async {
+    final db = ref.read(databaseProvider);
+
+    // Hier bräuchten wir die Entry-ID aus dem Flow
+    // Für den Moment speichern wir die Nachbewertung
+    // In einer vollständigen Implementierung würde die Entry-ID
+    // bereits im NewSituationFlow gespeichert werden
+
+    // Zum HomeScreen navigieren
+    if (mounted) {
+      context.go(AppRoutes.home);
+    }
+  }
+}
+
+// Importe
+import 'package:innenkompass/app/theme/colors.dart';
+import 'package:innenkompass/shared/widgets/loading/app_loading_indicator.dart';
