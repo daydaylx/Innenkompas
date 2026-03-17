@@ -1,6 +1,7 @@
 /// Intervention types in Innenkompass.
 ///
 /// These are the categories of interventions available in the system.
+/// abc3 and rsaAbcde are worksheet-style templates added per konzeptv2neu.md.
 enum InterventionType {
   regulation,
   factCheck,
@@ -8,7 +9,13 @@ enum InterventionType {
   ruminationStop,
   communication,
   overwhelmStructure,
-  selfValueCheck;
+  selfValueCheck,
+
+  /// ABC-3 Kurzprotokoll: Auslöser → Bewertung → Konsequenzen (Gefühl/Körper/Verhalten)
+  abc3,
+
+  /// RSA/ABCDE: Rationale Selbstanalyse mit Disputation und rationaler Alternative
+  rsaAbcde;
 
   /// Get display label with emoji
   String get displayLabel {
@@ -27,6 +34,10 @@ enum InterventionType {
         return '📋 Überforderungsstruktur';
       case InterventionType.selfValueCheck:
         return '💪 Selbstabwertungscheck';
+      case InterventionType.abc3:
+        return '📝 ABC-3 Protokoll';
+      case InterventionType.rsaAbcde:
+        return '🔬 Rationale Selbstanalyse';
     }
   }
 
@@ -47,6 +58,10 @@ enum InterventionType {
         return '📋';
       case InterventionType.selfValueCheck:
         return '💪';
+      case InterventionType.abc3:
+        return '📝';
+      case InterventionType.rsaAbcde:
+        return '🔬';
     }
   }
 
@@ -67,6 +82,10 @@ enum InterventionType {
         return 'Überforderungsstruktur';
       case InterventionType.selfValueCheck:
         return 'Selbstabwertungscheck';
+      case InterventionType.abc3:
+        return 'ABC-3 Protokoll';
+      case InterventionType.rsaAbcde:
+        return 'Rationale Selbstanalyse';
     }
   }
 
@@ -87,6 +106,10 @@ enum InterventionType {
         return 'Überforderung in handhabbare Schritte aufteilen';
       case InterventionType.selfValueCheck:
         return 'Erkennen und challengen von Selbstabwertung';
+      case InterventionType.abc3:
+        return 'Situation, Gedanken und Konsequenzen strukturiert erfassen';
+      case InterventionType.rsaAbcde:
+        return 'Gedanken prüfen (Wahr? Hilfreich?) und rationale Alternative entwickeln';
     }
   }
 
@@ -107,6 +130,10 @@ enum InterventionType {
         return 360; // 6 minutes
       case InterventionType.selfValueCheck:
         return 300; // 5 minutes
+      case InterventionType.abc3:
+        return 480; // 8 minutes
+      case InterventionType.rsaAbcde:
+        return 720; // 12 minutes
     }
   }
 
@@ -127,6 +154,10 @@ enum InterventionType {
         return 120; // 2 minutes
       case InterventionType.selfValueCheck:
         return 120; // 2 minutes
+      case InterventionType.abc3:
+        return 300; // 5 minutes
+      case InterventionType.rsaAbcde:
+        return 480; // 8 minutes
     }
   }
 
@@ -147,6 +178,10 @@ enum InterventionType {
         return 900; // 15 minutes
       case InterventionType.selfValueCheck:
         return 900; // 15 minutes
+      case InterventionType.abc3:
+        return 900; // 15 minutes
+      case InterventionType.rsaAbcde:
+        return 1800; // 30 minutes
     }
   }
 
@@ -161,6 +196,8 @@ enum InterventionType {
       case InterventionType.communication:
       case InterventionType.overwhelmStructure:
       case InterventionType.selfValueCheck:
+      case InterventionType.abc3:
+      case InterventionType.rsaAbcde:
         return false;
     }
   }
@@ -172,6 +209,8 @@ enum InterventionType {
       case InterventionType.communication:
       case InterventionType.overwhelmStructure:
       case InterventionType.selfValueCheck:
+      case InterventionType.abc3:
+      case InterventionType.rsaAbcde:
         return true;
       case InterventionType.regulation:
       case InterventionType.impulsePause:

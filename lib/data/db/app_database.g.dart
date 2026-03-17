@@ -90,6 +90,18 @@ class $SituationEntriesTable extends SituationEntries
   late final GeneratedColumn<String> actualBehavior = GeneratedColumn<String>(
       'actual_behavior', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _needOrWoundedPointMeta =
+      const VerificationMeta('needOrWoundedPoint');
+  @override
+  late final GeneratedColumn<String> needOrWoundedPoint =
+      GeneratedColumn<String>('need_or_wounded_point', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _nextStepMeta =
+      const VerificationMeta('nextStep');
+  @override
+  late final GeneratedColumn<String> nextStep = GeneratedColumn<String>(
+      'next_step', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _systemStateMeta =
       const VerificationMeta('systemState');
   @override
@@ -205,6 +217,8 @@ class $SituationEntriesTable extends SituationEntries
         automaticThought,
         firstImpulse,
         actualBehavior,
+        needOrWoundedPoint,
+        nextStep,
         systemState,
         isCrisis,
         interventionType,
@@ -314,6 +328,16 @@ class $SituationEntriesTable extends SituationEntries
           _actualBehaviorMeta,
           actualBehavior.isAcceptableOrUnknown(
               data['actual_behavior']!, _actualBehaviorMeta));
+    }
+    if (data.containsKey('need_or_wounded_point')) {
+      context.handle(
+          _needOrWoundedPointMeta,
+          needOrWoundedPoint.isAcceptableOrUnknown(
+              data['need_or_wounded_point']!, _needOrWoundedPointMeta));
+    }
+    if (data.containsKey('next_step')) {
+      context.handle(_nextStepMeta,
+          nextStep.isAcceptableOrUnknown(data['next_step']!, _nextStepMeta));
     }
     if (data.containsKey('system_state')) {
       context.handle(
@@ -428,6 +452,10 @@ class $SituationEntriesTable extends SituationEntries
           .read(DriftSqlType.string, data['${effectivePrefix}first_impulse'])!,
       actualBehavior: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}actual_behavior']),
+      needOrWoundedPoint: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}need_or_wounded_point']),
+      nextStep: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}next_step']),
       systemState: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}system_state'])!,
       isCrisis: attachedDatabase.typeMapping
@@ -481,6 +509,8 @@ class SituationEntryData extends DataClass
   final String automaticThought;
   final String firstImpulse;
   final String? actualBehavior;
+  final String? needOrWoundedPoint;
+  final String? nextStep;
   final String systemState;
   final bool isCrisis;
   final String? interventionType;
@@ -509,6 +539,8 @@ class SituationEntryData extends DataClass
       required this.automaticThought,
       required this.firstImpulse,
       this.actualBehavior,
+      this.needOrWoundedPoint,
+      this.nextStep,
       required this.systemState,
       required this.isCrisis,
       this.interventionType,
@@ -546,6 +578,12 @@ class SituationEntryData extends DataClass
     map['first_impulse'] = Variable<String>(firstImpulse);
     if (!nullToAbsent || actualBehavior != null) {
       map['actual_behavior'] = Variable<String>(actualBehavior);
+    }
+    if (!nullToAbsent || needOrWoundedPoint != null) {
+      map['need_or_wounded_point'] = Variable<String>(needOrWoundedPoint);
+    }
+    if (!nullToAbsent || nextStep != null) {
+      map['next_step'] = Variable<String>(nextStep);
     }
     map['system_state'] = Variable<String>(systemState);
     map['is_crisis'] = Variable<bool>(isCrisis);
@@ -603,6 +641,12 @@ class SituationEntryData extends DataClass
       actualBehavior: actualBehavior == null && nullToAbsent
           ? const Value.absent()
           : Value(actualBehavior),
+      needOrWoundedPoint: needOrWoundedPoint == null && nullToAbsent
+          ? const Value.absent()
+          : Value(needOrWoundedPoint),
+      nextStep: nextStep == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextStep),
       systemState: Value(systemState),
       isCrisis: Value(isCrisis),
       interventionType: interventionType == null && nullToAbsent
@@ -654,6 +698,9 @@ class SituationEntryData extends DataClass
       automaticThought: serializer.fromJson<String>(json['automaticThought']),
       firstImpulse: serializer.fromJson<String>(json['firstImpulse']),
       actualBehavior: serializer.fromJson<String?>(json['actualBehavior']),
+      needOrWoundedPoint:
+          serializer.fromJson<String?>(json['needOrWoundedPoint']),
+      nextStep: serializer.fromJson<String?>(json['nextStep']),
       systemState: serializer.fromJson<String>(json['systemState']),
       isCrisis: serializer.fromJson<bool>(json['isCrisis']),
       interventionType: serializer.fromJson<String?>(json['interventionType']),
@@ -689,6 +736,8 @@ class SituationEntryData extends DataClass
       'automaticThought': serializer.toJson<String>(automaticThought),
       'firstImpulse': serializer.toJson<String>(firstImpulse),
       'actualBehavior': serializer.toJson<String?>(actualBehavior),
+      'needOrWoundedPoint': serializer.toJson<String?>(needOrWoundedPoint),
+      'nextStep': serializer.toJson<String?>(nextStep),
       'systemState': serializer.toJson<String>(systemState),
       'isCrisis': serializer.toJson<bool>(isCrisis),
       'interventionType': serializer.toJson<String?>(interventionType),
@@ -721,6 +770,8 @@ class SituationEntryData extends DataClass
           String? automaticThought,
           String? firstImpulse,
           Value<String?> actualBehavior = const Value.absent(),
+          Value<String?> needOrWoundedPoint = const Value.absent(),
+          Value<String?> nextStep = const Value.absent(),
           String? systemState,
           bool? isCrisis,
           Value<String?> interventionType = const Value.absent(),
@@ -754,6 +805,10 @@ class SituationEntryData extends DataClass
         firstImpulse: firstImpulse ?? this.firstImpulse,
         actualBehavior:
             actualBehavior.present ? actualBehavior.value : this.actualBehavior,
+        needOrWoundedPoint: needOrWoundedPoint.present
+            ? needOrWoundedPoint.value
+            : this.needOrWoundedPoint,
+        nextStep: nextStep.present ? nextStep.value : this.nextStep,
         systemState: systemState ?? this.systemState,
         isCrisis: isCrisis ?? this.isCrisis,
         interventionType: interventionType.present
@@ -812,6 +867,10 @@ class SituationEntryData extends DataClass
       actualBehavior: data.actualBehavior.present
           ? data.actualBehavior.value
           : this.actualBehavior,
+      needOrWoundedPoint: data.needOrWoundedPoint.present
+          ? data.needOrWoundedPoint.value
+          : this.needOrWoundedPoint,
+      nextStep: data.nextStep.present ? data.nextStep.value : this.nextStep,
       systemState:
           data.systemState.present ? data.systemState.value : this.systemState,
       isCrisis: data.isCrisis.present ? data.isCrisis.value : this.isCrisis,
@@ -861,6 +920,8 @@ class SituationEntryData extends DataClass
           ..write('automaticThought: $automaticThought, ')
           ..write('firstImpulse: $firstImpulse, ')
           ..write('actualBehavior: $actualBehavior, ')
+          ..write('needOrWoundedPoint: $needOrWoundedPoint, ')
+          ..write('nextStep: $nextStep, ')
           ..write('systemState: $systemState, ')
           ..write('isCrisis: $isCrisis, ')
           ..write('interventionType: $interventionType, ')
@@ -894,6 +955,8 @@ class SituationEntryData extends DataClass
         automaticThought,
         firstImpulse,
         actualBehavior,
+        needOrWoundedPoint,
+        nextStep,
         systemState,
         isCrisis,
         interventionType,
@@ -926,6 +989,8 @@ class SituationEntryData extends DataClass
           other.automaticThought == this.automaticThought &&
           other.firstImpulse == this.firstImpulse &&
           other.actualBehavior == this.actualBehavior &&
+          other.needOrWoundedPoint == this.needOrWoundedPoint &&
+          other.nextStep == this.nextStep &&
           other.systemState == this.systemState &&
           other.isCrisis == this.isCrisis &&
           other.interventionType == this.interventionType &&
@@ -956,6 +1021,8 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
   final Value<String> automaticThought;
   final Value<String> firstImpulse;
   final Value<String?> actualBehavior;
+  final Value<String?> needOrWoundedPoint;
+  final Value<String?> nextStep;
   final Value<String> systemState;
   final Value<bool> isCrisis;
   final Value<String?> interventionType;
@@ -984,6 +1051,8 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     this.automaticThought = const Value.absent(),
     this.firstImpulse = const Value.absent(),
     this.actualBehavior = const Value.absent(),
+    this.needOrWoundedPoint = const Value.absent(),
+    this.nextStep = const Value.absent(),
     this.systemState = const Value.absent(),
     this.isCrisis = const Value.absent(),
     this.interventionType = const Value.absent(),
@@ -1013,6 +1082,8 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     required String automaticThought,
     required String firstImpulse,
     this.actualBehavior = const Value.absent(),
+    this.needOrWoundedPoint = const Value.absent(),
+    this.nextStep = const Value.absent(),
     required String systemState,
     this.isCrisis = const Value.absent(),
     this.interventionType = const Value.absent(),
@@ -1050,6 +1121,8 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     Expression<String>? automaticThought,
     Expression<String>? firstImpulse,
     Expression<String>? actualBehavior,
+    Expression<String>? needOrWoundedPoint,
+    Expression<String>? nextStep,
     Expression<String>? systemState,
     Expression<bool>? isCrisis,
     Expression<String>? interventionType,
@@ -1080,6 +1153,9 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
       if (automaticThought != null) 'automatic_thought': automaticThought,
       if (firstImpulse != null) 'first_impulse': firstImpulse,
       if (actualBehavior != null) 'actual_behavior': actualBehavior,
+      if (needOrWoundedPoint != null)
+        'need_or_wounded_point': needOrWoundedPoint,
+      if (nextStep != null) 'next_step': nextStep,
       if (systemState != null) 'system_state': systemState,
       if (isCrisis != null) 'is_crisis': isCrisis,
       if (interventionType != null) 'intervention_type': interventionType,
@@ -1113,6 +1189,8 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
       Value<String>? automaticThought,
       Value<String>? firstImpulse,
       Value<String?>? actualBehavior,
+      Value<String?>? needOrWoundedPoint,
+      Value<String?>? nextStep,
       Value<String>? systemState,
       Value<bool>? isCrisis,
       Value<String?>? interventionType,
@@ -1141,6 +1219,8 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
       automaticThought: automaticThought ?? this.automaticThought,
       firstImpulse: firstImpulse ?? this.firstImpulse,
       actualBehavior: actualBehavior ?? this.actualBehavior,
+      needOrWoundedPoint: needOrWoundedPoint ?? this.needOrWoundedPoint,
+      nextStep: nextStep ?? this.nextStep,
       systemState: systemState ?? this.systemState,
       isCrisis: isCrisis ?? this.isCrisis,
       interventionType: interventionType ?? this.interventionType,
@@ -1202,6 +1282,12 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     }
     if (actualBehavior.present) {
       map['actual_behavior'] = Variable<String>(actualBehavior.value);
+    }
+    if (needOrWoundedPoint.present) {
+      map['need_or_wounded_point'] = Variable<String>(needOrWoundedPoint.value);
+    }
+    if (nextStep.present) {
+      map['next_step'] = Variable<String>(nextStep.value);
     }
     if (systemState.present) {
       map['system_state'] = Variable<String>(systemState.value);
@@ -1266,6 +1352,8 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
           ..write('automaticThought: $automaticThought, ')
           ..write('firstImpulse: $firstImpulse, ')
           ..write('actualBehavior: $actualBehavior, ')
+          ..write('needOrWoundedPoint: $needOrWoundedPoint, ')
+          ..write('nextStep: $nextStep, ')
           ..write('systemState: $systemState, ')
           ..write('isCrisis: $isCrisis, ')
           ..write('interventionType: $interventionType, ')
@@ -2727,6 +2815,8 @@ typedef $$SituationEntriesTableCreateCompanionBuilder
   required String automaticThought,
   required String firstImpulse,
   Value<String?> actualBehavior,
+  Value<String?> needOrWoundedPoint,
+  Value<String?> nextStep,
   required String systemState,
   Value<bool> isCrisis,
   Value<String?> interventionType,
@@ -2757,6 +2847,8 @@ typedef $$SituationEntriesTableUpdateCompanionBuilder
   Value<String> automaticThought,
   Value<String> firstImpulse,
   Value<String?> actualBehavior,
+  Value<String?> needOrWoundedPoint,
+  Value<String?> nextStep,
   Value<String> systemState,
   Value<bool> isCrisis,
   Value<String?> interventionType,
@@ -2826,6 +2918,13 @@ class $$SituationEntriesTableFilterComposer
   ColumnFilters<String> get actualBehavior => $composableBuilder(
       column: $table.actualBehavior,
       builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get needOrWoundedPoint => $composableBuilder(
+      column: $table.needOrWoundedPoint,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get nextStep => $composableBuilder(
+      column: $table.nextStep, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get systemState => $composableBuilder(
       column: $table.systemState, builder: (column) => ColumnFilters(column));
@@ -2932,6 +3031,13 @@ class $$SituationEntriesTableOrderingComposer
       column: $table.actualBehavior,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get needOrWoundedPoint => $composableBuilder(
+      column: $table.needOrWoundedPoint,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get nextStep => $composableBuilder(
+      column: $table.nextStep, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get systemState => $composableBuilder(
       column: $table.systemState, builder: (column) => ColumnOrderings(column));
 
@@ -3030,6 +3136,12 @@ class $$SituationEntriesTableAnnotationComposer
   GeneratedColumn<String> get actualBehavior => $composableBuilder(
       column: $table.actualBehavior, builder: (column) => column);
 
+  GeneratedColumn<String> get needOrWoundedPoint => $composableBuilder(
+      column: $table.needOrWoundedPoint, builder: (column) => column);
+
+  GeneratedColumn<String> get nextStep =>
+      $composableBuilder(column: $table.nextStep, builder: (column) => column);
+
   GeneratedColumn<String> get systemState => $composableBuilder(
       column: $table.systemState, builder: (column) => column);
 
@@ -3113,6 +3225,8 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             Value<String> automaticThought = const Value.absent(),
             Value<String> firstImpulse = const Value.absent(),
             Value<String?> actualBehavior = const Value.absent(),
+            Value<String?> needOrWoundedPoint = const Value.absent(),
+            Value<String?> nextStep = const Value.absent(),
             Value<String> systemState = const Value.absent(),
             Value<bool> isCrisis = const Value.absent(),
             Value<String?> interventionType = const Value.absent(),
@@ -3142,6 +3256,8 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             automaticThought: automaticThought,
             firstImpulse: firstImpulse,
             actualBehavior: actualBehavior,
+            needOrWoundedPoint: needOrWoundedPoint,
+            nextStep: nextStep,
             systemState: systemState,
             isCrisis: isCrisis,
             interventionType: interventionType,
@@ -3171,6 +3287,8 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             required String automaticThought,
             required String firstImpulse,
             Value<String?> actualBehavior = const Value.absent(),
+            Value<String?> needOrWoundedPoint = const Value.absent(),
+            Value<String?> nextStep = const Value.absent(),
             required String systemState,
             Value<bool> isCrisis = const Value.absent(),
             Value<String?> interventionType = const Value.absent(),
@@ -3200,6 +3318,8 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             automaticThought: automaticThought,
             firstImpulse: firstImpulse,
             actualBehavior: actualBehavior,
+            needOrWoundedPoint: needOrWoundedPoint,
+            nextStep: nextStep,
             systemState: systemState,
             isCrisis: isCrisis,
             interventionType: interventionType,

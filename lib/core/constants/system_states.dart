@@ -83,8 +83,8 @@ enum SystemState {
   }
 
   /// Get states sorted by severity (lowest first)
-  static List<SystemState> get bySeverity =>
-      SystemState.values.toList()..sort((a, b) => a.severityLevel.compareTo(b.severityLevel));
+  static List<SystemState> get bySeverity => SystemState.values.toList()
+    ..sort((a, b) => a.severityLevel.compareTo(b.severityLevel));
 }
 
 /// Extension for SystemState with additional helper methods

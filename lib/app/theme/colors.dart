@@ -1,88 +1,96 @@
 import 'package:flutter/material.dart';
 
-/// App color palette for Innenkompass.
-///
-/// Calm UX design with muted, calming colors and clear contrasts.
+/// Warm, calm palette for Innenkompass.
 class AppColors {
-  // Private constructor to prevent instantiation
   AppColors._();
 
-  // Primary colors
-  static const Color primary = Color(0xFF4A6FA5); // Calming blue
-  static const Color primaryLight = Color(0xFF7A9FC7);
-  static const Color primaryDark = Color(0xFF335577);
+  // Core palette
+  static const Color primary = Color(0xFFC27A60);
+  static const Color primaryLight = Color(0xFFD8A28D);
+  static const Color primaryDark = Color(0xFF9E5E46);
+  static const Color primarySoft = Color(0xFFF2DED4);
 
-  // Secondary colors
-  static const Color secondary = Color(0xFF7B8FA1); // Muted gray-blue
-  static const Color secondaryLight = Color(0xFFABBFC7);
-  static const Color secondaryDark = Color(0xFF556F7F);
+  static const Color secondary = Color(0xFF778D7E);
+  static const Color secondaryLight = Color(0xFFAABAAF);
+  static const Color secondaryDark = Color(0xFF5C7063);
+  static const Color secondarySoft = Color(0xFFDCE6DE);
+
+  static const Color accent = Color(0xFF7A6172);
+  static const Color accentLight = Color(0xFFCDBFC8);
+  static const Color accentSoft = Color(0xFFF1E8ED);
 
   // Semantic colors
-  static const Color success = Color(0xFF6B9080); // Soft green
-  static const Color successLight = Color(0xFF9BC0B0);
-  static const Color warning = Color(0xFFE9B44C); // Muted orange
-  static const Color warningLight = Color(0xFFF5D47C);
-  static const Color error = Color(0xFFC05C5C); // Soft red
-  static const Color errorLight = Color(0xFFE08C8C);
+  static const Color success = Color(0xFF708A79);
+  static const Color successLight = Color(0xFF96AA9D);
+  static const Color successSoft = Color(0xFFE4ECE7);
+  static const Color warning = Color(0xFFC59B63);
+  static const Color warningLight = Color(0xFFE0C59F);
+  static const Color warningSoft = Color(0xFFF5ECDC);
+  static const Color error = Color(0xFF9F5A53);
+  static const Color errorLight = Color(0xFFC9857A);
+  static const Color errorSoft = Color(0xFFF2DFDB);
 
-  // Neutral colors
-  static const Color background = Color(0xFFF5F5F0); // Warm white
-  static const Color surface = Color(0xFFFFFFFF); // Pure white
-  static const Color surfaceVariant = Color(0xFFF0F0EB);
-  static const Color onSurface = Color(0xFF1A1A1A);
-  static const Color onSurfaceVariant = Color(0xFF4A4A4A);
+  // Crisis / higher-contrast safety palette
+  static const Color crisis = Color(0xFF8F4F49);
+  static const Color crisisSurface = Color(0xFFF5E2DE);
 
-  // Text colors
-  static const Color textPrimary = Color(0xFF1A1A1A);
-  static const Color textSecondary = Color(0xFF4A4A4A);
-  static const Color textTertiary = Color(0xFF7A7A7A);
-  static const Color textDisabled = Color(0xFFBDBDBD);
+  // Neutrals and materials
+  static const Color background = Color(0xFFF6F0EA);
+  static const Color backgroundElevated = Color(0xFFFBF6F1);
+  static const Color surface = Color(0xFFF9F4EF);
+  static const Color surfaceStrong = Color(0xFFFFFBF8);
+  static const Color surfaceVariant = Color(0xFFF0E5DC);
+  static const Color surfaceMuted = Color(0xFFE7D9CD);
+  static const Color onSurface = Color(0xFF2F2926);
+  static const Color onSurfaceVariant = Color(0xFF5C524C);
 
-  // Border and divider
-  static const Color border = Color(0xFFE0E0E0);
-  static const Color borderLight = Color(0xFFF0F0F0);
-  static const Color divider = Color(0xFFE8E8E8);
+  static const Color textPrimary = Color(0xFF332B28);
+  static const Color textSecondary = Color(0xFF675A54);
+  static const Color textTertiary = Color(0xFF8B7C74);
+  static const Color textDisabled = Color(0xFFB7AAA3);
 
-  // Overlay colors
-  static const Color overlay = Color(0x80000000);
-  static const Color overlayLight = Color(0x40000000);
+  static const Color border = Color(0xFFDCCFC4);
+  static const Color borderLight = Color(0xFFEBE1D8);
+  static const Color divider = Color(0xFFE5D8CD);
 
-  // Emotion colors (muted versions)
-  static const Color emotionAnger = Color(0xFFC05C5C); // Red
-  static const Color emotionFear = Color(0xFF8B5FBF); // Purple
-  static const Color emotionSadness = Color(0xFF6B8E9B); // Blue-gray
-  static const Color emotionShame = Color(0xFFD4A574); // Brownish
-  static const Color emotionJoy = Color(0xFF6B9080); // Green
-  static const Color emotionDisgust = Color(0xFF9B8B5F); // Olive
-  static const Color emotionSurprise = Color(0xFFE9B44C); // Orange
-  static const Color emotionGuilt = Color(0xFF7B8FA1); // Gray-blue
-  static const Color emotionPride = Color(0xFF4A6FA5); // Blue
-  static const Color emotionLoneliness = Color(0xFF8899A6); // Desaturated blue
+  static const Color overlay = Color(0x80332B28);
+  static const Color overlayLight = Color(0x40332B28);
+  static const Color glassOverlay = Color(0xCCFFF8F3);
+
+  // Emotion colors kept muted and warm.
+  static const Color emotionAnger = Color(0xFFB96A5D);
+  static const Color emotionFear = Color(0xFF8A6B7C);
+  static const Color emotionSadness = Color(0xFF718698);
+  static const Color emotionShame = Color(0xFFB68A68);
+  static const Color emotionJoy = Color(0xFF7B9078);
+  static const Color emotionDisgust = Color(0xFF8D8B64);
+  static const Color emotionSurprise = Color(0xFFC49B68);
+  static const Color emotionGuilt = Color(0xFF938287);
+  static const Color emotionPride = Color(0xFF8A6A73);
+  static const Color emotionLoneliness = Color(0xFF8B93A0);
 
   // System state colors
-  static const Color stateAcuteActivation = Color(0xFFE9B44C); // Orange
-  static const Color stateReflectiveReady = Color(0xFF6B9080); // Green
-  static const Color stateRumination = Color(0xFF7B8FA1); // Gray-blue
-  static const Color stateConflict = Color(0xFFC05C5C); // Red
-  static const Color stateSelfDevaluation = Color(0xFF8B5FBF); // Purple
-  static const Color stateOverwhelm = Color(0xFFD4A574); // Brownish
-  static const Color stateCrisis = Color(0xFFB03030); // Dark red
+  static const Color stateAcuteActivation = warning;
+  static const Color stateReflectiveReady = success;
+  static const Color stateRumination = accent;
+  static const Color stateConflict = error;
+  static const Color stateSelfDevaluation = accent;
+  static const Color stateOverwhelm = primaryDark;
+  static const Color stateCrisis = crisis;
 
-  // Intensity colors (gradient from green to red)
   static const List<Color> intensityGradient = [
-    Color(0xFF6B9080), // 1-2: Good/OK
-    Color(0xFF9BB57D), // 3-4: Mostly OK
-    Color(0xFFE9B44C), // 5-6: Moderate
-    Color(0xFFD4845C), // 7-8: High
-    Color(0xFFC05C5C), // 9-10: Severe
+    Color(0xFF7E9887),
+    Color(0xFFA9B894),
+    Color(0xFFD2AF72),
+    Color(0xFFC78367),
+    Color(0xFFAB6056),
   ];
 
   // Shadows
-  static const Color shadowLight = Color(0x1A000000);
-  static const Color shadowMedium = Color(0x33000000);
-  static const Color shadowDark = Color(0x4D000000);
+  static const Color shadowLight = Color(0x1461493A);
+  static const Color shadowMedium = Color(0x1F61493A);
+  static const Color shadowDark = Color(0x33584237);
 
-  /// Get intensity color based on rating (1-10)
   static Color intensityColor(int rating) {
     if (rating <= 2) return intensityGradient[0];
     if (rating <= 4) return intensityGradient[1];
@@ -91,7 +99,6 @@ class AppColors {
     return intensityGradient[4];
   }
 
-  /// Get color for emotion type
   static Color emotionColor(String emotionType) {
     switch (emotionType.toLowerCase()) {
       case 'wut':

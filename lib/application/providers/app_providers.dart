@@ -3,7 +3,25 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import '../../app/router.dart';
 import '../../core/constants/app_constants.dart';
+import '../../features/onboarding/screens/onboarding_screen.dart';
+import '../../features/home/screens/home_screen.dart';
+import '../../features/splash/screens/splash_screen.dart';
+import '../../features/settings/screens/settings_screen.dart';
+import '../../features/new_situation/screens/situation_event_screen.dart';
+import '../../features/new_situation/screens/situation_emotion_screen.dart';
+import '../../features/new_situation/screens/situation_thought_impulse_screen.dart';
+import '../../features/new_situation/screens/situation_reflection_screen.dart';
+import '../../features/crisis/screens/crisis_screen.dart';
+import '../../features/crisis/screens/crisis_plan_edit_screen.dart';
+import '../../features/history/screens/history_screen.dart';
+import '../../features/history/screens/entry_detail_screen.dart';
+import '../../features/lock/screens/lock_screen.dart';
+import '../../features/patterns/screens/patterns_screen.dart';
+import '../../features/intervention/screens/intervention_screen.dart';
+import '../../features/intervention/screens/post_evaluation_screen.dart';
 import 'database_provider.dart';
+import 'settings_provider.dart';
+import 'lock_provider.dart';
 
 /// Provider for the GoRouter instance.
 ///
@@ -12,73 +30,64 @@ import 'database_provider.dart';
 final routerProvider = Provider<GoRouter>((ref) {
   // Watch the database initialization to ensure it's ready
   ref.watch(databaseInitProvider);
+  final setupState = ref.watch(databaseSetupProvider);
 
-  // For now, default to false (not completed) since we need synchronous access
-  // This will be updated when the onboarding flow is implemented
-  bool isOnboardingCompleted() => false;
+  // Watch settings provider for reactive onboarding status updates
+  ref.watch(settingsNotifierProvider);
+
+  // Check onboarding status from settings provider
+  bool isOnboardingCompleted() {
+    final settings = ref.read(settingsNotifierProvider);
+    return settings?.onboardingCompleted ?? false;
+  }
+
+  bool isAppLocked() {
+    final lockState = ref.read(lockStateProvider);
+    return lockState.isLocked;
+  }
+
+  bool isAppReady() {
+    return setupState.hasValue;
+  }
 
   return AppRouter.createRouter(
-    onboardingScreen: (context) => const Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
+    splashScreen: (context) => const SplashScreen(),
+    onboardingScreen: (context) => const OnboardingScreen(),
+    homeScreen: (context) => const HomeScreen(),
+    historyScreen: (context) => const HistoryScreen(),
+    patternsScreen: (context) => const PatternsScreen(),
+    crisisScreen: (context) => const CrisisScreen(),
+    crisisEditScreen: (context) => const CrisisPlanEditScreen(),
+    settingsScreen: (context) => const SettingsScreen(),
+    lockScreen: (context) => const LockScreen(),
+    newSituationEventScreen: (context, state) => const SituationEventScreen(),
+    newSituationEmotionScreen: (context, state) =>
+        const SituationEmotionScreen(),
+    newSituationThoughtImpulseScreen: (context, state) =>
+        const SituationThoughtImpulseScreen(),
+    newSituationReflectionScreen: (context, state) =>
+        const SituationReflectionScreen(),
+    interventionScreen: (context, state) => InterventionScreen(
+      interventionId: state.uri.queryParameters['id'] ??
+          ((state.extra is Map<String, dynamic>)
+              ? (state.extra as Map<String, dynamic>)['type'] as String?
+              : null),
     ),
-    homeScreen: (context) => const Scaffold(
-      body: Center(
-        child: Text('Home Screen - To be implemented'),
-      ),
-    ),
-    historyScreen: (context) => const Scaffold(
-      body: Center(
-        child: Text('History Screen - To be implemented'),
-      ),
-    ),
-    patternsScreen: (context) => const Scaffold(
-      body: Center(
-        child: Text('Patterns Screen - To be implemented'),
-      ),
-    ),
-    crisisScreen: (context) => const Scaffold(
-      body: Center(
-        child: Text('Crisis Screen - To be implemented'),
-      ),
-    ),
-    settingsScreen: (context) => const Scaffold(
-      body: Center(
-        child: Text('Settings Screen - To be implemented'),
-      ),
-    ),
-    newSituationEventScreen: (context, state) => const Scaffold(
-      body: Center(
-        child: Text('New Situation Event Screen - To be implemented'),
-      ),
-    ),
-    newSituationEmotionScreen: (context, state) => const Scaffold(
-      body: Center(
-        child: Text('New Situation Emotion Screen - To be implemented'),
-      ),
-    ),
-    newSituationThoughtImpulseScreen: (context, state) => const Scaffold(
-      body: Center(
-        child: Text('New Situation Thought Impulse Screen - To be implemented'),
-      ),
-    ),
-    interventionScreen: (context, state) => const Scaffold(
-      body: Center(
-        child: Text('Intervention Screen - To be implemented'),
-      ),
-    ),
-    postEvaluationScreen: (context, state) => const Scaffold(
-      body: Center(
-        child: Text('Post Evaluation Screen - To be implemented'),
-      ),
-    ),
-    entryDetailScreen: (context, state) => const Scaffold(
-      body: Center(
-        child: Text('Entry Detail Screen - To be implemented'),
-      ),
-    ),
+    postEvaluationScreen: (context, state) => const PostEvaluationScreen(),
+    entryDetailScreen: (context, state) {
+      final id = int.tryParse(state.pathParameters['id'] ?? '');
+      if (id == null) {
+        return const Scaffold(
+          body: Center(
+            child: Text('Eintrag nicht gefunden'),
+          ),
+        );
+      }
+      return EntryDetailScreen(entryId: id);
+    },
     isOnboardingCompleted: isOnboardingCompleted,
+    isAppLocked: isAppLocked,
+    isAppReady: isAppReady,
   );
 });
 
@@ -96,18 +105,22 @@ final appInitProvider = Provider<bool>((ref) {
 ///
 /// Default is 'de' (German), can be changed to 'en' (English).
 final localeProvider = Provider<String>((ref) {
-  // For Phase 1, use default locale. Will be updated from settings in Phase 2.
-  return AppConstants.defaultLocale;
+  // Watch settings provider for reactive locale updates
+  final settings = ref.watch(settingsNotifierProvider);
+  return settings?.locale ?? AppConstants.defaultLocale;
 });
 
 /// Provider for notifications enabled status.
 final notificationsEnabledProvider = Provider<bool>((ref) {
-  // For Phase 1, use default. Will be updated from settings in Phase 2.
-  return AppConstants.defaultNotificationsEnabled;
+  // Watch settings provider for reactive notification updates
+  final settings = ref.watch(settingsNotifierProvider);
+  return settings?.notificationsEnabled ??
+      AppConstants.defaultNotificationsEnabled;
 });
 
 /// Provider for app lock enabled status.
 final appLockEnabledProvider = Provider<bool>((ref) {
-  // For Phase 1, use default. Will be updated from settings in Phase 2.
-  return AppConstants.defaultAppLockEnabled;
+  // Watch settings provider for reactive app lock updates
+  final settings = ref.watch(settingsNotifierProvider);
+  return settings?.appLockEnabled ?? AppConstants.defaultAppLockEnabled;
 });

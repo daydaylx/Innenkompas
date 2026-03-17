@@ -11,8 +11,7 @@ class UserSettings extends Table {
   // Onboarding and first launch
   BoolColumn get onboardingCompleted =>
       boolean().withDefault(const Constant(false))();
-  BoolColumn get isFirstLaunch =>
-      boolean().withDefault(const Constant(true))();
+  BoolColumn get isFirstLaunch => boolean().withDefault(const Constant(true))();
 
   // Language and locale
   TextColumn get locale =>
@@ -29,12 +28,11 @@ class UserSettings extends Table {
   // App lock
   BoolColumn get appLockEnabled =>
       boolean().withDefault(const Constant(false))();
-  TextColumn get appLockType =>
-      text().nullable()(); // 'biometric', 'pin', etc.
+  TextColumn get appLockType => text().nullable()(); // 'biometric', 'pin', etc.
 
   // Theme
-  TextColumn get themeMode =>
-      text().withDefault(const Constant('system'))(); // 'light', 'dark', 'system'
+  TextColumn get themeMode => text()
+      .withDefault(const Constant('system'))(); // 'light', 'dark', 'system'
 
   // Emergency contacts (JSON array)
   TextColumn get emergencyContacts => text().nullable()();
@@ -46,8 +44,6 @@ class UserSettings extends Table {
   DateTimeColumn get lastDataCleanupAt => dateTime().nullable()();
 
   // Timestamps
-  DateTimeColumn get createdAt =>
-      dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get updatedAt =>
-      dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }

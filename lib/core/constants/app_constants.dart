@@ -13,6 +13,9 @@ class AppConstants {
   static const int maxSituationDescriptionLength = 300;
   static const int maxThoughtDescriptionLength = 200;
   static const int maxBehaviorDescriptionLength = 300;
+  static const int minReflectionFieldLength = 3;
+  static const int maxNeedDescriptionLength = 240;
+  static const int maxNextStepLength = 240;
   static const int maxNoteLength = 500;
 
   // Rating scales
@@ -34,7 +37,7 @@ class AppConstants {
 
   // Database
   static const String databaseName = 'innenkompass.db';
-  static const int databaseVersion = 1;
+  static const int databaseVersion = 2;
 
   // Pagination
   static const int defaultHistoryPageSize = 20;
@@ -67,9 +70,11 @@ class AppConstants {
   static const int animationDurationSlow = 500;
 
   // Layout
-  static const double buttonHeight = 56.0;
-  static const double cardElevation = 2.0;
-  static const double borderRadius = 12.0;
+  static const double buttonHeight = 60.0;
+  static const double cardElevation = 0.0;
+  static const double borderRadius = 20.0;
+  static const double borderRadiusLarge = 28.0;
+  static const double borderRadiusPill = 999.0;
   static const double spacingSmall = 8.0;
   static const double spacingMedium = 16.0;
   static const double spacingLarge = 24.0;

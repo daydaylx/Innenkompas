@@ -21,14 +21,15 @@ class SituationEntries extends Table {
   TextColumn get primaryEmotion => text()();
   TextColumn get secondaryEmotion =>
       text().nullable()(); // Optional second emotion
-  TextColumn get bodySymptoms =>
-      text().nullable()(); // JSON array of symptoms
+  TextColumn get bodySymptoms => text().nullable()(); // JSON array of symptoms
 
   // Thought and impulse fields (Phase 1)
   TextColumn get automaticThought => text()();
   TextColumn get firstImpulse => text()();
   TextColumn get actualBehavior =>
       text().nullable()(); // Optional actual behavior
+  TextColumn get needOrWoundedPoint => text().nullable()();
+  TextColumn get nextStep => text().nullable()();
 
   // Classification fields (Phase 4)
   TextColumn get systemState => text()();
@@ -56,10 +57,8 @@ class SituationEntries extends Table {
   TextColumn get postNote => text().nullable()(); // Optional note after
 
   // Metadata
-  DateTimeColumn get createdAt =>
-      dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get updatedAt =>
-      dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
   BoolColumn get isDraft =>
       boolean().withDefault(const Constant(false))(); // For incomplete entries
 

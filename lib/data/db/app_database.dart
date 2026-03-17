@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import '../../core/constants/app_constants.dart';
 import 'tables/situation_entries.dart';
 import 'tables/user_settings.dart';
 import 'tables/crisis_plan.dart';
@@ -15,9 +16,10 @@ part 'app_database.g.dart';
 @DriftDatabase(tables: [SituationEntries, UserSettings, CrisisPlan])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
+  AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => AppConstants.databaseVersion;
 
   /// Migration strategy for database upgrades.
   @override
@@ -27,8 +29,16 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        // Handle database migrations here when schemaVersion increases
-        // For now, we're at version 1, so no migrations needed yet
+        if (from < 2) {
+          await m.addColumn(
+            situationEntries,
+            situationEntries.needOrWoundedPoint,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.nextStep,
+          );
+        }
       },
       beforeOpen: (OpeningDetails details) async {
         // Enable foreign keys and other database pragmas
@@ -39,6 +49,30 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // ========== Situation Entries ==========
+
+  /// Update post-evaluation data for an entry
+  Future<void> updatePostEvaluation({
+    required int entryId,
+    required int postIntensity,
+    required int postBodyTension,
+    required int postClarity,
+    required int helpfulnessRating,
+    String? userNote,
+    required DateTime completedAt,
+    required int actualDuration,
+  }) async {
+    await (update(situationEntries)..where((e) => e.id.equals(entryId))).write(
+      SituationEntriesCompanion(
+        postIntensity: Value(postIntensity),
+        postBodyTension: Value(postBodyTension),
+        postClarity: Value(postClarity),
+        helpfulnessRating: Value(helpfulnessRating),
+        postNote: Value(userNote),
+        interventionCompleted: const Value(true),
+        interventionDurationSec: Value(actualDuration),
+      ),
+    );
+  }
 
   /// Get all situation entries ordered by timestamp (newest first)
   Future<List<SituationEntryData>> getAllSituationEntries() {
@@ -201,6 +235,8 @@ class AppDatabase extends _$AppDatabase {
         'automaticThought': e.automaticThought,
         'firstImpulse': e.firstImpulse,
         'actualBehavior': e.actualBehavior,
+        'needOrWoundedPoint': e.needOrWoundedPoint,
+        'nextStep': e.nextStep,
         'systemState': e.systemState,
         'isCrisis': e.isCrisis,
         'interventionType': e.interventionType,

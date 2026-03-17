@@ -83,6 +83,26 @@ class SettingsNotifier extends StateNotifier<UserSettingsData?> {
     await db.updateUserSettings(updated);
     state = updated;
   }
+
+  Future<void> completeOnboarding() async {
+    final db = ref.read(databaseProvider);
+    final currentSettings = await db.getOrCreateUserSettings();
+    final updated = currentSettings.copyWith(
+      onboardingCompleted: true,
+    );
+    await db.updateUserSettings(updated);
+    state = updated;
+  }
+
+  Future<void> resetOnboarding() async {
+    final db = ref.read(databaseProvider);
+    final currentSettings = await db.getOrCreateUserSettings();
+    final updated = currentSettings.copyWith(
+      onboardingCompleted: false,
+    );
+    await db.updateUserSettings(updated);
+    state = updated;
+  }
 }
 
 /// Settings state notifier provider.

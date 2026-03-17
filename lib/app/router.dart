@@ -17,13 +17,16 @@ class AppRoutes {
   static const String newSituationEmotion = '/new-situation/emotion';
   static const String newSituationThoughtImpulse =
       '/new-situation/thought-impulse';
+  static const String newSituationReflection = '/new-situation/reflection';
   static const String intervention = '/intervention';
   static const String postEvaluation = '/post-evaluation';
   static const String history = '/history';
   static const String entryDetail = '/history/:id';
   static const String patterns = '/patterns';
   static const String crisis = '/crisis';
+  static const String crisisEdit = '/crisis/edit';
   static const String settings = '/settings';
+  static const String lock = '/lock';
 }
 
 /// GoRouter configuration for Innenkompass.
@@ -36,43 +39,70 @@ class AppRouter {
 
   /// Create the GoRouter configuration
   static GoRouter createRouter({
+    required Widget Function(BuildContext) splashScreen,
     required Widget Function(BuildContext) onboardingScreen,
     required Widget Function(BuildContext) homeScreen,
     required Widget Function(BuildContext) historyScreen,
     required Widget Function(BuildContext) patternsScreen,
     required Widget Function(BuildContext) crisisScreen,
+    required Widget Function(BuildContext) crisisEditScreen,
     required Widget Function(BuildContext) settingsScreen,
+    required Widget Function(BuildContext) lockScreen,
     required Widget Function(BuildContext, GoRouterState)
         newSituationEventScreen,
     required Widget Function(BuildContext, GoRouterState)
         newSituationEmotionScreen,
     required Widget Function(BuildContext, GoRouterState)
         newSituationThoughtImpulseScreen,
+    required Widget Function(BuildContext, GoRouterState)
+        newSituationReflectionScreen,
     required Widget Function(BuildContext, GoRouterState) interventionScreen,
     required Widget Function(BuildContext, GoRouterState) postEvaluationScreen,
     required Widget Function(BuildContext, GoRouterState) entryDetailScreen,
     required bool Function() isOnboardingCompleted,
+    bool Function()? isAppLocked,
+    bool Function()? isAppReady,
   }) {
     return GoRouter(
       initialLocation: AppRoutes.root,
       debugLogDiagnostics: true,
       redirect: (context, state) {
+        final appReady = isAppReady?.call() ?? true;
+        if (!appReady && state.matchedLocation == AppRoutes.root) {
+          return null;
+        }
+
+        if (!appReady) {
+          return AppRoutes.root;
+        }
+
+        // Lock guard: redirect to lock screen if app is locked
+        final appLocked = isAppLocked?.call() ?? false;
+        final isLockRoute = state.matchedLocation == AppRoutes.lock;
+        final isCrisisRoute = state.matchedLocation == AppRoutes.crisis ||
+            state.matchedLocation == AppRoutes.crisisEdit;
+
+        if (appLocked && !isLockRoute && !isCrisisRoute) {
+          return AppRoutes.lock;
+        }
+
         // Check if onboarding is completed
         final onboardingCompleted = isOnboardingCompleted();
 
-        // If trying to access root and onboarding not completed, go to onboarding
-        if (state.matchedLocation == AppRoutes.root && !onboardingCompleted) {
-          return AppRoutes.onboarding;
+        if (state.matchedLocation == AppRoutes.root) {
+          return onboardingCompleted ? AppRoutes.home : AppRoutes.onboarding;
         }
 
         // If trying to access onboarding and already completed, go to home
-        if (state.matchedLocation == AppRoutes.onboarding && onboardingCompleted) {
+        if (state.matchedLocation == AppRoutes.onboarding &&
+            onboardingCompleted) {
           return AppRoutes.home;
         }
 
-        // If onboarding not completed and not on onboarding screen, redirect
+        // If onboarding not completed and not on onboarding/crisis screen, redirect
         if (!onboardingCompleted &&
-            state.matchedLocation != AppRoutes.onboarding) {
+            state.matchedLocation != AppRoutes.onboarding &&
+            !isCrisisRoute) {
           return AppRoutes.onboarding;
         }
 
@@ -118,6 +148,13 @@ class AppRouter {
           pageBuilder: (context, state) => MaterialPage(
             key: state.pageKey,
             child: newSituationThoughtImpulseScreen(context, state),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.newSituationReflection,
+          pageBuilder: (context, state) => MaterialPage(
+            key: state.pageKey,
+            child: newSituationReflectionScreen(context, state),
           ),
         ),
 
@@ -178,6 +215,24 @@ class AppRouter {
           ),
         ),
 
+        // Crisis edit route
+        GoRoute(
+          path: AppRoutes.crisisEdit,
+          pageBuilder: (context, state) => MaterialPage(
+            key: state.pageKey,
+            child: crisisEditScreen(context),
+          ),
+        ),
+
+        // Lock route
+        GoRoute(
+          path: AppRoutes.lock,
+          pageBuilder: (context, state) => MaterialPage(
+            key: state.pageKey,
+            child: lockScreen(context),
+          ),
+        ),
+
         // Settings route
         GoRoute(
           path: AppRoutes.settings,
@@ -190,13 +245,9 @@ class AppRouter {
         // Root route - redirects based on onboarding status
         GoRoute(
           path: AppRoutes.root,
-          pageBuilder: (context, state) => const MaterialPage(
-            key: ValueKey('splash'),
-            child: Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
+          pageBuilder: (context, state) => MaterialPage(
+            key: const ValueKey('splash'),
+            child: splashScreen(context),
           ),
         ),
       ],
