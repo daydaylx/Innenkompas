@@ -1,4 +1,10 @@
-# Innenkompass Device Smoke Test
+# Innenkompass Android APK Smoke Test
+
+## Installation
+
+- Build the APK with `flutter build apk --debug`.
+- Install the APK on an Android device or emulator.
+- Launch the app from the installed package, not from `flutter run`.
 
 ## Cold Start
 
@@ -22,7 +28,7 @@
 ## Platform Features
 
 - Enable notifications and verify local reminders trigger.
-- Enable app lock and verify biometric unlock on a physical device.
+- Enable app lock and verify biometric unlock on an Android device with biometrics.
 - Trigger phone shortcuts in the crisis area and verify the dialer opens.
 - Test export/share from Settings.
 

@@ -83,7 +83,7 @@ class AppLockToggle extends ConsumerWidget {
         ),
       );
 
-      if (choice == null) return;
+      if (!context.mounted || choice == null) return;
 
       if (choice == 'pin' || choice == 'biometric_and_pin') {
         final pin = await _showPinDialog(context);

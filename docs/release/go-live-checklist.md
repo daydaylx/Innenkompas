@@ -1,13 +1,12 @@
-# Innenkompass Go-Live Checklist
+# Innenkompass APK-Checklist
 
-## Release
-- Android `key.properties` from `android/key.properties.example` filled with real signing values
-- Release keystore stored outside git
-- iOS signing/team configured in Xcode
-- Android and iOS release builds install successfully on real devices
+## Build
+- Debug-APK baut erfolgreich mit `flutter build apk --debug`
+- APK lässt sich auf Android installieren
+- Optional: Release-APK nur dann bauen, wenn echte Signierung vorhanden ist
 - Follow `docs/release/signing-setup.md`
 
-## Product Validation
+## Produktvalidierung
 - First launch, onboarding, lock screen, and splash verified
 - New situation flow tested end-to-end
 - Intervention and post-evaluation tested end-to-end
@@ -15,13 +14,12 @@
 - Upgrade from an older local database tested without data loss
 - Run the manual checklist in `docs/release/device-smoke-test.md`
 
-## Permissions
-- Notifications permission tested on Android and iOS
-- Face ID / biometrics tested on physical devices
+## Android-Funktionen
+- Notifications permission tested on Android
+- Biometrics / app lock tested on physical Android device
 - Phone-call shortcuts tested on device
 
-## Store / Ops
-- Privacy policy reviewed and published
-- Support channel reviewed and published
-- App Store / Play Store copy and screenshots prepared
+## Optional später
+- Release-Signing mit eigenem Keystore ergänzen
+- Privacy-/Support-Texte nur dann finalisieren, wenn die APK breiter verteilt wird
 - CI green on the release branch

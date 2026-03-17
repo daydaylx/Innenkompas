@@ -11,6 +11,7 @@ import 'package:innenkompass/domain/models/intervention_step.dart';
 import 'package:innenkompass/domain/models/pattern_summary.dart';
 import 'package:innenkompass/domain/services/pattern_analyzer.dart';
 import 'database_provider.dart';
+import 'new_situation_providers.dart';
 
 part 'intervention_providers.freezed.dart';
 part 'intervention_providers.g.dart';
@@ -189,6 +190,19 @@ extension InterventionFlowDataExtension on InterventionFlowData {
 /// Provider für Interventionen basierend auf Klassifikation
 @riverpod
 List<Intervention> recommendedInterventions(Ref ref) {
+  final classification = ref.watch(classificationResultProvider);
+  if (classification != null) {
+    return classification.recommendedInterventions
+        .expand((type) => InterventionLibrary.getByType(type).take(1))
+        .toList(growable: false);
+  }
+
+  final currentIntervention =
+      ref.watch(interventionFlowStateProvider).intervention;
+  if (currentIntervention != null) {
+    return [currentIntervention];
+  }
+
   return const [];
 }
 

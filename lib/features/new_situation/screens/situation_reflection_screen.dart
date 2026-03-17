@@ -100,13 +100,13 @@ class _SituationReflectionScreenState
 
     final classification = ref.read(classificationResultProvider);
     if (classification != null && classification.primaryIntervention != null) {
-      final intervention = InterventionLibrary.getById(
-        classification.primaryIntervention!.name,
+      final interventions = InterventionLibrary.getByType(
+        classification.primaryIntervention!,
       );
-      if (intervention != null) {
+      if (interventions.isNotEmpty) {
         ref
             .read(interventionFlowStateProvider.notifier)
-            .startIntervention(intervention, entryId: savedId);
+            .startIntervention(interventions.first, entryId: savedId);
         context.push(AppRoutes.intervention);
         return;
       }

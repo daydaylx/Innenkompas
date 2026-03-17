@@ -1,6 +1,28 @@
-# Innenkompass Release Signing Setup
+# Innenkompass APK Build Setup
 
-## Android
+## Standardweg: Debug-APK
+
+Für den aktuellen Zielzustand reicht eine installierbare Debug-APK.
+
+```bash
+flutter build apk --debug
+```
+
+Die fertige Datei liegt danach unter:
+
+```text
+build/app/outputs/flutter-apk/app-debug.apk
+```
+
+Optional kann sie direkt per `adb` installiert werden:
+
+```bash
+adb install -r build/app/outputs/flutter-apk/app-debug.apk
+```
+
+## Optional: Release-APK
+
+Nur nötig, wenn die APK außerhalb des Entwicklungskontexts verteilt werden soll.
 
 1. Create a release keystore outside git, for example in `android/keystore/`.
 2. Copy `android/key.properties.example` to `android/key.properties`.
@@ -13,28 +35,16 @@ keyAlias=REPLACE_WITH_KEY_ALIAS
 storeFile=../keystore/release-keystore.jks
 ```
 
-4. Build the release artifact:
+4. Build the release APK:
 
 ```bash
-flutter build appbundle --release
+flutter build apk --release
 ```
 
-The Gradle configuration now fails fast if `android/key.properties` is missing, so unsigned debug-style release builds are blocked intentionally.
+The Gradle configuration now fails fast if `android/key.properties` is missing, so unsigned release builds are blocked intentionally.
 
-## iOS
+## Prüfpunkte
 
-1. Open `ios/Runner.xcworkspace` in Xcode.
-2. Select the correct Apple Team and bundle signing profile.
-3. Verify the release configuration on a physical device.
-4. Build the archive from Xcode or with:
-
-```bash
-flutter build ios --release
-```
-
-## Pre-release check
-
-- Android release keystore exists and is not committed.
-- `android/key.properties` exists locally and is gitignored.
-- iOS signing identity and provisioning profile resolve without manual fixes.
-- Release builds install on at least one Android device and one iPhone.
+- Debug-APK builds without signing setup.
+- `android/key.properties` is only required for `--release`.
+- Release keystore exists and is not committed if a release APK is needed later.

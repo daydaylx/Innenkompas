@@ -33,19 +33,19 @@ class InterventionSelector {
     // Adjust ordering based on intensity
     if (intensity >= 8) {
       // At very high intensity, regulation comes first
-      return [
+      return {
         if (!stateBased.contains(InterventionType.regulation))
           InterventionType.regulation,
         ...stateBased.take(3),
         ...emotionBased.take(1),
-      ].toSet().toList().take(4).toList();
+      }.take(4).toList();
     }
 
     // Combine and deduplicate while maintaining priority
-    final combined = <InterventionType>[
+    final combined = {
       ...stateBased,
       ...emotionBased,
-    ].toSet().toList();
+    }.toList();
 
     // Reorder based on state priority
     final ordered = _reorderForState(combined, systemState);
