@@ -10,20 +10,18 @@ class SelectionStep extends StatelessWidget {
   final String? selectedOption;
   final ValueChanged<String>? onOptionSelected;
 
-  // Multi-select
+  final bool allowMultiple;
   final List<String>? selectedOptions;
   final ValueChanged<List<String>>? onOptionsChanged;
-
-  final bool allowMultiple;
 
   const SelectionStep({
     super.key,
     required this.options,
     this.selectedOption,
     this.onOptionSelected,
+    this.allowMultiple = false,
     this.selectedOptions,
     this.onOptionsChanged,
-    this.allowMultiple = false,
   });
 
   @override
@@ -31,7 +29,7 @@ class SelectionStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: options.map((option) {
-        final bool isSelected = allowMultiple
+        final isSelected = allowMultiple
             ? (selectedOptions?.contains(option) ?? false)
             : selectedOption == option;
 
@@ -41,16 +39,16 @@ class SelectionStep extends StatelessWidget {
             color: Colors.transparent,
             child: InkWell(
               onTap: () {
-                if (allowMultiple && onOptionsChanged != null) {
+                if (allowMultiple) {
                   final current = List<String>.from(selectedOptions ?? []);
                   if (current.contains(option)) {
                     current.remove(option);
                   } else {
                     current.add(option);
                   }
-                  onOptionsChanged!(current);
-                } else if (onOptionSelected != null) {
-                  onOptionSelected!(option);
+                  onOptionsChanged?.call(current);
+                } else {
+                  onOptionSelected?.call(option);
                 }
               },
               borderRadius: BorderRadius.circular(12),

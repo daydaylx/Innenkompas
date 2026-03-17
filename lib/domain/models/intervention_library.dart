@@ -396,7 +396,7 @@ class InterventionLibrary {
         type: InterventionStepType.action,
         title: 'Stopp-Befehl',
         body:
-            'Sage dir laut oder in Gedanken: STOPP! Du kannst auch eine Geste machen,比如 in die Hände klatschen.',
+            'Sage dir laut oder in Gedanken: STOPP! Du kannst auch eine Geste machen, zum Beispiel in die Hände klatschen.',
         helpText:
             'Dieser physische oder mentale "Knall" unterbricht die Gedankenschleife.',
       ),
@@ -464,7 +464,7 @@ class InterventionLibrary {
     title: 'Ich-Botschaften formulieren',
     summary: 'Konstruktiv kommunizieren in Konfliktsituationen',
     description:
-        'Lerne, deine Bedürfnisse und Gefühle klar und vorwurfsvoll auszudrücken.',
+        'Lerne, deine Bedürfnisse und Gefühle klar und nicht vorwurfsvoll auszudrücken.',
     steps: [
       InterventionStep(
         id: 'intro',
