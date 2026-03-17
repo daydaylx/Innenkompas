@@ -1,16 +1,29 @@
-# innenkompass
+# Innenkompass
 
-A new Flutter project.
+Eine Flutter-App zur Emotions- und Selbstfürsorge-Unterstützung. Nutzer können ihre emotionalen Zustände tracken, Interventionen durchführen und ihren inneren Kompass erkunden.
 
-## Getting Started
+## Tech-Stack
 
-This project is a starting point for a Flutter application.
+- **Flutter** – Cross-platform UI (Android, iOS)
+- **Riverpod** – State Management
+- **Drift** – Lokale SQLite-Datenbank
+- **Go Router** – Navigation
 
-A few resources to get you started if this is your first Flutter project:
+## Projektstruktur
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```
+lib/                    Dart-Quellcode (Features, Widgets, Models)
+docs/
+  konzept/              Konzept- und Planungsdokumente
+  legal/                Lizenzen und rechtliche Hinweise
+  release/              Release-Notes und Changelogs
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Konzeptdokumente
+
+Unter `docs/konzept/` liegen die fachlichen und technischen Grundlagen:
+
+- `03_technischer_umsetzungsplan_innenkompass.md` – Technischer Umsetzungsplan
+- `04_gap_analyse_konzeptv2neu.md` – Gap-Analyse Konzept v2
+- `05_rechteklärung_lizenzen.md` – Rechteklärung & Lizenzen
+- `07_visuelles_designkonzept_innenkompass.md` – Visuelles Designkonzept

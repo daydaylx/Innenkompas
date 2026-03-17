@@ -52,3 +52,6 @@ sqlite_mcp_server.db
 /android/key.properties
 *.jks
 *.keystore
+
+# Lokale Entwicklungsreferenz (eigenständiges Flutter-Projekt, kein Bestandteil dieses Repos)
+innenkompass/
