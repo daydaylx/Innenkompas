@@ -171,34 +171,86 @@ class CrisisScreen extends ConsumerWidget {
                         items: [plan.safeEnvironment!],
                       ),
 
-                    if (plan.socialSupport.isNotEmpty)
-                      CrisisPlanPreviewSection(
-                        title: 'Menschen, die mich begleiten',
-                        icon: Icons.people_outline,
-                        items: plan.socialSupport
-                            .map(
-                              (contact) => [
-                                contact.name,
-                                if ((contact.relationship ?? '').isNotEmpty)
-                                  contact.relationship!,
-                                contact.phoneNumber,
-                              ].join(' · '),
-                            )
-                            .toList(),
+                    if (plan.socialSupport.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          bottom: AppConstants.spacingSmall,
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.people_outline,
+                              size: 20,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: AppConstants.spacingSmall),
+                            Text(
+                              'Menschen, die mich begleiten',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                      ...plan.socialSupport.map(
+                        (contact) => CrisisContactCard(
+                          name: contact.name,
+                          phoneNumber: contact.phoneNumber,
+                          subtitle: contact.relationship,
+                          onTap: () => _callNumber(
+                            contact.phoneNumber.replaceAll(' ', ''),
+                          ),
+                        ),
+                      ),
+                    ],
 
-                    if (plan.professionalResources.isNotEmpty)
+                    if (plan.professionalResources
+                        .any((r) => (r.phoneNumber ?? '').isNotEmpty)) ...[
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          bottom: AppConstants.spacingSmall,
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.local_hospital_outlined,
+                              size: 20,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: AppConstants.spacingSmall),
+                            Text(
+                              'Professionelle Hilfen',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ...plan.professionalResources
+                          .where((r) => (r.phoneNumber ?? '').isNotEmpty)
+                          .map(
+                            (r) => CrisisContactCard(
+                              name: r.name,
+                              phoneNumber: r.phoneNumber!,
+                              subtitle: r.type,
+                              onTap: () => _callNumber(
+                                r.phoneNumber!.replaceAll(' ', ''),
+                              ),
+                            ),
+                          ),
+                    ] else if (plan.professionalResources.isNotEmpty)
                       CrisisPlanPreviewSection(
                         title: 'Professionelle Hilfen',
                         icon: Icons.local_hospital_outlined,
                         items: plan.professionalResources
                             .map(
-                              (resource) => [
-                                resource.name,
-                                if ((resource.type ?? '').isNotEmpty)
-                                  resource.type!,
-                                if ((resource.phoneNumber ?? '').isNotEmpty)
-                                  resource.phoneNumber!,
+                              (r) => [
+                                r.name,
+                                if ((r.type ?? '').isNotEmpty) r.type!,
                               ].join(' · '),
                             )
                             .toList(),

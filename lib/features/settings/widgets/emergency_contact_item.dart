@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/constants/app_constants.dart';
 
@@ -37,15 +38,21 @@ class EmergencyContactItem extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            // In a real app, this would launch a phone call
-            // For now, just show the number
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Anrufen: $phoneNumber'),
-                duration: const Duration(seconds: 2),
-              ),
+          onTap: () async {
+            final uri = Uri(
+              scheme: 'tel',
+              path: phoneNumber.replaceAll(' ', ''),
             );
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri);
+            } else if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Anruf nicht möglich: $phoneNumber'),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
           },
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           child: Padding(
