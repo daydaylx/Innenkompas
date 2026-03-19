@@ -29,9 +29,10 @@ class NotificationSettings {
   final List<TimeOfDay> times;
 
   factory NotificationSettings.fromUserSettings(UserSettingsData? settings) {
-    final times = NotificationSchedule.fromJsonString(settings?.notificationTimes)
-        .map((schedule) => schedule.time)
-        .toList(growable: false);
+    final times =
+        NotificationSchedule.fromJsonString(settings?.notificationTimes)
+            .map((schedule) => schedule.time)
+            .toList(growable: false);
 
     return NotificationSettings(
       enabled: settings?.notificationsEnabled ?? false,
@@ -75,7 +76,9 @@ class NotificationSettingsController {
 
   Future<void> updateTimes(List<TimeOfDay> times) async {
     final normalizedTimes = _normalizeTimes(times);
-    await _ref.read(settingsNotifierProvider.notifier).updateNotificationSettings(
+    await _ref
+        .read(settingsNotifierProvider.notifier)
+        .updateNotificationSettings(
           notificationTimes: normalizedTimes.isEmpty
               ? null
               : NotificationSchedule.toJsonString(
@@ -106,7 +109,9 @@ class NotificationSettingsController {
   }
 
   List<NotificationSchedule> _schedulesFromTimes(List<TimeOfDay> times) {
-    return times.asMap().entries
+    return times
+        .asMap()
+        .entries
         .map(
           (entry) => NotificationSchedule(
             id: entry.key,
@@ -144,7 +149,8 @@ Future<void> syncNotificationSchedules({
     return;
   }
 
-  final schedules = NotificationSchedule.fromJsonString(settings.notificationTimes);
+  final schedules =
+      NotificationSchedule.fromJsonString(settings.notificationTimes);
   if (schedules.isEmpty) {
     await service.cancelAll();
     return;

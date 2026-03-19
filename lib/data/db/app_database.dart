@@ -100,6 +100,100 @@ class AppDatabase extends _$AppDatabase {
             situationEntries.aiEvaluationSchemaVersion,
           );
         }
+        if (from < 5) {
+          await m.addColumn(
+            situationEntries,
+            situationEntries.involvedEntities,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.preTriggerPreoccupation,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.problemTiming,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.triggerDescription,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.preTriggerLoad,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.initialBodyReactions,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.additionalEmotions,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.thoughtFocus,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.systemReaction,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.thoughtPatterns,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.actualBehaviorTags,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.tippingPointAwareness,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.fearOrPressurePoint,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.touchedThemes,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.neededSupports,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.realisticAlternative,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.triggerAsLastDrop,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.backgroundTheme,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.preEscalationRelief,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.patternFamiliarity,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.evaluationHelpfulNowKey,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.evaluationLearningPointKey,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.evaluationStatusKeys,
+          );
+        }
       },
       beforeOpen: (OpeningDetails details) async {
         // Enable foreign keys and other database pragmas
@@ -364,31 +458,52 @@ class AppDatabase extends _$AppDatabase {
         'context': e.context,
         'timestamp': e.timestamp.toIso8601String(),
         'involvedPerson': e.involvedPerson,
+        'involvedEntities': e.involvedEntities,
+        'preTriggerPreoccupation': e.preTriggerPreoccupation,
+        'problemTiming': e.problemTiming,
+        'triggerDescription': e.triggerDescription,
+        'preTriggerLoad': e.preTriggerLoad,
         'intensity': e.intensity,
         'bodyTension': e.bodyTension,
         'primaryEmotion': e.primaryEmotion,
         'secondaryEmotion': e.secondaryEmotion,
         'bodySymptoms': e.bodySymptoms,
+        'initialBodyReactions': e.initialBodyReactions,
+        'additionalEmotions': e.additionalEmotions,
+        'thoughtFocus': e.thoughtFocus,
         'automaticThought': e.automaticThought,
         'firstImpulse': e.firstImpulse,
         'factInterpretationResult': e.factInterpretationResult,
+        'systemReaction': e.systemReaction,
+        'thoughtPatterns': e.thoughtPatterns,
+        'actualBehaviorTags': e.actualBehaviorTags,
         'actualBehavior': e.actualBehavior,
+        'tippingPointAwareness': e.tippingPointAwareness,
+        'fearOrPressurePoint': e.fearOrPressurePoint,
         'needOrWoundedPoint': e.needOrWoundedPoint,
+        'touchedThemes': e.touchedThemes,
+        'neededSupports': e.neededSupports,
+        'realisticAlternative': e.realisticAlternative,
+        'triggerAsLastDrop': e.triggerAsLastDrop,
+        'backgroundTheme': e.backgroundTheme,
+        'preEscalationRelief': e.preEscalationRelief,
+        'patternFamiliarity': e.patternFamiliarity,
         'nextStep': e.nextStep,
         'systemState': e.systemState,
         'isCrisis': e.isCrisis,
         'evaluationHeadlineKey': e.evaluationHeadlineKey,
         'evaluationMeaningKey': e.evaluationMeaningKey,
+        'evaluationHelpfulNowKey': e.evaluationHelpfulNowKey,
+        'evaluationLearningPointKey': e.evaluationLearningPointKey,
+        'evaluationStatusKeys': e.evaluationStatusKeys,
         'suggestedTipIds': e.suggestedTipIds,
         'suggestedNextActionKey': e.suggestedNextActionKey,
         'selectedNextActionKey': e.selectedNextActionKey,
         'aiEvaluationStatus': e.aiEvaluationStatus,
         'aiEvaluationProvider': e.aiEvaluationProvider,
         'aiEvaluationModel': e.aiEvaluationModel,
-        'aiEvaluationRequestedAt':
-            e.aiEvaluationRequestedAt?.toIso8601String(),
-        'aiEvaluationCompletedAt':
-            e.aiEvaluationCompletedAt?.toIso8601String(),
+        'aiEvaluationRequestedAt': e.aiEvaluationRequestedAt?.toIso8601String(),
+        'aiEvaluationCompletedAt': e.aiEvaluationCompletedAt?.toIso8601String(),
         'aiEvaluationConsentGiven': e.aiEvaluationConsentGiven,
         'aiEvaluationText': e.aiEvaluationText,
         'aiEvaluationSchemaVersion': e.aiEvaluationSchemaVersion,

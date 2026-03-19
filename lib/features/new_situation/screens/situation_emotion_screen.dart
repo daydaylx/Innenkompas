@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../app/router.dart';
 import '../../../app/theme/colors.dart';
+import '../../../application/providers/new_situation_providers.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/emotion_types.dart';
 import '../../../core/validators/new_situation_validators.dart';
@@ -11,13 +13,11 @@ import '../../../shared/widgets/app_scaffold.dart';
 import '../../../shared/widgets/buttons/app_primary_button.dart';
 import '../../../shared/widgets/buttons/app_secondary_button.dart';
 import '../../../shared/widgets/cards/app_card.dart';
-import '../../../application/providers/new_situation_providers.dart';
-import '../widgets/flow_progress_indicator.dart';
-import '../widgets/emotion/intensity_slider.dart';
-import '../widgets/emotion/emotion_selector.dart';
 import '../widgets/emotion/body_symptoms_selector.dart';
+import '../widgets/emotion/emotion_selector.dart';
+import '../widgets/emotion/intensity_slider.dart';
+import '../widgets/flow_progress_indicator.dart';
 
-/// Step 2 screen of the new situation flow - Emotions and intensity.
 class SituationEmotionScreen extends ConsumerStatefulWidget {
   const SituationEmotionScreen({super.key});
 
@@ -28,57 +28,62 @@ class SituationEmotionScreen extends ConsumerStatefulWidget {
 
 class _SituationEmotionScreenState
     extends ConsumerState<SituationEmotionScreen> {
-  int _intensity = 5;
-  int _bodyTension = 5;
+  int _preTriggerLoad = 0;
+  int _intensity = 0;
+  int _bodyTension = 0;
   EmotionType? _primaryEmotion;
-  EmotionType? _secondaryEmotion;
-  List<String> _bodySymptoms = [];
+  List<EmotionType> _additionalEmotions = const [];
+  List<String> _initialBodyReactions = const [];
 
   @override
   void initState() {
     super.initState();
-    // Load existing emotion data if available
     final existingData = ref.read(emotionDataProvider);
     if (existingData != null) {
+      _preTriggerLoad = existingData.preTriggerLoad;
       _intensity = existingData.intensity;
       _bodyTension = existingData.bodyTension;
       _primaryEmotion = existingData.primaryEmotion;
-      _secondaryEmotion = existingData.secondaryEmotion;
-      _bodySymptoms = List.from(existingData.bodySymptoms);
+      _additionalEmotions =
+          List<EmotionType>.from(existingData.additionalEmotions);
+      _initialBodyReactions =
+          List<String>.from(existingData.initialBodyReactions);
     }
   }
 
   bool get _isValid {
     if (_primaryEmotion == null) return false;
-    final intensityValidation =
-        NewSituationValidators.validateIntensity(_intensity);
-    final tensionValidation =
-        NewSituationValidators.validateBodyTension(_bodyTension);
-    return intensityValidation.isValid && tensionValidation.isValid;
+    return NewSituationValidators.validateEmotionData(
+      SituationEmotionData(
+        preTriggerLoad: _preTriggerLoad,
+        intensity: _intensity,
+        bodyTension: _bodyTension,
+        primaryEmotion: _primaryEmotion!,
+        additionalEmotions: _additionalEmotions,
+        initialBodyReactions: _initialBodyReactions,
+      ),
+    ).isValid;
   }
 
   void _handleNext() {
     if (_primaryEmotion == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bitte wähle eine Emotion aus.')),
+        const SnackBar(content: Text('Bitte wähle das stärkste Gefühl aus.')),
       );
       return;
     }
 
-    // Save emotion data
-    final emotionData = SituationEmotionData(
-      intensity: _intensity,
-      bodyTension: _bodyTension,
-      primaryEmotion: _primaryEmotion!,
-      secondaryEmotion: _secondaryEmotion,
-      bodySymptoms: _bodySymptoms,
-    );
+    ref.read(newSituationFlowControllerProvider.notifier).updateEmotionData(
+          SituationEmotionData(
+            preTriggerLoad: _preTriggerLoad,
+            intensity: _intensity,
+            bodyTension: _bodyTension,
+            primaryEmotion: _primaryEmotion!,
+            additionalEmotions: _additionalEmotions,
+            initialBodyReactions: _initialBodyReactions,
+          ),
+        );
 
-    ref
-        .read(newSituationFlowControllerProvider.notifier)
-        .updateEmotionData(emotionData);
-
-    // Navigate to next step
     context.push(AppRoutes.newSituationThoughtImpulse);
   }
 
@@ -91,7 +96,7 @@ class _SituationEmotionScreenState
     final theme = Theme.of(context);
 
     return AppScaffold(
-      title: 'Emotionen erfassen',
+      title: 'Körper und Gefühle',
       backgroundVariant: AppBackgroundVariant.focus,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
@@ -119,7 +124,7 @@ class _SituationEmotionScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Wie hast du dich gefühlt?',
+                    'Wie geladen war dein System?',
                     style: theme.textTheme.headlineMedium?.copyWith(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
@@ -127,7 +132,7 @@ class _SituationEmotionScreenState
                   ),
                   const SizedBox(height: AppConstants.spacingSmall),
                   Text(
-                    'Wähle in Ruhe die Emotionen und Signale aus, die gerade am besten passen.',
+                    'Wir trennen hier Vorbelastung, Momentbelastung und Körperreaktion, damit später klarer wird, was schon vorher da war.',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -138,8 +143,14 @@ class _SituationEmotionScreenState
             const SizedBox(height: AppConstants.spacingLarge),
             AppCard(
               child: IntensitySlider(
+                preTriggerLoad: _preTriggerLoad,
                 intensity: _intensity,
                 bodyTension: _bodyTension,
+                onPreTriggerLoadChanged: (value) {
+                  setState(() {
+                    _preTriggerLoad = value;
+                  });
+                },
                 onIntensityChanged: (value) {
                   setState(() {
                     _intensity = value;
@@ -154,22 +165,35 @@ class _SituationEmotionScreenState
             ),
             AppCard(
               variant: AppCardVariant.soft,
-              child: EmotionSelector(
-                primaryEmotion: _primaryEmotion,
-                secondaryEmotion: _secondaryEmotion,
-                onPrimaryChanged: (emotion) {
-                  setState(() {
-                    _primaryEmotion = emotion;
-                    if (_secondaryEmotion == emotion) {
-                      _secondaryEmotion = null;
-                    }
-                  });
-                },
-                onSecondaryChanged: (emotion) {
-                  setState(() {
-                    _secondaryEmotion = emotion;
-                  });
-                },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Gefühle',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: AppConstants.spacingSmall),
+                  EmotionSelector(
+                    primaryEmotion: _primaryEmotion,
+                    additionalEmotions: _additionalEmotions,
+                    onPrimaryChanged: (emotion) {
+                      setState(() {
+                        _primaryEmotion = emotion;
+                        _additionalEmotions = _additionalEmotions
+                            .where((value) => value != emotion)
+                            .toList(growable: false);
+                      });
+                    },
+                    onAdditionalChanged: (emotions) {
+                      setState(() {
+                        _additionalEmotions = emotions;
+                      });
+                    },
+                  ),
+                ],
               ),
             ),
             AppCard(
@@ -178,7 +202,7 @@ class _SituationEmotionScreenState
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Körperzeichen (Optional)',
+                    'Was ist im Körper zuerst hochgegangen?',
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
@@ -186,17 +210,17 @@ class _SituationEmotionScreenState
                   ),
                   const SizedBox(height: AppConstants.spacingSmall),
                   Text(
-                    'Welche körperlichen Signale hast du gespürt? Mehrere sind möglich.',
+                    'Mehr als drei Auswahlpunkte machen die Rückschau meist unklarer als hilfreicher.',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: AppConstants.spacingMedium),
                   BodySymptomsSelector(
-                    selectedSymptoms: _bodySymptoms,
-                    onSymptomsChanged: (symptoms) {
+                    selectedSymptoms: _initialBodyReactions,
+                    onSymptomsChanged: (values) {
                       setState(() {
-                        _bodySymptoms = symptoms;
+                        _initialBodyReactions = values;
                       });
                     },
                   ),

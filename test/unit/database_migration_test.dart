@@ -9,7 +9,7 @@ import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:innenkompass/data/db/app_database.dart';
 
 void main() {
-  test('migrates schema version 1 entries to version 4 without data loss',
+  test('migrates schema version 1 entries to version 5 without data loss',
       () async {
     final tempDir = await Directory.systemTemp.createTemp(
       'innenkompass_migration_test',
@@ -146,6 +146,26 @@ void main() {
     expect(columnNames, contains('ai_evaluation_consent_given'));
     expect(columnNames, contains('ai_evaluation_text'));
     expect(columnNames, contains('ai_evaluation_schema_version'));
+    expect(columnNames, contains('pre_trigger_preoccupation'));
+    expect(columnNames, contains('problem_timing'));
+    expect(columnNames, contains('trigger_description'));
+    expect(columnNames, contains('pre_trigger_load'));
+    expect(columnNames, contains('initial_body_reactions'));
+    expect(columnNames, contains('additional_emotions'));
+    expect(columnNames, contains('thought_focus'));
+    expect(columnNames, contains('system_reaction'));
+    expect(columnNames, contains('thought_patterns'));
+    expect(columnNames, contains('actual_behavior_tags'));
+    expect(columnNames, contains('tipping_point_awareness'));
+    expect(columnNames, contains('touched_themes'));
+    expect(columnNames, contains('needed_supports'));
+    expect(columnNames, contains('realistic_alternative'));
+    expect(columnNames, contains('trigger_as_last_drop'));
+    expect(columnNames, contains('background_theme'));
+    expect(columnNames, contains('pattern_familiarity'));
+    expect(columnNames, contains('evaluation_helpful_now_key'));
+    expect(columnNames, contains('evaluation_learning_point_key'));
+    expect(columnNames, contains('evaluation_status_keys'));
 
     final upgradedEntry = await database.getSituationEntryById(1);
     expect(upgradedEntry, isNotNull);
@@ -168,6 +188,13 @@ void main() {
     expect(upgradedEntry.aiEvaluationConsentGiven, isFalse);
     expect(upgradedEntry.aiEvaluationText, isNull);
     expect(upgradedEntry.aiEvaluationSchemaVersion, isNull);
+    expect(upgradedEntry.preTriggerPreoccupation, isNull);
+    expect(upgradedEntry.thoughtFocus, isNull);
+    expect(upgradedEntry.systemReaction, isNull);
+    expect(upgradedEntry.realisticAlternative, isNull);
+    expect(upgradedEntry.evaluationHelpfulNowKey, isNull);
+    expect(upgradedEntry.evaluationLearningPointKey, isNull);
+    expect(upgradedEntry.evaluationStatusKeys, isNull);
 
     final updated = upgradedEntry.copyWith(
       needOrWoundedPoint: const Value('Ich brauche Abstand.'),
@@ -183,6 +210,6 @@ void main() {
 
     final versionRow =
         await database.customSelect('PRAGMA user_version;').getSingle();
-    expect(versionRow.data['user_version'], 4);
+    expect(versionRow.data['user_version'], 5);
   });
 }

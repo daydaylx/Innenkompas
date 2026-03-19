@@ -49,11 +49,11 @@ class _InterventionScreenState extends ConsumerState<InterventionScreen> {
       if (!mounted) return;
 
       final flowState = ref.read(interventionFlowStateProvider);
-      final shouldReuseExistingFlow = flowState.intervention?.id ==
-              interventionId &&
-          flowState.entryId != null &&
-          !flowState.isCompleted &&
-          !flowState.wasAborted;
+      final shouldReuseExistingFlow =
+          flowState.intervention?.id == interventionId &&
+              flowState.entryId != null &&
+              !flowState.isCompleted &&
+              !flowState.wasAborted;
       if (shouldReuseExistingFlow) return;
 
       final intervention = InterventionLibrary.getById(interventionId);

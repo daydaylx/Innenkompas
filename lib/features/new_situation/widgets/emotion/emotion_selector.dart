@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/emotion_types.dart';
+
 import '../../../../app/theme/colors.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/constants/emotion_types.dart';
 
-/// Emotion selector with primary (required) and secondary (optional) selection.
 class EmotionSelector extends StatelessWidget {
   const EmotionSelector({
     super.key,
     required this.primaryEmotion,
-    required this.secondaryEmotion,
+    required this.additionalEmotions,
     required this.onPrimaryChanged,
-    required this.onSecondaryChanged,
+    required this.onAdditionalChanged,
   });
 
   final EmotionType? primaryEmotion;
-  final EmotionType? secondaryEmotion;
+  final List<EmotionType> additionalEmotions;
   final ValueChanged<EmotionType?> onPrimaryChanged;
-  final ValueChanged<EmotionType?> onSecondaryChanged;
+  final ValueChanged<List<EmotionType>> onAdditionalChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -25,33 +25,29 @@ class EmotionSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Primary emotion (required)
         Text(
-          'Was hast du am stärksten gespürt?',
+          'Was war das stärkste Gefühl?',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: AppColors.textPrimary,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: AppConstants.spacingSmall),
         Wrap(
           spacing: AppConstants.spacingSmall,
           runSpacing: AppConstants.spacingSmall,
-          children: EmotionType.values.map((emotion) {
+          children: EmotionType.flowOptions.map((emotion) {
             final isSelected = primaryEmotion == emotion;
             return _EmotionChip(
               emotion: emotion,
               isSelected: isSelected,
-              isPrimary: true,
               onTap: () => onPrimaryChanged(isSelected ? null : emotion),
             );
           }).toList(),
         ),
         const SizedBox(height: AppConstants.spacingLarge),
-
-        // Secondary emotion (optional)
         Text(
-          'Was hast du sonst noch gespürt? (Optional)',
+          'Was war noch mit dabei? Optional, max. 2',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: AppColors.textSecondary,
           ),
@@ -60,17 +56,29 @@ class EmotionSelector extends StatelessWidget {
         Wrap(
           spacing: AppConstants.spacingSmall,
           runSpacing: AppConstants.spacingSmall,
-          children: EmotionType.values.map((emotion) {
-            // Don't show primary emotion as an option for secondary
-            if (emotion == primaryEmotion) {
-              return const SizedBox.shrink();
-            }
-            final isSelected = secondaryEmotion == emotion;
+          children: EmotionType.flowOptions.where((emotion) {
+            return emotion != primaryEmotion;
+          }).map((emotion) {
+            final isSelected = additionalEmotions.contains(emotion);
+            final disableNewSelection =
+                additionalEmotions.length >= 2 && !isSelected;
+
             return _EmotionChip(
               emotion: emotion,
               isSelected: isSelected,
-              isPrimary: false,
-              onTap: () => onSecondaryChanged(isSelected ? null : emotion),
+              isDisabled: disableNewSelection,
+              onTap: disableNewSelection
+                  ? null
+                  : () {
+                      final updated =
+                          List<EmotionType>.from(additionalEmotions);
+                      if (isSelected) {
+                        updated.remove(emotion);
+                      } else {
+                        updated.add(emotion);
+                      }
+                      onAdditionalChanged(updated);
+                    },
             );
           }).toList(),
         ),
@@ -83,14 +91,14 @@ class _EmotionChip extends StatelessWidget {
   const _EmotionChip({
     required this.emotion,
     required this.isSelected,
-    required this.isPrimary,
     required this.onTap,
+    this.isDisabled = false,
   });
 
   final EmotionType emotion;
   final bool isSelected;
-  final bool isPrimary;
-  final VoidCallback onTap;
+  final bool isDisabled;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -107,10 +115,16 @@ class _EmotionChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? emotionColor.withValues(alpha: 0.16)
-              : AppColors.surfaceStrong.withValues(alpha: 0.88),
+              : isDisabled
+                  ? AppColors.surfaceVariant
+                  : AppColors.surfaceStrong.withValues(alpha: 0.88),
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           border: Border.all(
-            color: isSelected ? emotionColor : AppColors.borderLight,
+            color: isSelected
+                ? emotionColor
+                : isDisabled
+                    ? AppColors.border
+                    : AppColors.borderLight,
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -125,9 +139,12 @@ class _EmotionChip extends StatelessWidget {
             Text(
               emotion.label,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isSelected ? emotionColor : AppColors.textPrimary,
-                fontWeight:
-                    isPrimary && isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected
+                    ? emotionColor
+                    : isDisabled
+                        ? AppColors.textTertiary
+                        : AppColors.textPrimary,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
           ],

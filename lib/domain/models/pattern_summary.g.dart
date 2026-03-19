@@ -68,7 +68,10 @@ const _$ContextTypeEnumMap = {
   ContextType.family: 'family',
   ContextType.partnership: 'partnership',
   ContextType.friends: 'friends',
+  ContextType.everyday: 'everyday',
+  ContextType.organizationHousehold: 'organizationHousehold',
   ContextType.health: 'health',
+  ContextType.selfWorthPerformance: 'selfWorthPerformance',
   ContextType.finances: 'finances',
   ContextType.leisure: 'leisure',
   ContextType.solitude: 'solitude',
@@ -77,13 +80,20 @@ const _$ContextTypeEnumMap = {
 
 const _$EmotionTypeEnumMap = {
   EmotionType.anger: 'anger',
+  EmotionType.annoyance: 'annoyance',
   EmotionType.fear: 'fear',
+  EmotionType.powerlessness: 'powerlessness',
+  EmotionType.overwhelm: 'overwhelm',
+  EmotionType.disappointment: 'disappointment',
+  EmotionType.hurt: 'hurt',
   EmotionType.sadness: 'sadness',
   EmotionType.shame: 'shame',
   EmotionType.joy: 'joy',
   EmotionType.disgust: 'disgust',
   EmotionType.surprise: 'surprise',
   EmotionType.guilt: 'guilt',
+  EmotionType.helplessness: 'helplessness',
+  EmotionType.emptiness: 'emptiness',
   EmotionType.pride: 'pride',
   EmotionType.loneliness: 'loneliness',
 };
@@ -101,6 +111,7 @@ const _$ImpulseTypeEnumMap = {
   ImpulseType.immediateAction: 'immediateAction',
   ImpulseType.distraction: 'distraction',
   ImpulseType.seekHelp: 'seekHelp',
+  ImpulseType.unknown: 'unknown',
 };
 
 const _$SystemStateEnumMap = {

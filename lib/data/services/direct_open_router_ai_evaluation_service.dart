@@ -24,13 +24,20 @@ const _maxEntryFieldLengths = {
   'context': 64,
   'situation_description': 300,
   'involved_person': 120,
+  'involved_entities': 120,
+  'pre_trigger_preoccupation': 240,
+  'trigger_description': 200,
   'primary_emotion': 64,
   'secondary_emotion': 64,
+  'system_reaction': 64,
   'automatic_thought': 200,
+  'thought_focus': 200,
   'first_impulse': 64,
   'fact_interpretation_result': 64,
   'actual_behavior': 300,
   'need_or_wounded_point': 240,
+  'background_theme': 240,
+  'realistic_alternative': 240,
   'next_step': 240,
   'system_state': 64,
 };
@@ -39,7 +46,10 @@ const _contextLabels = {
   'family': 'Familie',
   'partnership': 'Partnerschaft',
   'friends': 'Freunde',
+  'everyday': 'Alltag',
+  'organizationHousehold': 'Organisation/Haushalt',
   'health': 'Gesundheit',
+  'selfWorthPerformance': 'Selbstbild/Leistung',
   'finances': 'Finanzen',
   'leisure': 'Freizeit',
   'solitude': 'Alleinsein',
@@ -47,13 +57,20 @@ const _contextLabels = {
 };
 const _emotionLabels = {
   'anger': 'Wut',
+  'annoyance': 'Genervtheit',
   'fear': 'Angst',
+  'powerlessness': 'Ohnmacht',
+  'overwhelm': 'Überforderung',
+  'disappointment': 'Enttäuschung',
+  'hurt': 'Kränkung',
   'sadness': 'Trauer',
   'shame': 'Scham',
   'joy': 'Freude',
   'disgust': 'Ekel',
   'surprise': 'Überraschung',
   'guilt': 'Schuld',
+  'helplessness': 'Hilflosigkeit',
+  'emptiness': 'Leere',
   'pride': 'Stolz',
   'loneliness': 'Einsamkeit',
 };
@@ -70,6 +87,7 @@ const _impulseLabels = {
   'immediateAction': 'Sofort handeln',
   'distraction': 'Ablenkung',
   'seekHelp': 'Hilfe suchen',
+  'unknown': 'Weiß ich nicht',
 };
 const _factInterpretationLabels = {
   'mostlyFacts': 'Eher Fakten',
@@ -105,34 +123,61 @@ const _systemStateDescriptions = {
   'crisis': 'Akute Not oder Sicherheitsrisiko.',
 };
 const _localHeadlineLabels = {
-  'acute_activation_high_tension': 'Hohe Belastung und starker Handlungsdruck',
-  'acute_activation_withdrawal': 'Hohe Belastung mit starkem Rückzugsimpuls',
-  'rumination_loop': 'Kreisende Gedanken ohne echte Klärung',
-  'conflict_impulse': 'Konflikt mit schneller Reaktionsneigung',
-  'self_devaluation_load': 'Belastung mit starker Selbstbewertung',
-  'overwhelm_pressure': 'Viel Druck und zu viel gleichzeitig',
-  'interpretation_uncertain_facts':
-      'Starke Deutung bei noch unsicherer Faktenlage',
-  'reflective_ready': 'Die Situation ist belastend, aber einordnbar',
-  'crisis_support':
-      'Sehr hohe Belastung mit Bedarf nach sofortiger Stabilisierung',
+  'high_tension_body_fast': 'Dein System war stark unter Spannung.',
+  'small_trigger_big_load':
+      'Der Auslöser wirkt eher wie der letzte Tropfen als wie das ganze Thema.',
+  'thought_spiral_active':
+      'Neben dem Auslöser lief schon viel innere Vorbeschäftigung.',
+  'automatic_reaction_fast':
+      'Zwischen Auslöser und Reaktion war wenig innerer Puffer.',
+  'conflict_pattern_visible':
+      'Die Situation zeigt ein klares Konflikt- oder Schutzmuster.',
+  'reflection_reachable': 'Die Situation ist belastend, aber noch einordbar.',
+  'safety_relevant_signal': 'Die Belastung wirkt gerade sicherheitsrelevant.',
 };
 const _localMeaningLabels = {
-  'acute_activation_alarm':
-      'Der Körper war vermutlich schneller als die sachliche Einordnung.',
-  'rumination_clarifying':
-      'Der Eintrag wirkt eher wie eine Denkschleife als wie eine Klärung.',
-  'conflict_loaded': 'Die Situation wirkt konfliktgeladen und impulsanfällig.',
-  'self_devaluation_connected':
-      'Die Belastung scheint stark mit Selbstbewertung verbunden.',
-  'overwhelm_not_unsolvable':
-      'Die Situation wirkt eher überfordernd als unlösbar.',
-  'interpretation_not_certain':
-      'Vieles klingt eher nach Annahme als nach gesichertem Fakt.',
-  'reflective_ready_accessible':
-      'Die Person scheint noch gut erreichbar für einen ruhigen nächsten Schritt.',
-  'crisis_regulate_first':
-      'Gerade zählt zuerst Stabilisierung und Unterstützung, nicht tiefe Analyse.',
+  'background_pressure_already_high':
+      'Wahrscheinlich war die innere Belastung schon vorher erhöht.',
+  'background_need_hit':
+      'Es scheint weniger nur um den Anlass zu gehen, sondern um etwas, das in dir getroffen wurde.',
+  'background_interpretation':
+      'Ein Teil des Drucks kommt vermutlich aus Deutung oder Befürchtung.',
+  'background_control':
+      'Kontrolle, Leistungsdruck oder Verantwortung könnten hier mit hineinspielen.',
+  'background_conflict':
+      'Respekt, Grenzen oder Gesehenwerden wirken hier als mögliches Hintergrundthema.',
+  'background_unknown':
+      'Das eigentliche Thema dahinter ist noch nicht ganz klar, wirkt aber größer als der Auslöser allein.',
+  'background_safety_first':
+      'Im Moment ist nicht entscheidend, alles zu verstehen, sondern erst wieder etwas Stabilität zu bekommen.',
+};
+const _localHelpfulNowLabels = {
+  'helpful_stabilize_body':
+      'Gerade ist Stabilisierung hilfreicher als weiteres Analysieren.',
+  'helpful_reduce_input':
+      'Weniger Reize und mehr Abstand wären jetzt hilfreicher als weitere Klärung.',
+  'helpful_pause_before_contact':
+      'Nicht sofort reagieren ist gerade hilfreicher als das Thema direkt weiterzutreiben.',
+  'helpful_name_facts':
+      'Zuerst den sachlichen Kern zu sortieren wäre gerade hilfreicher als weiterzudenken.',
+  'helpful_choose_small_step':
+      'Ein kleiner nächster Schritt ist jetzt hilfreicher als alles auf einmal lösen zu wollen.',
+  'helpful_seek_support':
+      'Sich Unterstützung zu holen ist jetzt hilfreicher, als allein weiterzudrücken.',
+};
+const _localLearningLabels = {
+  'learning_before_trigger':
+      'Der früheste Abzweig lag wahrscheinlich schon vor dem Auslöser.',
+  'learning_notice_body_first':
+      'Der früheste merkbare Punkt lag wahrscheinlich im Körper.',
+  'learning_name_automatic_thought':
+      'Ein früher Abzweig könnte sein, den ersten Gedanken schneller als Deutung zu erkennen.',
+  'learning_interrupt_pattern':
+      'Wenn das Muster früher bemerkt wird, reicht oft schon ein kleiner Bruch.',
+  'learning_build_pause':
+      'Mehr Puffer zwischen Reiz und Reaktion wäre hier vermutlich der wichtigste Lernpunkt.',
+  'learning_stabilize_not_solve':
+      'In sehr geladenen Momenten ist erst beruhigen oft der sinnvollere Abzweig als lösen.',
 };
 const _nextActionLabels = {
   'pause_now': 'Jetzt kurz Abstand schaffen.',
@@ -415,6 +460,19 @@ class DirectOpenRouterAiEvaluationService implements AiEvaluationService {
           entry.involvedPerson,
           _maxEntryFieldLengths['involved_person']!,
         ),
+        'involved_entities': _limitString(
+          entry.involvedEntities,
+          _maxEntryFieldLengths['involved_entities']!,
+        ),
+        'pre_trigger_preoccupation': _limitString(
+          entry.preTriggerPreoccupation,
+          _maxEntryFieldLengths['pre_trigger_preoccupation']!,
+        ),
+        'trigger_description': _limitString(
+          entry.triggerDescription,
+          _maxEntryFieldLengths['trigger_description']!,
+        ),
+        'pre_trigger_load_1_to_10': entry.preTriggerLoad,
         'intensity_1_to_10': entry.intensity,
         'body_tension_1_to_10': entry.bodyTension,
         'primary_emotion': _humanizeMappedValue(
@@ -432,6 +490,11 @@ class DirectOpenRouterAiEvaluationService implements AiEvaluationService {
           _emotionLabels,
         ),
         'body_symptoms': _sanitizeStringArray(entry.bodySymptoms),
+        'additional_emotions': _sanitizeStringArray(entry.additionalEmotions),
+        'thought_focus': _limitString(
+          entry.thoughtFocus,
+          _maxEntryFieldLengths['thought_focus']!,
+        ),
         'automatic_thought': _limitString(
           entry.automaticThought,
           _maxEntryFieldLengths['automatic_thought']!,
@@ -449,6 +512,12 @@ class DirectOpenRouterAiEvaluationService implements AiEvaluationService {
             _maxEntryFieldLengths['fact_interpretation_result']!,
           ),
         ),
+        'system_reaction': _limitString(
+          entry.systemReaction,
+          _maxEntryFieldLengths['system_reaction']!,
+        ),
+        'thought_patterns': _sanitizeStringArray(entry.thoughtPatterns),
+        'actual_behavior_tags': _sanitizeStringArray(entry.actualBehaviorTags),
         'actual_behavior': _limitString(
           entry.actualBehavior,
           _maxEntryFieldLengths['actual_behavior']!,
@@ -461,6 +530,18 @@ class DirectOpenRouterAiEvaluationService implements AiEvaluationService {
           entry.nextStep,
           _maxEntryFieldLengths['next_step']!,
         ),
+        'realistic_alternative': _limitString(
+          entry.realisticAlternative,
+          _maxEntryFieldLengths['realistic_alternative']!,
+        ),
+        'background_theme': _limitString(
+          entry.backgroundTheme,
+          _maxEntryFieldLengths['background_theme']!,
+        ),
+        'trigger_as_last_drop': entry.triggerAsLastDrop,
+        'touched_themes': _sanitizeStringArray(entry.touchedThemes),
+        'needed_supports': _sanitizeStringArray(entry.neededSupports),
+        'tipping_point_awareness': entry.tippingPointAwareness,
         'local_system_state_hint': _buildSystemStateHint(
           _limitString(
             entry.systemState,
@@ -509,6 +590,15 @@ class DirectOpenRouterAiEvaluationService implements AiEvaluationService {
         entry.evaluationMeaningKey,
         _localMeaningLabels,
       ),
+      'helpful_now': _humanizeMappedValue(
+        entry.evaluationHelpfulNowKey,
+        _localHelpfulNowLabels,
+      ),
+      'learning_point': _humanizeMappedValue(
+        entry.evaluationLearningPointKey,
+        _localLearningLabels,
+      ),
+      'status_keys': _decodeStringList(entry.evaluationStatusKeys),
       'suggested_next_action': _humanizeMappedValue(
         entry.suggestedNextActionKey,
         _nextActionLabels,

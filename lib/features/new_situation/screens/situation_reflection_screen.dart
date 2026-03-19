@@ -8,6 +8,9 @@ import '../../../application/providers/evaluation_providers.dart';
 import '../../../application/providers/intervention_providers.dart';
 import '../../../application/providers/new_situation_providers.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/new_situation_option_lists.dart';
+import '../../../core/constants/pattern_familiarity.dart';
+import '../../../core/constants/trigger_as_last_drop.dart';
 import '../../../core/validators/new_situation_validators.dart';
 import '../../../domain/models/situation_draft.dart';
 import '../../../shared/widgets/app_scaffold.dart';
@@ -16,8 +19,9 @@ import '../../../shared/widgets/buttons/app_secondary_button.dart';
 import '../../../shared/widgets/cards/app_card.dart';
 import '../../../shared/widgets/loading/app_loading_indicator.dart';
 import '../widgets/flow_progress_indicator.dart';
+import '../widgets/shared/form_text_area.dart';
+import '../widgets/shared/string_chip_selector.dart';
 
-/// Step 4 screen of the new situation flow - reflection and next step.
 class SituationReflectionScreen extends ConsumerStatefulWidget {
   const SituationReflectionScreen({super.key});
 
@@ -28,58 +32,95 @@ class SituationReflectionScreen extends ConsumerStatefulWidget {
 
 class _SituationReflectionScreenState
     extends ConsumerState<SituationReflectionScreen> {
-  final _needController = TextEditingController();
-  final _nextStepController = TextEditingController();
-  String _needOrWoundedPoint = '';
+  List<String> _touchedThemes = const [];
+  List<String> _neededSupports = const [];
+  String _realisticAlternative = '';
+  TriggerAsLastDrop? _triggerAsLastDrop;
+  String _backgroundTheme = '';
   String _nextStep = '';
-  String? _needError;
+  String _preEscalationRelief = '';
+  PatternFamiliarity? _patternFamiliarity;
+  String? _alternativeError;
+  String? _backgroundThemeError;
   String? _nextStepError;
+  String? _touchedThemesError;
+  String? _neededSupportsError;
 
   @override
   void initState() {
     super.initState();
     final existingData = ref.read(reflectionDataProvider);
     if (existingData != null) {
-      _needOrWoundedPoint = existingData.needOrWoundedPoint;
+      _touchedThemes = List<String>.from(existingData.touchedThemes);
+      _neededSupports = List<String>.from(existingData.neededSupports);
+      _realisticAlternative = existingData.realisticAlternative;
+      _triggerAsLastDrop = existingData.triggerAsLastDrop;
+      _backgroundTheme = existingData.backgroundTheme;
       _nextStep = existingData.nextStep;
-      _needController.text = _needOrWoundedPoint;
-      _nextStepController.text = _nextStep;
+      _preEscalationRelief = existingData.preEscalationRelief ?? '';
+      _patternFamiliarity = existingData.patternFamiliarity;
     }
   }
 
-  @override
-  void dispose() {
-    _needController.dispose();
-    _nextStepController.dispose();
-    super.dispose();
-  }
-
-  bool get _isValid {
-    final reflection = SituationReflectionData(
-      needOrWoundedPoint: _needOrWoundedPoint,
-      nextStep: _nextStep,
-    );
-    return NewSituationValidators.validateReflectionData(reflection).isValid;
-  }
-
   Future<void> _handleSave() async {
-    final needValidation =
-        NewSituationValidators.validateNeedOrWoundedPoint(_needOrWoundedPoint);
-    final nextStepValidation =
-        NewSituationValidators.validateNextStep(_nextStep);
+    if (_triggerAsLastDrop == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Bitte ordne kurz ein, ob der Auslöser eher der letzte Tropfen war.'),
+        ),
+      );
+      return;
+    }
 
-    if (!needValidation.isValid || !nextStepValidation.isValid) {
-      setState(() {
-        _needError = needValidation.firstError;
-        _nextStepError = nextStepValidation.firstError;
-      });
+    final validation = NewSituationValidators.validateReflectionData(
+      SituationReflectionData(
+        touchedThemes: _touchedThemes,
+        neededSupports: _neededSupports,
+        realisticAlternative: _realisticAlternative,
+        triggerAsLastDrop: _triggerAsLastDrop!,
+        backgroundTheme: _backgroundTheme,
+        nextStep: _nextStep,
+        preEscalationRelief: _preEscalationRelief.trim().isEmpty
+            ? null
+            : _preEscalationRelief.trim(),
+        patternFamiliarity: _patternFamiliarity,
+      ),
+    );
+
+    setState(() {
+      _touchedThemesError = _touchedThemes.isEmpty
+          ? 'Bitte wähle, was in dir getroffen wurde.'
+          : null;
+      _neededSupportsError = _neededSupports.isEmpty
+          ? 'Bitte wähle, was du gebraucht hättest.'
+          : null;
+      _alternativeError = NewSituationValidators.validateRealisticAlternative(
+        _realisticAlternative,
+      ).firstError;
+      _backgroundThemeError =
+          NewSituationValidators.validateBackgroundTheme(_backgroundTheme)
+              .firstError;
+      _nextStepError =
+          NewSituationValidators.validateNextStep(_nextStep).firstError;
+    });
+
+    if (!validation.isValid) {
       return;
     }
 
     ref.read(newSituationFlowControllerProvider.notifier).updateReflectionData(
           SituationReflectionData(
-            needOrWoundedPoint: _needOrWoundedPoint.trim(),
+            touchedThemes: _touchedThemes,
+            neededSupports: _neededSupports,
+            realisticAlternative: _realisticAlternative.trim(),
+            triggerAsLastDrop: _triggerAsLastDrop!,
+            backgroundTheme: _backgroundTheme.trim(),
             nextStep: _nextStep.trim(),
+            preEscalationRelief: _preEscalationRelief.trim().isEmpty
+                ? null
+                : _preEscalationRelief.trim(),
+            patternFamiliarity: _patternFamiliarity,
           ),
         );
 
@@ -117,6 +158,7 @@ class _SituationReflectionScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isSaving = ref.watch(isFlowSavingProvider);
+    final thoughtData = ref.watch(thoughtImpulseDataProvider);
 
     return AppScaffold(
       title: 'Einordnen und weitergehen',
@@ -147,7 +189,7 @@ class _SituationReflectionScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Was ist darin gerade besonders berührt?',
+                    'Was steckt dahinter und was wäre ein realistischer nächster Schritt?',
                     style: theme.textTheme.headlineMedium?.copyWith(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
@@ -155,7 +197,7 @@ class _SituationReflectionScreenState
                   ),
                   const SizedBox(height: AppConstants.spacingSmall),
                   Text(
-                    'Halte fest, was in dir Schutz, Klärung oder Zuwendung braucht und welcher kleine nächste Schritt dir jetzt gut tun würde.',
+                    'Hier geht es nicht um perfektes Verhalten, sondern um einen ehrlichen Abzweigpunkt, der in echt machbar gewesen wäre.',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -164,34 +206,177 @@ class _SituationReflectionScreenState
               ),
             ),
             const SizedBox(height: AppConstants.spacingLarge),
+            _buildSelectorCard(
+              title: 'Was wurde in dir getroffen? Max. 2',
+              errorText: _touchedThemesError,
+              child: StringChipSelector(
+                options: NewSituationOptionLists.touchedThemes,
+                selectedValues: _touchedThemes,
+                maxSelected: 2,
+                onChanged: (values) {
+                  setState(() {
+                    _touchedThemes = values;
+                    _touchedThemesError = null;
+                  });
+                },
+              ),
+            ),
+            _buildSelectorCard(
+              title:
+                  'Was hättest du in dem Moment eigentlich gebraucht? Max. 2',
+              variant: AppCardVariant.soft,
+              errorText: _neededSupportsError,
+              child: StringChipSelector(
+                options: NewSituationOptionLists.neededSupports,
+                selectedValues: _neededSupports,
+                maxSelected: 2,
+                onChanged: (values) {
+                  setState(() {
+                    _neededSupports = values;
+                    _neededSupportsError = null;
+                  });
+                },
+              ),
+            ),
+            _buildPromptCard(
+              title:
+                  'Was wäre in genau diesem Moment ein realistischer anderer Schritt gewesen?',
+              variant: AppCardVariant.soft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  StringChipSelector(
+                    options:
+                        NewSituationOptionLists.realisticAlternativeOptions,
+                    selectedValues: const [],
+                    maxSelected: 1,
+                    onChanged: (values) {
+                      if (values.isEmpty) return;
+                      final selection = values.first;
+                      setState(() {
+                        _realisticAlternative = _realisticAlternative.isEmpty
+                            ? selection
+                            : '$_realisticAlternative, $selection';
+                        _alternativeError = null;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: AppConstants.spacingMedium),
+                  FormTextArea(
+                    initialValue: _realisticAlternative,
+                    onChanged: (value) {
+                      setState(() {
+                        _realisticAlternative = value;
+                        _alternativeError = null;
+                      });
+                    },
+                    maxLength: AppConstants.maxAlternativeStepLength,
+                    maxLines: 3,
+                    hintText:
+                        'Zum Beispiel: Ich hätte kurz stoppen und sagen können, dass ich später antworte.',
+                    errorText: _alternativeError,
+                  ),
+                ],
+              ),
+            ),
+            if (thoughtData != null)
+              AppCard(
+                variant: AppCardVariant.soft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Was hast du stattdessen gemacht?',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.spacingSmall),
+                    Text(
+                      [
+                        if (thoughtData.actualBehaviorTags.isNotEmpty)
+                          thoughtData.actualBehaviorTags.join(', '),
+                        if ((thoughtData.actualBehaviorNote ?? '').isNotEmpty)
+                          thoughtData.actualBehaviorNote!,
+                      ].join(' | '),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             AppCard(
+              variant: AppCardVariant.soft,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Bedürfnis oder verletzter Punkt',
+                    'War die Kleinigkeit wahrscheinlich nur der Trigger für etwas Größeres?',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: AppConstants.spacingSmall),
-                  TextField(
-                    controller: _needController,
-                    maxLines: 4,
-                    maxLength: AppConstants.maxNeedDescriptionLength,
-                    decoration: InputDecoration(
-                      hintText:
-                          'z.B. Ich brauche gerade Sicherheit, Klarheit oder ein Gefühl von Gesehenwerden.',
-                      errorText: _needError,
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _needOrWoundedPoint = value;
-                        _needError = null;
-                      });
-                    },
+                  Wrap(
+                    spacing: AppConstants.spacingSmall,
+                    runSpacing: AppConstants.spacingSmall,
+                    children: TriggerAsLastDrop.values.map((value) {
+                      return ChoiceChip(
+                        selected: _triggerAsLastDrop == value,
+                        label: Text(value.label),
+                        onSelected: (_) {
+                          setState(() {
+                            _triggerAsLastDrop = value;
+                          });
+                        },
+                      );
+                    }).toList(),
                   ),
+                  if (_triggerAsLastDrop != null) ...[
+                    const SizedBox(height: AppConstants.spacingSmall),
+                    Text(
+                      _triggerAsLastDrop!.description,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ],
+              ),
+            ),
+            _buildPromptCard(
+              title: 'Was war wahrscheinlich das eigentliche Thema dahinter?',
+              variant: AppCardVariant.soft,
+              child: FormTextArea(
+                initialValue: _backgroundTheme,
+                onChanged: (value) {
+                  setState(() {
+                    _backgroundTheme = value;
+                    _backgroundThemeError = null;
+                  });
+                },
+                maxLength: AppConstants.maxBackgroundThemeLength,
+                hintText:
+                    'Zum Beispiel: Nicht ernst genommen werden, Leistungsdruck, alte Kränkung oder Kontrollverlust.',
+                errorText: _backgroundThemeError,
+              ),
+            ),
+            _buildPromptCard(
+              title:
+                  'Was hätte die Situation wahrscheinlich entschärft, bevor sie gekippt ist? Optional',
+              variant: AppCardVariant.soft,
+              child: FormTextArea(
+                initialValue: _preEscalationRelief,
+                onChanged: (value) {
+                  setState(() {
+                    _preEscalationRelief = value;
+                  });
+                },
+                maxLength: AppConstants.maxPreEscalationReliefLength,
+                maxLines: 3,
+                hintText:
+                    'Zum Beispiel: eine Pause, weniger Druck, klarere Ansage, etwas essen oder früher Grenzen setzen.',
               ),
             ),
             AppCard(
@@ -200,27 +385,67 @@ class _SituationReflectionScreenState
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Nächster kleiner Schritt',
+                    'Kennst du dieses Muster schon von früher? Optional',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: AppConstants.spacingSmall),
-                  TextField(
-                    controller: _nextStepController,
-                    maxLines: 3,
-                    maxLength: AppConstants.maxNextStepLength,
-                    decoration: InputDecoration(
-                      hintText:
-                          'z.B. Erst drei Minuten atmen, dann eine Nachricht entwerfen statt sofort zu reagieren.',
-                      errorText: _nextStepError,
-                    ),
+                  Wrap(
+                    spacing: AppConstants.spacingSmall,
+                    runSpacing: AppConstants.spacingSmall,
+                    children: PatternFamiliarity.values.map((value) {
+                      return ChoiceChip(
+                        selected: _patternFamiliarity == value,
+                        label: Text(value.label),
+                        onSelected: (_) {
+                          setState(() {
+                            _patternFamiliarity =
+                                _patternFamiliarity == value ? null : value;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+            _buildPromptCard(
+              title:
+                  'Was ist der kleinste sinnvolle nächste Schritt nach diesem Eintrag?',
+              variant: AppCardVariant.soft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  StringChipSelector(
+                    options: NewSituationOptionLists.nextStepOptions,
+                    selectedValues: const [],
+                    maxSelected: 1,
+                    onChanged: (values) {
+                      if (values.isEmpty) return;
+                      final selection = values.first;
+                      setState(() {
+                        _nextStep = _nextStep.isEmpty
+                            ? selection
+                            : '$_nextStep, $selection';
+                        _nextStepError = null;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: AppConstants.spacingMedium),
+                  FormTextArea(
+                    initialValue: _nextStep,
                     onChanged: (value) {
                       setState(() {
                         _nextStep = value;
                         _nextStepError = null;
                       });
                     },
+                    maxLength: AppConstants.maxNextStepLength,
+                    maxLines: 3,
+                    hintText:
+                        'Zum Beispiel: Erst runterkommen, dann das Thema heute Abend sachlich notieren.',
+                    errorText: _nextStepError,
                   ),
                 ],
               ),
@@ -239,7 +464,7 @@ class _SituationReflectionScreenState
                   child: isSaving
                       ? const AppLoadingIndicator()
                       : AppPrimaryButton(
-                          onPressed: _isValid ? _handleSave : null,
+                          onPressed: _handleSave,
                           label: 'Speichern',
                         ),
                 ),
@@ -247,6 +472,63 @@ class _SituationReflectionScreenState
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPromptCard({
+    required String title,
+    required Widget child,
+    AppCardVariant variant = AppCardVariant.focus,
+  }) {
+    return AppCard(
+      variant: variant,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: AppConstants.spacingSmall),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectorCard({
+    required String title,
+    required Widget child,
+    required String? errorText,
+    AppCardVariant variant = AppCardVariant.focus,
+  }) {
+    return AppCard(
+      variant: variant,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          if (errorText != null) ...[
+            const SizedBox(height: AppConstants.spacingSmall),
+            Text(
+              errorText,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.error,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ],
+          const SizedBox(height: AppConstants.spacingSmall),
+          child,
+        ],
       ),
     );
   }

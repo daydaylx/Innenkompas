@@ -73,6 +73,7 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
           return contentAsync.when(
             data: (content) {
               final tipIds = _decodeTipIds(entry.suggestedTipIds);
+              final statusKeys = _decodeTipIds(entry.evaluationStatusKeys);
               final nextActionOptions = [
                 entry.suggestedNextActionKey,
                 entry.selectedNextActionKey,
@@ -104,28 +105,51 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (statusKeys.isNotEmpty) ...[
+                      Wrap(
+                        spacing: AppConstants.spacingSmall,
+                        runSpacing: AppConstants.spacingSmall,
+                        children: statusKeys
+                            .map(
+                              (statusKey) => Chip(
+                                label: Text(content.statusLabelFor(statusKey)),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                      const SizedBox(height: AppConstants.spacingMedium),
+                    ],
                     _InfoCard(
                       title: 'Was auffällt',
                       icon: Icons.visibility_outlined,
-                      body: content.headlineFor(
-                        entry.evaluationHeadlineKey ?? 'reflective_ready',
+                      body: content.standOutFor(
+                        entry.evaluationHeadlineKey ?? 'reflection_reachable',
                       ),
                     ),
                     const SizedBox(height: AppConstants.spacingMedium),
                     _InfoCard(
-                      title: 'Was das bedeuten könnte',
+                      title: 'Was dahinter liegen könnte',
                       icon: Icons.psychology_alt_outlined,
-                      body: content.meaningFor(
-                        entry.evaluationMeaningKey ??
-                            'reflective_ready_accessible',
+                      body: content.backgroundFor(
+                        entry.evaluationMeaningKey ?? 'background_unknown',
                       ),
                     ),
                     const SizedBox(height: AppConstants.spacingMedium),
                     _InfoCard(
-                      title: 'Was jetzt hilfreich sein kann',
+                      title: 'Was jetzt hilfreicher ist als weitere Analyse',
                       icon: Icons.self_improvement_outlined,
-                      body: content.nextActionFor(
-                        entry.suggestedNextActionKey ?? 'choose_one_step',
+                      body: content.helpfulNowFor(
+                        entry.evaluationHelpfulNowKey ??
+                            'helpful_choose_small_step',
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.spacingMedium),
+                    _InfoCard(
+                      title: 'Lernpunkt / frühester möglicher Abzweig',
+                      icon: Icons.alt_route_outlined,
+                      body: content.learningPointFor(
+                        entry.evaluationLearningPointKey ??
+                            'learning_build_pause',
                       ),
                     ),
                     const SizedBox(height: AppConstants.spacingLarge),
@@ -168,6 +192,10 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
                                 });
                               },
                               title: Text(content.nextActionFor(actionKey)),
+                              subtitle:
+                                  actionKey == entry.suggestedNextActionKey
+                                      ? const Text('Lokal vorgeschlagen')
+                                      : null,
                               dense: true,
                               contentPadding: EdgeInsets.zero,
                             ),
@@ -723,10 +751,12 @@ class _InfoCard extends StatelessWidget {
               children: [
                 Icon(icon, size: 20),
                 const SizedBox(width: AppConstants.spacingSmall),
-                Text(
-                  title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+                Expanded(
+                  child: Text(
+                    title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],

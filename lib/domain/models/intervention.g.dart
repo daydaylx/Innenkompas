@@ -81,13 +81,20 @@ const _$SystemStateEnumMap = {
 
 const _$EmotionTypeEnumMap = {
   EmotionType.anger: 'anger',
+  EmotionType.annoyance: 'annoyance',
   EmotionType.fear: 'fear',
+  EmotionType.powerlessness: 'powerlessness',
+  EmotionType.overwhelm: 'overwhelm',
+  EmotionType.disappointment: 'disappointment',
+  EmotionType.hurt: 'hurt',
   EmotionType.sadness: 'sadness',
   EmotionType.shame: 'shame',
   EmotionType.joy: 'joy',
   EmotionType.disgust: 'disgust',
   EmotionType.surprise: 'surprise',
   EmotionType.guilt: 'guilt',
+  EmotionType.helplessness: 'helplessness',
+  EmotionType.emptiness: 'emptiness',
   EmotionType.pride: 'pride',
   EmotionType.loneliness: 'loneliness',
 };

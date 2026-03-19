@@ -6,8 +6,23 @@ enum EmotionType {
   /// Wut - Ärger, Groll, Frustration
   anger('Wut', '😠'),
 
+  /// Genervtheit - gereizt, genervt, dünnhäutig
+  annoyance('Genervtheit', '😤'),
+
   /// Angst - Sorge, Furcht, Panik
   fear('Angst', '😨'),
+
+  /// Ohnmacht - ausgeliefert, kein Einfluss
+  powerlessness('Ohnmacht', '🫥'),
+
+  /// Überforderung - zu viel auf einmal, innerer Druck
+  overwhelm('Überforderung', '🫨'),
+
+  /// Enttäuschung - verletzt durch ausbleibende Erwartung
+  disappointment('Enttäuschung', '😞'),
+
+  /// Kränkung - getroffen, verletzt, abgewertet
+  hurt('Kränkung', '💔'),
 
   /// Trauer - Niedergeschlagenheit, Verlust, Leere
   sadness('Trauer', '😢'),
@@ -27,6 +42,12 @@ enum EmotionType {
   /// Schuldgefühle - Reue, Gewissensbisse
   guilt('Schuld', '😔'),
 
+  /// Hilflosigkeit - nicht wissen, wie weiter
+  helplessness('Hilflosigkeit', '🫳'),
+
+  /// Leere - innerlich leer oder abgeschnitten
+  emptiness('Leere', '🕳️'),
+
   /// Stolz - Selbstwertgefühl, Zufriedenheit mit sich
   pride('Stolz', '😌'),
 
@@ -42,10 +63,16 @@ enum EmotionType {
   static List<EmotionType> get negativeEmotions => [
         anger,
         fear,
+        powerlessness,
+        overwhelm,
+        disappointment,
+        hurt,
         sadness,
         shame,
         disgust,
         guilt,
+        helplessness,
+        emptiness,
         loneliness,
       ];
 
@@ -54,6 +81,21 @@ enum EmotionType {
         joy,
         pride,
         surprise,
+      ];
+
+  static List<EmotionType> get flowOptions => [
+        anger,
+        shame,
+        fear,
+        powerlessness,
+        overwhelm,
+        disappointment,
+        hurt,
+        sadness,
+        helplessness,
+        annoyance,
+        guilt,
+        emptiness,
       ];
 
   /// Get display label with emoji
@@ -73,8 +115,18 @@ extension EmotionTypeExtension on EmotionType {
     switch (this) {
       case EmotionType.anger:
         return 'Gefühl von Ärger, Groll oder Frustration';
+      case EmotionType.annoyance:
+        return 'Gereizt, genervt oder schnell angefasst';
       case EmotionType.fear:
         return 'Sorgen, Ängste oder Furcht vor etwas';
+      case EmotionType.powerlessness:
+        return 'Gefühl von Ausgeliefertsein oder fehlendem Einfluss';
+      case EmotionType.overwhelm:
+        return 'Zu viel auf einmal, innerer Druck oder Überlastung';
+      case EmotionType.disappointment:
+        return 'Enttäuscht oder innerlich abgesackt';
+      case EmotionType.hurt:
+        return 'Innerlich getroffen, gekränkt oder verletzt';
       case EmotionType.sadness:
         return 'Niedergeschlagenheit, Trauer oder Leere';
       case EmotionType.shame:
@@ -87,6 +139,10 @@ extension EmotionTypeExtension on EmotionType {
         return 'Überraschung oder unerwartete Ereignisse';
       case EmotionType.guilt:
         return 'Schuldgefühle oder Reue';
+      case EmotionType.helplessness:
+        return 'Gefühl, nicht zu wissen, wie es weitergeht';
+      case EmotionType.emptiness:
+        return 'Innerlich leer oder abgeschnitten';
       case EmotionType.pride:
         return 'Stolz auf etwas oder sich selbst';
       case EmotionType.loneliness:
@@ -99,8 +155,18 @@ extension EmotionTypeExtension on EmotionType {
     switch (this) {
       case EmotionType.anger:
         return 0xFFC05C5C; // Red
+      case EmotionType.annoyance:
+        return 0xFFCF7A4C; // Orange-red
       case EmotionType.fear:
         return 0xFF8B5FBF; // Purple
+      case EmotionType.powerlessness:
+        return 0xFF847F96; // Muted violet
+      case EmotionType.overwhelm:
+        return 0xFFD4A574; // Brownish
+      case EmotionType.disappointment:
+        return 0xFF8E7C71; // Warm gray
+      case EmotionType.hurt:
+        return 0xFFB56576; // Rose
       case EmotionType.sadness:
         return 0xFF6B8E9B; // Blue-gray
       case EmotionType.shame:
@@ -113,6 +179,10 @@ extension EmotionTypeExtension on EmotionType {
         return 0xFFE9B44C; // Orange
       case EmotionType.guilt:
         return 0xFF7B8FA1; // Gray-blue
+      case EmotionType.helplessness:
+        return 0xFF6C7A89; // Slate
+      case EmotionType.emptiness:
+        return 0xFF6E7280; // Neutral gray
       case EmotionType.pride:
         return 0xFF4A6FA5; // Blue
       case EmotionType.loneliness:

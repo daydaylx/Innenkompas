@@ -11,17 +11,24 @@ class AppConstants {
   // Validation Constants
   static const int minSituationDescriptionLength = 3;
   static const int maxSituationDescriptionLength = 300;
+  static const int maxPreoccupationLength = 240;
+  static const int maxTriggerDescriptionLength = 200;
   static const int maxThoughtDescriptionLength = 200;
+  static const int maxThoughtFocusLength = 200;
   static const int maxBehaviorDescriptionLength = 300;
   static const int minReflectionFieldLength = 3;
   static const int maxNeedDescriptionLength = 240;
+  static const int maxAlternativeStepLength = 240;
+  static const int maxBackgroundThemeLength = 240;
+  static const int maxFearPressurePointLength = 220;
+  static const int maxPreEscalationReliefLength = 220;
   static const int maxNextStepLength = 240;
   static const int maxNoteLength = 500;
 
   // Rating scales
-  static const int minIntensityRating = 1;
+  static const int minIntensityRating = 0;
   static const int maxIntensityRating = 10;
-  static const int minBodyTensionRating = 1;
+  static const int minBodyTensionRating = 0;
   static const int maxBodyTensionRating = 10;
   static const int minClarityRating = 1;
   static const int maxClarityRating = 10;
@@ -37,7 +44,7 @@ class AppConstants {
 
   // Database
   static const String databaseName = 'innenkompass.db';
-  static const int databaseVersion = 4;
+  static const int databaseVersion = 5;
 
   // Pagination
   static const int defaultHistoryPageSize = 20;

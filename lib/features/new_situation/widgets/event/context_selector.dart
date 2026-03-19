@@ -16,24 +16,18 @@ class ContextSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 52,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: ContextType.values.length,
-        separatorBuilder: (context, index) =>
-            const SizedBox(width: AppConstants.spacingSmall),
-        itemBuilder: (context, index) {
-          final contextType = ContextType.values[index];
-          final isSelected = selectedContext == contextType;
+    return Wrap(
+      spacing: AppConstants.spacingSmall,
+      runSpacing: AppConstants.spacingSmall,
+      children: ContextType.flowOptions.map((contextType) {
+        final isSelected = selectedContext == contextType;
 
-          return _ContextChip(
-            contextType: contextType,
-            isSelected: isSelected,
-            onTap: () => onContextSelected(contextType),
-          );
-        },
-      ),
+        return _ContextChip(
+          contextType: contextType,
+          isSelected: isSelected,
+          onTap: () => onContextSelected(contextType),
+        );
+      }).toList(),
     );
   }
 }

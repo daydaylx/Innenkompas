@@ -47,8 +47,7 @@ class PatternsScreen extends ConsumerWidget {
             return _buildEmptyState(context);
           }
 
-          final burnoutRisk =
-              burnoutAsync.valueOrNull ?? BurnoutRisk.low;
+          final burnoutRisk = burnoutAsync.valueOrNull ?? BurnoutRisk.low;
           final trendSlope = trendSlopeAsync.valueOrNull ?? 0.0;
           final correlations = correlationsAsync.valueOrNull ?? [];
           final insights = insightsAsync.valueOrNull ?? [];
@@ -459,9 +458,8 @@ class PatternsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final isHigh = risk == BurnoutRisk.high;
     final color = isHigh ? AppColors.error : AppColors.warning;
-    final icon = isHigh
-        ? Icons.warning_amber_rounded
-        : Icons.trending_up_rounded;
+    final icon =
+        isHigh ? Icons.warning_amber_rounded : Icons.trending_up_rounded;
     final text = isHigh
         ? 'Mehrere Tage anhaltend hohe Belastung – Erholung einplanen.'
         : 'Erhöhte Belastung über mehrere Tage in Folge.';
@@ -639,13 +637,11 @@ class PatternsScreen extends ConsumerWidget {
           .map(
             (insight) => Container(
               width: double.infinity,
-              margin:
-                  const EdgeInsets.only(bottom: AppConstants.spacingSmall),
+              margin: const EdgeInsets.only(bottom: AppConstants.spacingSmall),
               padding: const EdgeInsets.all(AppConstants.spacingMedium),
               decoration: BoxDecoration(
                 color: AppColors.surface.withValues(alpha: 0.92),
-                borderRadius:
-                    BorderRadius.circular(AppConstants.borderRadius),
+                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
                 border: Border.all(
                   color: AppColors.border.withValues(alpha: 0.7),
                 ),

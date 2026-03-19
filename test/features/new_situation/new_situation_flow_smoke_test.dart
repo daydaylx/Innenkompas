@@ -10,49 +10,112 @@ void main() {
       final harness = await pumpTestApp(tester);
 
       Future<void> tapVisible(Finder finder) async {
-        await tester.ensureVisible(finder);
-        await tester.pump();
-        await tester.tap(finder);
-        await tester.pump();
+        final scrollables = find.byType(Scrollable);
+        if (scrollables.evaluate().isNotEmpty) {
+          await tester.scrollUntilVisible(
+            finder,
+            200,
+            scrollable: scrollables.first,
+          );
+        } else {
+          await tester.ensureVisible(finder);
+        }
+        await tester.pumpAndSettle();
+        await tester.tap(finder, warnIfMissed: false);
         await tester.pumpAndSettle();
       }
 
       Finder gestureTarget(String label) {
-        return find.ancestor(
-          of: find.text(label).first,
-          matching: find.byType(GestureDetector),
-        ).hitTestable().first;
+        return find
+            .ancestor(
+              of: find.text(label).first,
+              matching: find.byType(GestureDetector),
+            )
+            .first;
       }
 
       Finder choiceChipTarget(String label) {
-        return find.ancestor(
-          of: find.text(label),
-          matching: find.byType(ChoiceChip),
-        ).hitTestable().first;
+        return find
+            .ancestor(
+              of: find.text(label),
+              matching: find.byType(ChoiceChip),
+            )
+            .first;
+      }
+
+      Finder filterChipTarget(String label) {
+        return find
+            .ancestor(
+              of: find.text(label),
+              matching: find.byType(FilterChip),
+            )
+            .first;
+      }
+
+      Finder elevatedButtonTarget(String label) {
+        return find.widgetWithText(ElevatedButton, label).first;
+      }
+
+      Finder textFieldByHint(String hintText) {
+        return find.byWidgetPredicate(
+          (widget) =>
+              widget is TextField && widget.decoration?.hintText == hintText,
+        );
       }
 
       await tester.tap(find.text('Was ist passiert?'));
       await tester.pump();
       await tester.pumpAndSettle();
 
-      expect(find.text('Situation erfassen'), findsOneWidget);
+      expect(find.text('Situation und Vorlauf'), findsOneWidget);
 
       await tester.enterText(
-        find.byType(TextField).first,
+        textFieldByHint(
+          'Zum Beispiel: Im Gespräch fiel ein Satz, der mich sofort hochgefahren hat.',
+        ),
         'Das Gespräch im Meeting wurde plötzlich angespannt.',
       );
+      await tester.enterText(
+        textFieldByHint(
+          'Zum Beispiel: Ich war schon erschöpft, habe über Arbeit nachgedacht oder innerlich Druck gemacht.',
+        ),
+        'Ich war schon vorher unter Druck und gedanklich bei dem Termin.',
+      );
+      await tapVisible(choiceChipTarget('Teilweise'));
+      await tester.enterText(
+        textFieldByHint(
+          'Zum Beispiel: Ein bestimmter Satz, Blick, eine Nachricht oder ein kleiner Fehler.',
+        ),
+        'Ein scharfer Kommentar vor allen anderen.',
+      );
       await tapVisible(gestureTarget('Arbeit'));
-      await tapVisible(find.text('Weiter'));
+      expect(
+        tester.widget<ElevatedButton>(elevatedButtonTarget('Weiter')).onPressed,
+        isNotNull,
+      );
+      await tapVisible(elevatedButtonTarget('Weiter'));
 
-      expect(find.text('Emotionen erfassen'), findsOneWidget);
+      expect(find.text('Körper und Gefühle'), findsOneWidget);
 
       await tapVisible(gestureTarget('Angst'));
-      await tapVisible(find.text('Weiter'));
+      expect(
+        tester.widget<ElevatedButton>(elevatedButtonTarget('Weiter')).onPressed,
+        isNotNull,
+      );
+      await tapVisible(elevatedButtonTarget('Weiter'));
 
-      expect(find.text('Gedanken und Impulse'), findsOneWidget);
+      expect(find.text('Gedanken, Muster und Verhalten'), findsOneWidget);
 
       await tester.enterText(
-        find.byType(TextField).first,
+        textFieldByHint(
+          'Zum Beispiel: Ich war schon bei den nächsten Problemen oder habe innerlich etwas durchgespielt.',
+        ),
+        'Ich war gedanklich schon bei meinem Fehler von davor.',
+      );
+      await tester.enterText(
+        textFieldByHint(
+          'Zum Beispiel: Jetzt reicht’s. Oder: Ich mache alles schlimmer.',
+        ),
         'Ich werde jetzt sicher falsch verstanden.',
       );
       await tester.drag(
@@ -60,22 +123,52 @@ void main() {
         const Offset(0, -500),
       );
       await tester.pumpAndSettle();
-      await tapVisible(gestureTarget('Rückziehen'));
       await tapVisible(choiceChipTarget('Gemischt'));
-      await tapVisible(find.text('Weiter'));
+      await tapVisible(choiceChipTarget('Rückzug'));
+      await tapVisible(filterChipTarget('zurückgezogen'));
+      await tapVisible(choiceChipTarget('Erst im Nachhinein'));
+      expect(
+        tester.widget<ElevatedButton>(elevatedButtonTarget('Weiter')).onPressed,
+        isNotNull,
+      );
+      await tapVisible(elevatedButtonTarget('Weiter'));
 
       expect(find.text('Einordnen und weitergehen'), findsOneWidget);
 
+      await tapVisible(filterChipTarget('Respekt'));
+      await tapVisible(filterChipTarget('Klarheit'));
       await tester.enterText(
-        find.byType(TextField).first,
-        'Ich brauche gerade mehr Sicherheit.',
+        textFieldByHint(
+          'Zum Beispiel: Ich hätte kurz stoppen und sagen können, dass ich später antworte.',
+        ),
+        'Ich hätte kurz stoppen und sagen können, dass ich später antworte.',
+      );
+      await tester.drag(
+        find.byType(SingleChildScrollView),
+        const Offset(0, -500),
+      );
+      await tester.pumpAndSettle();
+      await tapVisible(choiceChipTarget('Ja, ziemlich sicher'));
+      await tester.enterText(
+        textFieldByHint(
+          'Zum Beispiel: Nicht ernst genommen werden, Leistungsdruck, alte Kränkung oder Kontrollverlust.',
+        ),
+        'Nicht ernst genommen werden.',
       );
       await tester.enterText(
-        find.byType(TextField).at(1),
+        textFieldByHint(
+          'Zum Beispiel: Erst runterkommen, dann das Thema heute Abend sachlich notieren.',
+        ),
         'Ich schreibe mir zuerst die Fakten auf.',
       );
 
-      await tapVisible(find.text('Speichern'));
+      expect(
+        tester
+            .widget<ElevatedButton>(elevatedButtonTarget('Speichern'))
+            .onPressed,
+        isNotNull,
+      );
+      await tapVisible(elevatedButtonTarget('Speichern'));
 
       expect(find.text('Deine Auswertung'), findsOneWidget);
       expect(find.text('Was auffällt'), findsOneWidget);
@@ -85,6 +178,14 @@ void main() {
       expect(
         entries.single.situationDescription,
         'Das Gespräch im Meeting wurde plötzlich angespannt.',
+      );
+      expect(
+        entries.single.preTriggerPreoccupation,
+        'Ich war schon vorher unter Druck und gedanklich bei dem Termin.',
+      );
+      expect(
+        entries.single.triggerDescription,
+        'Ein scharfer Kommentar vor allen anderen.',
       );
       expect(entries.single.primaryEmotion, 'fear');
       expect(tester.takeException(), isNull);

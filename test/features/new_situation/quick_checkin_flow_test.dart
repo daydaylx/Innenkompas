@@ -67,5 +67,102 @@ void main() {
       expect(entries.single.systemState, 'crisis');
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets(
+        'prefills emotion and moment intensity when continuing reflection',
+        (WidgetTester tester) async {
+      final harness = await pumpTestApp(tester);
+
+      Finder textFieldByHint(String hintText) {
+        return find.byWidgetPredicate(
+          (widget) =>
+              widget is TextField && widget.decoration?.hintText == hintText,
+        );
+      }
+
+      Finder choiceChipTarget(String label) {
+        return find
+            .ancestor(
+              of: find.text(label),
+              matching: find.byType(ChoiceChip),
+            )
+            .first;
+      }
+
+      Finder gestureTarget(String label) {
+        return find
+            .ancestor(
+              of: find.text(label).first,
+              matching: find.byType(GestureDetector),
+            )
+            .first;
+      }
+
+      Finder elevatedButtonTarget(String label) {
+        return find.widgetWithText(ElevatedButton, label).first;
+      }
+
+      Future<void> tapVisible(Finder finder) async {
+        final scrollables = find.byType(Scrollable);
+        if (scrollables.evaluate().isNotEmpty) {
+          await tester.scrollUntilVisible(
+            finder,
+            200,
+            scrollable: scrollables.first,
+          );
+        } else {
+          await tester.ensureVisible(finder);
+        }
+        await tester.pumpAndSettle();
+        await tester.tap(finder, warnIfMissed: false);
+        await tester.pumpAndSettle();
+      }
+
+      await harness.goTo(tester, AppRoutes.quickCheckin);
+
+      await tester.tap(find.text('Angst'));
+      await tester.pump();
+      expect(find.text('5 / 10'), findsOneWidget);
+
+      await tester.tap(find.text('Einchecken'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Ja, weiter reflektieren'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Situation und Vorlauf'), findsOneWidget);
+
+      await tester.enterText(
+        textFieldByHint(
+          'Zum Beispiel: Im Gespräch fiel ein Satz, der mich sofort hochgefahren hat.',
+        ),
+        'Das Meeting wurde scharf.',
+      );
+      await tester.enterText(
+        textFieldByHint(
+          'Zum Beispiel: Ich war schon erschöpft, habe über Arbeit nachgedacht oder innerlich Druck gemacht.',
+        ),
+        'Ich war schon innerlich angespannt.',
+      );
+      await tapVisible(choiceChipTarget('Teilweise'));
+      await tester.enterText(
+        textFieldByHint(
+          'Zum Beispiel: Ein bestimmter Satz, Blick, eine Nachricht oder ein kleiner Fehler.',
+        ),
+        'Ein Kommentar vor allen.',
+      );
+      await tapVisible(gestureTarget('Arbeit'));
+      await tapVisible(elevatedButtonTarget('Weiter'));
+
+      expect(find.text('Körper und Gefühle'), findsOneWidget);
+      expect(find.text('5 / 10'), findsOneWidget);
+
+      await tapVisible(elevatedButtonTarget('Weiter'));
+
+      expect(find.text('Gedanken, Muster und Verhalten'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
   });
 }

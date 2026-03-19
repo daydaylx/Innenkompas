@@ -403,7 +403,8 @@ class _SelectionStepWidgetState extends State<_SelectionStepWidget> {
     super.didUpdateWidget(oldWidget);
     final raw = widget.response?.selectionResponse ?? '';
     final nextOptions = raw.isEmpty ? <String>[] : raw.split('|');
-    if (oldWidget.response?.selectionResponse != widget.response?.selectionResponse) {
+    if (oldWidget.response?.selectionResponse !=
+        widget.response?.selectionResponse) {
       _selectedOptions = nextOptions;
     }
   }

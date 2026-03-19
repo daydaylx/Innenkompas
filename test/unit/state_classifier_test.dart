@@ -249,7 +249,9 @@ void main() {
       expect(result, SystemState.reflectiveReady);
     });
 
-    test('classifies interpretation when facts are uncertain and no higher rule matches', () {
+    test(
+        'classifies interpretation when facts are uncertain and no higher rule matches',
+        () {
       final result = StateClassifier.classify(
         intensity: 5,
         bodyTension: 5,

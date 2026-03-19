@@ -24,6 +24,8 @@ class HistoryEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final stepPreview = _stepPreview(entry);
+
     return AppListItemCard(
       variant: AppCardVariant.soft,
       onTap: onTap,
@@ -93,7 +95,11 @@ class HistoryEntryCard extends StatelessWidget {
 
           // Beschreibung (truncated)
           Text(
-            entry.situationDescription,
+            entry.situationDescription.isEmpty
+                ? (entry.triggerDescription?.isNotEmpty ?? false)
+                    ? 'Auslöser: ${entry.triggerDescription}'
+                    : 'Kurzer Check-in ohne ausführliche Situationsbeschreibung'
+                : entry.situationDescription,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -101,7 +107,7 @@ class HistoryEntryCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
 
-          if ((entry.nextStep ?? '').isNotEmpty) ...[
+          if (stepPreview != null) ...[
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.symmetric(
@@ -123,7 +129,7 @@ class HistoryEntryCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      entry.nextStep!,
+                      stepPreview,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppColors.primaryDark,
                             fontWeight: FontWeight.w600,
@@ -163,12 +169,12 @@ class HistoryEntryCard extends StatelessWidget {
                 ),
 
               if (entry.isCrisis == true)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(left: 8),
                   child: Icon(
-                    Icons.warning,
+                    Icons.shield_outlined,
                     size: 20,
-                    color: AppColors.crisis,
+                    color: AppColors.crisis.withValues(alpha: 0.8),
                   ),
                 ),
             ],
@@ -217,6 +223,20 @@ class HistoryEntryCard extends StatelessWidget {
     final ctx =
         ContextType.values.where((e) => e.name == contextName).firstOrNull;
     return ctx?.emoji ?? '❓';
+  }
+
+  String? _stepPreview(SituationEntryData entry) {
+    final nextStep = (entry.nextStep ?? '').trim();
+    if (nextStep.isNotEmpty) {
+      return nextStep;
+    }
+
+    final alternative = (entry.realisticAlternative ?? '').trim();
+    if (alternative.isNotEmpty) {
+      return 'Möglicher Schritt: $alternative';
+    }
+
+    return null;
   }
 }
 

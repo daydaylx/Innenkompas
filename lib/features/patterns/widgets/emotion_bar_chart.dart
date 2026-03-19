@@ -184,27 +184,6 @@ class EmotionBarChart extends StatelessWidget {
   }
 
   Color _getEmotionColor(EmotionType emotion) {
-    switch (emotion) {
-      case EmotionType.anger:
-        return AppColors.error;
-      case EmotionType.fear:
-        return AppColors.warning;
-      case EmotionType.sadness:
-        return AppColors.secondary;
-      case EmotionType.shame:
-        return AppColors.secondaryDark;
-      case EmotionType.disgust:
-        return AppColors.primaryDark;
-      case EmotionType.joy:
-        return AppColors.success;
-      case EmotionType.surprise:
-        return AppColors.primaryLight;
-      case EmotionType.guilt:
-        return AppColors.errorLight;
-      case EmotionType.pride:
-        return AppColors.primary;
-      case EmotionType.loneliness:
-        return AppColors.textTertiary;
-    }
+    return Color(emotion.colorCode);
   }
 }

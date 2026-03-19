@@ -14,22 +14,42 @@ class SituationEntries extends Table {
   DateTimeColumn get timestamp => dateTime()();
   TextColumn get involvedPerson =>
       text().nullable()(); // Optional person involved
+  TextColumn get involvedEntities => text().nullable()();
+  TextColumn get preTriggerPreoccupation => text().nullable()();
+  TextColumn get problemTiming => text().nullable()();
+  TextColumn get triggerDescription => text().nullable()();
 
   // Emotion fields (Phase 1)
+  IntColumn get preTriggerLoad => integer().nullable()();
   IntColumn get intensity => integer()(); // 1-10
   IntColumn get bodyTension => integer()(); // 1-10
   TextColumn get primaryEmotion => text()();
   TextColumn get secondaryEmotion =>
       text().nullable()(); // Optional second emotion
   TextColumn get bodySymptoms => text().nullable()(); // JSON array of symptoms
+  TextColumn get initialBodyReactions => text().nullable()();
+  TextColumn get additionalEmotions => text().nullable()();
 
   // Thought and impulse fields (Phase 1)
+  TextColumn get thoughtFocus => text().nullable()();
   TextColumn get automaticThought => text()();
   TextColumn get firstImpulse => text()();
   TextColumn get factInterpretationResult => text().nullable()();
+  TextColumn get systemReaction => text().nullable()();
+  TextColumn get thoughtPatterns => text().nullable()();
+  TextColumn get actualBehaviorTags => text().nullable()();
   TextColumn get actualBehavior =>
       text().nullable()(); // Optional actual behavior
+  TextColumn get tippingPointAwareness => text().nullable()();
+  TextColumn get fearOrPressurePoint => text().nullable()();
   TextColumn get needOrWoundedPoint => text().nullable()();
+  TextColumn get touchedThemes => text().nullable()();
+  TextColumn get neededSupports => text().nullable()();
+  TextColumn get realisticAlternative => text().nullable()();
+  TextColumn get triggerAsLastDrop => text().nullable()();
+  TextColumn get backgroundTheme => text().nullable()();
+  TextColumn get preEscalationRelief => text().nullable()();
+  TextColumn get patternFamiliarity => text().nullable()();
   TextColumn get nextStep => text().nullable()();
 
   // Classification fields (Phase 4)
@@ -37,6 +57,9 @@ class SituationEntries extends Table {
   BoolColumn get isCrisis => boolean().withDefault(const Constant(false))();
   TextColumn get evaluationHeadlineKey => text().nullable()();
   TextColumn get evaluationMeaningKey => text().nullable()();
+  TextColumn get evaluationHelpfulNowKey => text().nullable()();
+  TextColumn get evaluationLearningPointKey => text().nullable()();
+  TextColumn get evaluationStatusKeys => text().nullable()(); // JSON array
   TextColumn get suggestedTipIds => text().nullable()(); // JSON array
   TextColumn get suggestedNextActionKey => text().nullable()();
   TextColumn get selectedNextActionKey => text().nullable()();

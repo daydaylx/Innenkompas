@@ -37,7 +37,10 @@ enum ImpulseType {
   distraction('Ablenkung', '📱'),
 
   /// Hilfe suchen - nach Unterstützung fragen
-  seekHelp('Hilfe suchen', '🆘');
+  seekHelp('Hilfe suchen', '🆘'),
+
+  /// Weiß nicht - erste Reaktion ist unklar
+  unknown('Weiß ich nicht', '❔');
 
   final String label;
   final String emoji;
@@ -74,6 +77,8 @@ enum ImpulseType {
         return 'Etwas anderes tun, abgelenkt sein';
       case ImpulseType.seekHelp:
         return 'Nach Unterstützung oder Hilfe fragen';
+      case ImpulseType.unknown:
+        return 'Die erste Reaktion lässt sich gerade nicht klar benennen';
     }
   }
 
@@ -104,6 +109,8 @@ enum ImpulseType {
         return ['Reorientierung', 'Fokus-Übung', 'Erdung'];
       case ImpulseType.seekHelp:
         return ['Kommunikationshilfe', 'Sozialer Rückhalt'];
+      case ImpulseType.unknown:
+        return ['Regulation', 'Reorientierung'];
     }
   }
 }

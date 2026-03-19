@@ -3,7 +3,8 @@ import 'package:innenkompass/data/db/app_database.dart';
 import 'package:innenkompass/domain/services/pattern_analyzer.dart';
 
 void main() {
-  test('uses timestamp instead of createdAt for pattern date boundaries', () async {
+  test('uses timestamp instead of createdAt for pattern date boundaries',
+      () async {
     final entries = [
       SituationEntryData(
         id: 1,

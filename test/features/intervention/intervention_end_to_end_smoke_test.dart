@@ -48,16 +48,15 @@ void main() {
         routes: [
           GoRoute(
             path: '/eval',
-            builder: (context, state) => EntryEvaluationScreen(entryId: entryId),
+            builder: (context, state) =>
+                EntryEvaluationScreen(entryId: entryId),
           ),
           GoRoute(
             path: AppRoutes.intervention,
             builder: (context, state) => Consumer(
               builder: (context, ref, _) => InterventionScreen(
-                interventionId: ref
-                    .watch(interventionFlowStateProvider)
-                    .intervention
-                    ?.id,
+                interventionId:
+                    ref.watch(interventionFlowStateProvider).intervention?.id,
               ),
             ),
           ),

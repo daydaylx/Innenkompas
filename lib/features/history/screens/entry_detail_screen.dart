@@ -3,31 +3,35 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:go_router/go_router.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import 'package:innenkompass/app/theme/colors.dart';
+import 'package:innenkompass/application/providers/database_provider.dart';
 import 'package:innenkompass/application/providers/evaluation_providers.dart';
 import 'package:innenkompass/core/constants/app_constants.dart';
+import 'package:innenkompass/core/constants/context_types.dart';
 import 'package:innenkompass/core/constants/emotion_types.dart';
 import 'package:innenkompass/core/constants/fact_interpretation_results.dart';
-import 'package:innenkompass/core/constants/context_types.dart';
 import 'package:innenkompass/core/constants/impulse_types.dart';
-import 'package:innenkompass/core/constants/system_states.dart';
+import 'package:innenkompass/core/constants/pattern_familiarity.dart';
+import 'package:innenkompass/core/constants/problem_timing.dart';
+import 'package:innenkompass/core/constants/system_reaction_types.dart';
+import 'package:innenkompass/core/constants/tipping_point_awareness.dart';
+import 'package:innenkompass/core/constants/trigger_as_last_drop.dart';
 import 'package:innenkompass/data/db/app_database.dart';
 import 'package:innenkompass/domain/models/ai_evaluation.dart';
-import 'package:innenkompass/application/providers/database_provider.dart';
 import 'package:innenkompass/shared/widgets/app_scaffold.dart';
-import 'package:innenkompass/app/theme/colors.dart';
 
 part 'entry_detail_screen.g.dart';
 
-/// Screen für die Detailansicht eines Situationseintrags
 class EntryDetailScreen extends ConsumerStatefulWidget {
-  final int entryId;
-
   const EntryDetailScreen({
     super.key,
     required this.entryId,
   });
+
+  final int entryId;
 
   @override
   ConsumerState<EntryDetailScreen> createState() => _EntryDetailScreenState();
@@ -44,113 +48,122 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
       actions: [
         IconButton(
           icon: const Icon(Icons.delete),
-          onPressed: () => _showDeleteDialog(),
+          onPressed: _showDeleteDialog,
           tooltip: 'Löschen',
         ),
       ],
       body: entryAsync.when(
         data: (entry) {
           if (entry == null) {
-            return const Center(
-              child: Text('Eintrag nicht gefunden'),
-            );
+            return const Center(child: Text('Eintrag nicht gefunden'));
           }
+
+          final bodyReactions = _decodeStringList(
+            entry.initialBodyReactions ?? entry.bodySymptoms,
+          );
+          final additionalEmotions =
+              _decodeStringList(entry.additionalEmotions);
+          final thoughtPatterns = _decodeStringList(entry.thoughtPatterns);
+          final actualBehaviorTags =
+              _decodeStringList(entry.actualBehaviorTags);
+          final touchedThemes = _decodeStringList(entry.touchedThemes);
+          final neededSupports = _decodeStringList(entry.neededSupports);
+          final evaluationStatusKeys =
+              _decodeStringList(entry.evaluationStatusKeys);
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppConstants.spacingMedium),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Datum und Zeit
                 _buildSectionHeader(
                   Icons.calendar_today,
                   _formatDateTime(entry.timestamp),
                 ),
-
                 const SizedBox(height: AppConstants.spacingMedium),
-
-                // Situation
                 _buildCard(
                   title: 'Situation',
-                  icon: Icons.description,
+                  icon: Icons.description_outlined,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        entry.situationDescription,
+                        entry.situationDescription.isEmpty
+                            ? 'Für diesen Eintrag wurde die Situation nicht separat beschrieben.'
+                            : entry.situationDescription,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                       const SizedBox(height: AppConstants.spacingSmall),
-                      Row(
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
                         children: [
                           Chip(
                             label: Text(_getContextLabel(entry.context)),
                             avatar: Text(_getContextEmoji(entry.context)),
                           ),
-                          const SizedBox(width: 8),
-                          if (entry.involvedPerson != null &&
-                              entry.involvedPerson!.isNotEmpty)
+                          if (_involvedLabel(entry).isNotEmpty)
                             Chip(
-                              label: Text(entry.involvedPerson!),
-                              avatar: const Icon(Icons.person, size: 16),
+                              label: Text(_involvedLabel(entry)),
+                              avatar:
+                                  const Icon(Icons.people_outline, size: 16),
+                            ),
+                          if ((entry.triggerDescription ?? '').isNotEmpty)
+                            Chip(
+                              label:
+                                  Text('Auslöser: ${entry.triggerDescription}'),
+                              avatar: const Icon(
+                                Icons.bolt_outlined,
+                                size: 16,
+                              ),
                             ),
                         ],
                       ),
                     ],
                   ),
                 ),
-
+                if ((entry.preTriggerPreoccupation ?? '').isNotEmpty ||
+                    (entry.problemTiming ?? '').isNotEmpty) ...[
+                  const SizedBox(height: AppConstants.spacingMedium),
+                  _buildCard(
+                    title: 'Vorlauf',
+                    icon: Icons.timelapse_outlined,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if ((entry.preTriggerPreoccupation ?? '').isNotEmpty)
+                          _buildLabeledValue(
+                            'Schon vorher im Kopf',
+                            entry.preTriggerPreoccupation!,
+                          ),
+                        if ((entry.problemTiming ?? '').isNotEmpty)
+                          _buildLabeledValue(
+                            'War das Thema schon vorher da?',
+                            _getProblemTimingLabel(entry.problemTiming!),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: AppConstants.spacingMedium),
-
-                // Emotionen
                 _buildCard(
-                  title: 'Emotionen',
-                  icon: Icons.sentiment_satisfied_alt,
+                  title: 'Körper & Gefühle',
+                  icon: Icons.favorite_border,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Text(
-                            _getEmotionEmoji(entry.primaryEmotion),
-                            style: const TextStyle(fontSize: 32),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _getEmotionLabel(entry.primaryEmotion),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                                if (entry.secondaryEmotion != null) ...[
-                                  Text(
-                                    '+ ${_getEmotionLabel(entry.secondaryEmotion!)}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: Colors.grey[600],
-                                        ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
                           Expanded(
                             child: _IntensityBar(
-                              label: 'Belastung',
+                              label: 'Vorbelastung',
+                              value: entry.preTriggerLoad ?? 0,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _IntensityBar(
+                              label: 'Im Moment',
                               value: entry.intensity,
                             ),
                           ),
@@ -163,84 +176,121 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
                           ),
                         ],
                       ),
-                      if (entry.bodySymptoms != null &&
-                          entry.bodySymptoms!.isNotEmpty) ...[
-                        const SizedBox(height: 12),
+                      const SizedBox(height: 16),
+                      _buildLabeledValue(
+                        'Stärkstes Gefühl',
+                        _getEmotionLabel(entry.primaryEmotion),
+                      ),
+                      if (additionalEmotions.isNotEmpty ||
+                          (entry.secondaryEmotion ?? '').isNotEmpty)
+                        _buildLabeledValue(
+                          'Was noch mit dabei war',
+                          [
+                            ...additionalEmotions.map(_getEmotionLabel),
+                            if ((entry.secondaryEmotion ?? '').isNotEmpty &&
+                                !additionalEmotions
+                                    .contains(entry.secondaryEmotion))
+                              _getEmotionLabel(entry.secondaryEmotion!),
+                          ].join(', '),
+                        ),
+                      if (bodyReactions.isNotEmpty) ...[
+                        const Text(
+                          'Körperreaktionen:',
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 4),
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: _decodeBodySymptoms(entry.bodySymptoms)
-                              .where((s) => s.trim().isNotEmpty)
-                              .map((s) => Chip(label: Text(s.trim())))
+                          children: bodyReactions
+                              .map((value) => Chip(label: Text(value)))
                               .toList(),
                         ),
                       ],
                     ],
                   ),
                 ),
-
                 const SizedBox(height: AppConstants.spacingMedium),
-
-                // Gedanke & Impuls
                 _buildCard(
-                  title: 'Gedanken & Impulse',
-                  icon: Icons.psychology,
+                  title: 'Gedanken & Muster',
+                  icon: Icons.psychology_outlined,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Automatischer Gedanke:',
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        entry.automaticThought,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Erster Impuls:',
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _getImpulseLabel(entry.firstImpulse),
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      if ((entry.factInterpretationResult ?? '')
-                          .isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Fakt oder Deutung:',
-                          style: TextStyle(fontWeight: FontWeight.w500),
+                      if ((entry.thoughtFocus ?? '').isNotEmpty)
+                        _buildLabeledValue(
+                          'Gedanklich vertieft in',
+                          entry.thoughtFocus!,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
+                      _buildLabeledValue(
+                        'Erster automatischer Gedanke',
+                        entry.automaticThought.isEmpty
+                            ? 'Für diesen Eintrag nicht hinterlegt.'
+                            : entry.automaticThought,
+                      ),
+                      if ((entry.factInterpretationResult ?? '').isNotEmpty)
+                        _buildLabeledValue(
+                          'Fakt oder Deutung',
                           _getFactInterpretationLabel(
                             entry.factInterpretationResult!,
                           ),
-                          style: Theme.of(context).textTheme.bodyLarge,
                         ),
-                      ],
-                      if (entry.actualBehavior != null &&
-                          entry.actualBehavior!.isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Tatsächliches Verhalten:',
-                          style: TextStyle(fontWeight: FontWeight.w500),
+                      if ((entry.systemReaction ?? '').isNotEmpty)
+                        _buildLabeledValue(
+                          'Erste Systemreaktion',
+                          _getSystemReactionLabel(entry.systemReaction!),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          entry.actualBehavior!,
-                          style: Theme.of(context).textTheme.bodyLarge,
+                      if ((entry.systemReaction ?? '').isEmpty &&
+                          entry.firstImpulse.isNotEmpty)
+                        _buildLabeledValue(
+                          'Früher erfasster Erstimpuls',
+                          _getLegacyImpulseLabel(entry.firstImpulse),
                         ),
-                      ],
+                      if (thoughtPatterns.isNotEmpty)
+                        _buildLabeledValue(
+                          'Gedankenmuster',
+                          thoughtPatterns.join(', '),
+                        ),
+                      if ((entry.fearOrPressurePoint ?? '').isNotEmpty)
+                        _buildLabeledValue(
+                          'Was am meisten Angst oder Druck gemacht hat',
+                          entry.fearOrPressurePoint!,
+                        ),
+                      if ((entry.tippingPointAwareness ?? '').isNotEmpty)
+                        _buildLabeledValue(
+                          'Kipppunkt bemerkt',
+                          _getTippingPointLabel(entry.tippingPointAwareness!),
+                        ),
                     ],
                   ),
                 ),
-
-                if ((entry.needOrWoundedPoint ?? '').isNotEmpty ||
-                    (entry.nextStep ?? '').isNotEmpty) ...[
+                const SizedBox(height: AppConstants.spacingMedium),
+                _buildCard(
+                  title: 'Verhalten',
+                  icon: Icons.directions_run_outlined,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (actualBehaviorTags.isNotEmpty)
+                        _buildLabeledValue(
+                          'Ausgewähltes Verhalten',
+                          actualBehaviorTags.join(', '),
+                        ),
+                      if ((entry.actualBehavior ?? '').isNotEmpty)
+                        _buildLabeledValue(
+                          'Notiz zum Verhalten',
+                          entry.actualBehavior!,
+                        ),
+                    ],
+                  ),
+                ),
+                if (touchedThemes.isNotEmpty ||
+                    neededSupports.isNotEmpty ||
+                    _legacyNeedSummary(entry).isNotEmpty ||
+                    (entry.triggerAsLastDrop ?? '').isNotEmpty ||
+                    (entry.backgroundTheme ?? '').isNotEmpty ||
+                    (entry.preEscalationRelief ?? '').isNotEmpty ||
+                    (entry.patternFamiliarity ?? '').isNotEmpty) ...[
                   const SizedBox(height: AppConstants.spacingMedium),
                   _buildCard(
                     title: 'Einordnung',
@@ -248,142 +298,155 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if ((entry.needOrWoundedPoint ?? '').isNotEmpty) ...[
-                          const Text(
-                            'Bedürfnis oder verletzter Punkt:',
-                            style: TextStyle(fontWeight: FontWeight.w500),
+                        if (touchedThemes.isNotEmpty)
+                          _buildLabeledValue(
+                            'Getroffen wurde',
+                            touchedThemes.join(', '),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            entry.needOrWoundedPoint!,
-                            style: Theme.of(context).textTheme.bodyLarge,
+                        if (neededSupports.isNotEmpty)
+                          _buildLabeledValue(
+                            'Eigentlich gebraucht',
+                            neededSupports.join(', '),
                           ),
-                        ],
-                        if ((entry.needOrWoundedPoint ?? '').isNotEmpty &&
-                            (entry.nextStep ?? '').isNotEmpty)
-                          const SizedBox(height: 12),
-                        if ((entry.nextStep ?? '').isNotEmpty) ...[
-                          const Text(
-                            'Nächster Schritt:',
-                            style: TextStyle(fontWeight: FontWeight.w500),
+                        if (touchedThemes.isEmpty &&
+                            neededSupports.isEmpty &&
+                            _legacyNeedSummary(entry).isNotEmpty)
+                          _buildLabeledValue(
+                            'Einordnung aus älterem Eintrag',
+                            _legacyNeedSummary(entry),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            entry.nextStep!,
-                            style: Theme.of(context).textTheme.bodyLarge,
+                        if ((entry.triggerAsLastDrop ?? '').isNotEmpty)
+                          _buildLabeledValue(
+                            'War es eher der letzte Tropfen?',
+                            _getTriggerAsLastDropLabel(
+                                entry.triggerAsLastDrop!),
                           ),
-                        ],
+                        if ((entry.backgroundTheme ?? '').isNotEmpty)
+                          _buildLabeledValue(
+                            'Wahrscheinliches Hintergrundthema',
+                            entry.backgroundTheme!,
+                          ),
+                        if ((entry.preEscalationRelief ?? '').isNotEmpty)
+                          _buildLabeledValue(
+                            'Was es vorher entschärft hätte',
+                            entry.preEscalationRelief!,
+                          ),
+                        if ((entry.patternFamiliarity ?? '').isNotEmpty)
+                          _buildLabeledValue(
+                            'Bekanntes Muster',
+                            _getPatternFamiliarityLabel(
+                              entry.patternFamiliarity!,
+                            ),
+                          ),
                       ],
                     ),
                   ),
                 ],
-
-                const SizedBox(height: AppConstants.spacingMedium),
-
-                // Klassifikation
-                _buildCard(
-                  title: 'Klassifikation',
-                  icon: Icons.analytics,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Chip(
-                            label: Text(
-                              _getSystemStateLabel(entry.systemState),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            backgroundColor:
-                                _getSystemStateColor(entry.systemState)
-                                    .withValues(alpha: 0.2),
-                          ),
-                          if (entry.isCrisis == true) ...[
-                            const SizedBox(width: 8),
-                            Chip(
-                              label: const Text('Krise'),
-                              avatar: const Icon(
-                                Icons.warning,
-                                size: 16,
-                                color: Colors.red,
-                              ),
-                              backgroundColor:
-                                  Colors.red.withValues(alpha: 0.1),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                if ((entry.evaluationHeadlineKey ?? '').isNotEmpty ||
-                    (entry.evaluationMeaningKey ?? '').isNotEmpty ||
-                    (entry.suggestedTipIds ?? '').isNotEmpty) ...[
+                if ((entry.realisticAlternative ?? '').isNotEmpty ||
+                    (entry.nextStep ?? '').isNotEmpty) ...[
                   const SizedBox(height: AppConstants.spacingMedium),
                   _buildCard(
-                    title: 'Auswertung',
-                    icon: Icons.tips_and_updates_outlined,
-                    child: contentAsync.when(
-                      data: (content) {
-                        final tipIds = _decodeStringList(entry.suggestedTipIds);
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if ((entry.evaluationHeadlineKey ?? '').isNotEmpty)
-                              _buildLabeledValue(
-                                'Was auffällt',
-                                content.headlineFor(
-                                  entry.evaluationHeadlineKey!,
-                                ),
-                              ),
-                            if ((entry.evaluationMeaningKey ?? '').isNotEmpty)
-                              _buildLabeledValue(
-                                'Was das bedeuten könnte',
-                                content.meaningFor(
-                                  entry.evaluationMeaningKey!,
-                                ),
-                              ),
-                            if ((entry.suggestedNextActionKey ?? '').isNotEmpty)
-                              _buildLabeledValue(
-                                'Was jetzt hilfreich sein kann',
-                                content.nextActionFor(
-                                  entry.suggestedNextActionKey!,
-                                ),
-                              ),
-                            if (tipIds.isNotEmpty) ...[
-                              const Text(
-                                'Praktische Tipps:',
-                                style: TextStyle(fontWeight: FontWeight.w500),
-                              ),
-                              const SizedBox(height: 4),
-                              ...tipIds.map(
-                                (tipId) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 6),
-                                  child: Text('• ${content.tipFor(tipId)}'),
-                                ),
-                              ),
-                            ],
-                            if ((entry.selectedNextActionKey ?? '').isNotEmpty)
-                              _buildLabeledValue(
-                                'Gewählter nächster Schritt',
-                                content.nextActionFor(
-                                  entry.selectedNextActionKey!,
-                                ),
-                              ),
-                          ],
-                        );
-                      },
-                      loading: () => const CircularProgressIndicator(),
-                      error: (_, __) => const Text(
-                        'Auswertung konnte nicht geladen werden.',
-                      ),
+                    title: 'Nächster realistischer Schritt',
+                    icon: Icons.alt_route_outlined,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if ((entry.realisticAlternative ?? '').isNotEmpty)
+                          _buildLabeledValue(
+                            'Realistischer anderer Schritt',
+                            entry.realisticAlternative!,
+                          ),
+                        if ((entry.nextStep ?? '').isNotEmpty)
+                          _buildLabeledValue(
+                            (entry.realisticAlternative ?? '').isNotEmpty
+                                ? 'Kleinster sinnvoller nächster Schritt'
+                                : 'Notierter nächster Schritt',
+                            entry.nextStep!,
+                          ),
+                      ],
                     ),
                   ),
                 ],
-
+                const SizedBox(height: AppConstants.spacingMedium),
+                _buildCard(
+                  title: 'Auswertung',
+                  icon: Icons.tips_and_updates_outlined,
+                  child: contentAsync.when(
+                    data: (content) {
+                      final tipIds = _decodeStringList(entry.suggestedTipIds);
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (evaluationStatusKeys.isNotEmpty) ...[
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: evaluationStatusKeys
+                                  .map(
+                                    (key) => Chip(
+                                      label: Text(content.statusLabelFor(key)),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                          if ((entry.evaluationHeadlineKey ?? '').isNotEmpty)
+                            _buildLabeledValue(
+                              'Was auffällt',
+                              content.standOutFor(entry.evaluationHeadlineKey!),
+                            ),
+                          if ((entry.evaluationMeaningKey ?? '').isNotEmpty)
+                            _buildLabeledValue(
+                              'Was dahinter liegen könnte',
+                              content.backgroundFor(
+                                entry.evaluationMeaningKey!,
+                              ),
+                            ),
+                          if ((entry.evaluationHelpfulNowKey ?? '').isNotEmpty)
+                            _buildLabeledValue(
+                              'Was jetzt hilfreicher ist als weitere Analyse',
+                              content.helpfulNowFor(
+                                entry.evaluationHelpfulNowKey!,
+                              ),
+                            ),
+                          if ((entry.evaluationLearningPointKey ?? '')
+                              .isNotEmpty)
+                            _buildLabeledValue(
+                              'Lernpunkt / frühester möglicher Abzweig',
+                              content.learningPointFor(
+                                entry.evaluationLearningPointKey!,
+                              ),
+                            ),
+                          if (tipIds.isNotEmpty) ...[
+                            const Text(
+                              'Praktische Tipps:',
+                              style: TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                            const SizedBox(height: 4),
+                            ...tipIds.map(
+                              (tipId) => Padding(
+                                padding: const EdgeInsets.only(bottom: 6),
+                                child: Text('• ${content.tipFor(tipId)}'),
+                              ),
+                            ),
+                          ],
+                          if ((entry.selectedNextActionKey ?? '').isNotEmpty)
+                            _buildLabeledValue(
+                              'Gewählter nächster Schritt',
+                              content.nextActionFor(
+                                entry.selectedNextActionKey!,
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                    loading: () => const CircularProgressIndicator(),
+                    error: (_, __) => const Text(
+                      'Auswertung konnte nicht geladen werden.',
+                    ),
+                  ),
+                ),
                 if ((entry.aiEvaluationStatus ?? '').isNotEmpty ||
                     (entry.aiEvaluationText ?? '').isNotEmpty) ...[
                   const SizedBox(height: AppConstants.spacingMedium),
@@ -393,11 +456,8 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
                     child: _buildAiEvaluationSection(entry),
                   ),
                 ],
-
                 if (entry.interventionType != null) ...[
                   const SizedBox(height: AppConstants.spacingMedium),
-
-                  // Intervention
                   _buildCard(
                     title: 'Intervention',
                     icon: Icons.self_improvement,
@@ -443,40 +503,6 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
                               ),
                             ],
                           ),
-                          if (entry.postClarity != null) ...[
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.lightbulb,
-                                  size: 20,
-                                  color: AppColors.warning,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Klarheit: ${entry.postClarity}/10',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ],
-                            ),
-                          ],
-                          if (entry.helpfulnessRating != null) ...[
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.thumb_up,
-                                  size: 20,
-                                  color: AppColors.success,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Hilfreichkeit: ${entry.helpfulnessRating}/10',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ],
-                            ),
-                          ],
                         ],
                       ],
                     ),
@@ -487,9 +513,7 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Fehler: $error'),
-        ),
+        error: (error, stack) => Center(child: Text('Fehler: $error')),
       ),
     );
   }
@@ -543,15 +567,9 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
           ],
           _buildLabeledValue('Was auffällt', content.wasAuffaellt),
           _buildLabeledValue('Einordnung', content.einordnung),
-          _buildLabeledValue(
-            'Praktisch hilfreich',
-            content.praktischHilfreich,
-          ),
+          _buildLabeledValue('Praktisch hilfreich', content.praktischHilfreich),
           if (content.hasVorsichtshinweis)
-            _buildLabeledValue(
-              'Vorsichtshinweis',
-              content.vorsichtshinweis!,
-            ),
+            _buildLabeledValue('Vorsichtshinweis', content.vorsichtshinweis!),
         ],
       );
     }
@@ -621,74 +639,60 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
   }
 
   String _getContextLabel(String contextName) {
-    final ctx =
-        ContextType.values.where((e) => e.name == contextName).firstOrNull;
-    return ctx?.label ?? contextName;
+    return ContextType.fromRaw(contextName)?.label ?? contextName;
   }
 
   String _getContextEmoji(String contextName) {
-    final ctx =
-        ContextType.values.where((e) => e.name == contextName).firstOrNull;
-    return ctx?.emoji ?? '❓';
+    return ContextType.fromRaw(contextName)?.emoji ?? '❓';
   }
 
   String _getEmotionLabel(String emotionName) {
-    final emotion =
-        EmotionType.values.where((e) => e.name == emotionName).firstOrNull;
+    final emotion = EmotionType.values
+        .where((value) => value.name == emotionName)
+        .firstOrNull;
     return emotion?.label ?? emotionName;
   }
 
-  String _getEmotionEmoji(String emotionName) {
-    final emotion =
-        EmotionType.values.where((e) => e.name == emotionName).firstOrNull;
-    return emotion?.emoji ?? '😐';
+  String _getProblemTimingLabel(String rawValue) {
+    return ProblemTiming.fromRaw(rawValue)?.label ?? rawValue;
   }
 
-  String _getImpulseLabel(String impulseName) {
-    final impulse =
-        ImpulseType.values.where((e) => e.name == impulseName).firstOrNull;
-    return impulse?.label ?? impulseName;
+  String _getFactInterpretationLabel(String rawValue) {
+    final result = FactInterpretationResult.values
+        .where((candidate) => candidate.name == rawValue)
+        .firstOrNull;
+    return result?.label ?? rawValue;
   }
 
-  String _getSystemStateLabel(String stateStr) {
-    try {
-      final state =
-          SystemState.values.where((e) => e.name == stateStr).firstOrNull;
-      final labels = {
-        SystemState.acuteActivation: 'Akute Aktivierung',
-        SystemState.reflectiveReady: 'Reflexionsbereit',
-        SystemState.interpretation: 'Interpretationsmodus',
-        SystemState.rumination: 'Grübelmodus',
-        SystemState.conflict: 'Konflikt',
-        SystemState.selfDevaluation: 'Selbstabwertung',
-        SystemState.overwhelm: 'Überforderung',
-        SystemState.crisis: 'Krise',
-      };
-      if (state == null) return stateStr;
-      return labels[state] ?? state.name;
-    } catch (_) {
-      return stateStr;
+  String _getSystemReactionLabel(String rawValue) {
+    return SystemReactionType.fromRaw(rawValue)?.label ?? rawValue;
+  }
+
+  String _getLegacyImpulseLabel(String rawValue) {
+    return ImpulseType.values
+            .firstWhereOrNull((value) => value.name == rawValue)
+            ?.label ??
+        rawValue;
+  }
+
+  String _getTippingPointLabel(String rawValue) {
+    return TippingPointAwareness.fromRaw(rawValue)?.label ?? rawValue;
+  }
+
+  String _getTriggerAsLastDropLabel(String rawValue) {
+    return TriggerAsLastDrop.fromRaw(rawValue)?.label ?? rawValue;
+  }
+
+  String _getPatternFamiliarityLabel(String rawValue) {
+    return PatternFamiliarity.fromRaw(rawValue)?.label ?? rawValue;
+  }
+
+  String _legacyNeedSummary(SituationEntryData entry) {
+    if (_decodeStringList(entry.touchedThemes).isNotEmpty ||
+        _decodeStringList(entry.neededSupports).isNotEmpty) {
+      return '';
     }
-  }
-
-  Color _getSystemStateColor(String stateStr) {
-    try {
-      final state =
-          SystemState.values.where((e) => e.name == stateStr).firstOrNull;
-      final colors = {
-        SystemState.acuteActivation: AppColors.error,
-        SystemState.reflectiveReady: AppColors.success,
-        SystemState.interpretation: AppColors.warning,
-        SystemState.rumination: AppColors.warning,
-        SystemState.conflict: AppColors.error,
-        SystemState.selfDevaluation: Colors.purple,
-        SystemState.overwhelm: Colors.orange,
-        SystemState.crisis: Colors.red,
-      };
-      return colors[state] ?? Colors.grey;
-    } catch (_) {
-      return Colors.grey;
-    }
+    return (entry.needOrWoundedPoint ?? '').trim();
   }
 
   String _getInterventionLabel(String typeStr) {
@@ -704,11 +708,9 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
     return labels[typeStr] ?? typeStr;
   }
 
-  String _getFactInterpretationLabel(String rawValue) {
-    final result = FactInterpretationResult.values
-        .where((candidate) => candidate.name == rawValue)
-        .firstOrNull;
-    return result?.label ?? rawValue;
+  String _involvedLabel(SituationEntryData entry) {
+    final rawValue = entry.involvedEntities ?? entry.involvedPerson ?? '';
+    return rawValue.trim();
   }
 
   Widget _buildLabeledValue(String label, String value) {
@@ -728,21 +730,6 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
     );
   }
 
-  List<String> _decodeBodySymptoms(String? rawValue) {
-    if (rawValue == null || rawValue.isEmpty) return const [];
-
-    try {
-      final decoded = jsonDecode(rawValue);
-      if (decoded is List) {
-        return decoded.whereType<String>().toList();
-      }
-    } catch (_) {
-      // Fall back to legacy comma-separated representation.
-    }
-
-    return rawValue.split(',');
-  }
-
   List<String> _decodeStringList(String? rawValue) {
     if (rawValue == null || rawValue.isEmpty) return const [];
 
@@ -752,7 +739,11 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
         return decoded.whereType<String>().toList();
       }
     } catch (_) {
-      return const [];
+      return rawValue
+          .split(',')
+          .map((value) => value.trim())
+          .where((value) => value.isNotEmpty)
+          .toList();
     }
 
     return const [];
@@ -778,7 +769,7 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
               await db.deleteSituationEntryById(widget.entryId);
               if (!mounted) return;
 
-              context.pop(); // Zurück zur Liste
+              context.pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Eintrag gelöscht')),
               );
@@ -794,19 +785,18 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
   }
 }
 
-/// Widget für Intensitätsanzeige
 class _IntensityBar extends StatelessWidget {
-  final String label;
-  final int value;
-  final bool showImprovement;
-  final int? improvement;
-
   const _IntensityBar({
     required this.label,
     required this.value,
     this.showImprovement = false,
     this.improvement,
   });
+
+  final String label;
+  final int value;
+  final bool showImprovement;
+  final int? improvement;
 
   @override
   Widget build(BuildContext context) {
@@ -820,7 +810,7 @@ class _IntensityBar extends StatelessWidget {
               label,
               style: Theme.of(context).textTheme.bodySmall,
             ),
-            if (showImprovement && improvement != null) ...[
+            if (showImprovement && improvement != null)
               Text(
                 improvement! > 0 ? '-$improvement' : '+${-improvement!}',
                 style: TextStyle(
@@ -829,7 +819,6 @@ class _IntensityBar extends StatelessWidget {
                   color: improvement! > 0 ? AppColors.success : AppColors.error,
                 ),
               ),
-            ],
           ],
         ),
         const SizedBox(height: 4),

@@ -132,6 +132,7 @@ class InterventionSelector {
   ) {
     switch (emotion) {
       case EmotionType.anger:
+      case EmotionType.annoyance:
         return [
           InterventionType.impulsePause,
           InterventionType.regulation,
@@ -139,6 +140,8 @@ class InterventionSelector {
         ];
 
       case EmotionType.fear:
+      case EmotionType.powerlessness:
+      case EmotionType.helplessness:
         return [
           InterventionType.regulation,
           InterventionType.ruminationStop,
@@ -154,12 +157,16 @@ class InterventionSelector {
         ];
 
       case EmotionType.sadness:
+      case EmotionType.overwhelm:
+      case EmotionType.emptiness:
         return [
           InterventionType.regulation,
           InterventionType.factCheck,
         ];
 
       case EmotionType.disgust:
+      case EmotionType.disappointment:
+      case EmotionType.hurt:
         return [
           InterventionType.impulsePause,
           InterventionType.factCheck,
@@ -200,18 +207,16 @@ class InterventionSelector {
           state == SystemState.overwhelm ? 1 : 5,
 
       // Fact check is generally good for reflective states
-      InterventionType.factCheck:
-          state == SystemState.reflectiveReady ||
-                  state == SystemState.interpretation
-              ? 1
-              : 3,
+      InterventionType.factCheck: state == SystemState.reflectiveReady ||
+              state == SystemState.interpretation
+          ? 1
+          : 3,
 
       // Worksheet templates for reflective states
-      InterventionType.abc3:
-          state == SystemState.reflectiveReady ||
-                  state == SystemState.interpretation
-              ? 2
-              : 6,
+      InterventionType.abc3: state == SystemState.reflectiveReady ||
+              state == SystemState.interpretation
+          ? 2
+          : 6,
       InterventionType.rsaAbcde: state == SystemState.selfDevaluation ? 2 : 7,
     };
 

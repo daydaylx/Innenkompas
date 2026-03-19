@@ -193,7 +193,9 @@ class NotificationService {
 
   /// Get a preview message for the active notification mode.
   String getPreviewMessage({required bool discrete}) {
-    return discrete ? _discreteMessages.first.body : _standardMessages.first.body;
+    return discrete
+        ? _discreteMessages.first.body
+        : _standardMessages.first.body;
   }
 
   /// Get a notification message by ID and mode.
@@ -263,15 +265,18 @@ class NotificationService {
     ),
     _NotificationMessage(
       title: 'Innenkompass',
-      body: 'Wie geht es dir gerade wirklich? Eine kurze Reflexion kann helfen.',
+      body:
+          'Wie geht es dir gerade wirklich? Eine kurze Reflexion kann helfen.',
     ),
     _NotificationMessage(
       title: 'Innenkompass',
-      body: 'Wenn gerade viel los ist, kann ein kurzer Eintrag wieder Ordnung schaffen.',
+      body:
+          'Wenn gerade viel los ist, kann ein kurzer Eintrag wieder Ordnung schaffen.',
     ),
     _NotificationMessage(
       title: 'Innenkompass',
-      body: 'Vielleicht ist jetzt ein guter Zeitpunkt für einen bewussten Rückblick.',
+      body:
+          'Vielleicht ist jetzt ein guter Zeitpunkt für einen bewussten Rückblick.',
     ),
   ];
 }

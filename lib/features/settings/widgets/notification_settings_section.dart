@@ -107,7 +107,8 @@ class NotificationSettingsSection extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, size: 16, color: AppColors.textTertiary),
+                Icon(Icons.info_outline,
+                    size: 16, color: AppColors.textTertiary),
                 const SizedBox(width: AppConstants.spacingSmall),
                 Expanded(
                   child: Text(

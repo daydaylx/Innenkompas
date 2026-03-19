@@ -7,12 +7,14 @@ import '../../../app/router.dart';
 import '../../../app/theme/colors.dart';
 import '../../../application/providers/database_provider.dart';
 import '../../../application/providers/intervention_providers.dart';
+import '../../../application/providers/new_situation_providers.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/context_types.dart';
 import '../../../core/constants/emotion_types.dart';
 import '../../../core/constants/impulse_types.dart';
 import '../../../core/constants/system_states.dart';
 import '../../../data/db/app_database.dart';
+import '../../../domain/models/situation_draft.dart';
 import '../../../shared/widgets/app_scaffold.dart';
 import '../../../shared/widgets/buttons/app_primary_button.dart';
 
@@ -54,8 +56,10 @@ class _QuickCheckinScreenState extends ConsumerState<QuickCheckinScreen> {
               padding: const EdgeInsets.all(AppConstants.spacingLarge),
               decoration: BoxDecoration(
                 color: AppColors.surface.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
-                border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
+                borderRadius:
+                    BorderRadius.circular(AppConstants.borderRadiusLarge),
+                border:
+                    Border.all(color: AppColors.border.withValues(alpha: 0.6)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,8 +110,8 @@ class _QuickCheckinScreenState extends ConsumerState<QuickCheckinScreen> {
                       color: isSelected
                           ? AppColors.primary.withValues(alpha: 0.14)
                           : AppColors.surface.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(
-                          AppConstants.borderRadiusPill),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.borderRadiusPill),
                       border: Border.all(
                         color: isSelected
                             ? AppColors.primary.withValues(alpha: 0.5)
@@ -129,9 +133,8 @@ class _QuickCheckinScreenState extends ConsumerState<QuickCheckinScreen> {
                             color: isSelected
                                 ? AppColors.primaryDark
                                 : AppColors.textPrimary,
-                            fontWeight: isSelected
-                                ? FontWeight.w700
-                                : FontWeight.w500,
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w500,
                           ),
                         ),
                       ],
@@ -179,8 +182,8 @@ class _QuickCheckinScreenState extends ConsumerState<QuickCheckinScreen> {
               data: SliderTheme.of(context).copyWith(
                 activeTrackColor: AppColors.intensityColor(_intensity),
                 thumbColor: AppColors.intensityColor(_intensity),
-                overlayColor:
-                    AppColors.intensityColor(_intensity).withValues(alpha: 0.14),
+                overlayColor: AppColors.intensityColor(_intensity)
+                    .withValues(alpha: 0.14),
                 inactiveTrackColor: AppColors.border,
               ),
               child: Slider(
@@ -267,7 +270,9 @@ class _QuickCheckinScreenState extends ConsumerState<QuickCheckinScreen> {
       if (mounted) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Speichern fehlgeschlagen. Bitte erneut versuchen.')),
+          const SnackBar(
+              content:
+                  Text('Speichern fehlgeschlagen. Bitte erneut versuchen.')),
         );
       }
     }
@@ -316,11 +321,23 @@ class _QuickCheckinScreenState extends ConsumerState<QuickCheckinScreen> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.borderRadius),
                 ),
               ),
               onPressed: () {
                 Navigator.of(ctx).pop();
+                final flowController =
+                    ref.read(newSituationFlowControllerProvider.notifier);
+                flowController.reset();
+                flowController.updateEmotionData(
+                  SituationEmotionData(
+                    preTriggerLoad: 0,
+                    intensity: _intensity,
+                    bodyTension: 0,
+                    primaryEmotion: emotion,
+                  ),
+                );
                 context.go(AppRoutes.newSituationEvent);
               },
               child: const Text('Ja, weiter reflektieren'),

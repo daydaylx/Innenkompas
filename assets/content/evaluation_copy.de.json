@@ -1,37 +1,58 @@
 {
-  "headlines": {
-    "acute_activation_high_tension": "Hohe Belastung und starker Handlungsdruck",
-    "acute_activation_withdrawal": "Hohe Belastung mit starkem Rückzugsimpuls",
-    "rumination_loop": "Kreisende Gedanken ohne echte Klärung",
-    "conflict_impulse": "Konflikt mit schneller Reaktionsneigung",
-    "self_devaluation_load": "Belastung mit starker Selbstbewertung",
-    "overwhelm_pressure": "Viel Druck und zu viel gleichzeitig",
-    "interpretation_uncertain_facts": "Starke Deutung bei noch unsicherer Faktenlage",
-    "reflective_ready": "Die Situation ist belastend, aber einordnbar",
-    "crisis_support": "Sehr hohe Belastung mit Bedarf nach sofortiger Stabilisierung"
+  "standOut": {
+    "high_tension_body_fast": "Dein System war stark unter Spannung.",
+    "small_trigger_big_load": "Der Auslöser wirkt eher wie der letzte Tropfen als wie das ganze Thema.",
+    "thought_spiral_active": "Neben dem Auslöser lief schon viel innere Vorbeschäftigung.",
+    "automatic_reaction_fast": "Zwischen Auslöser und Reaktion war wenig innerer Puffer.",
+    "conflict_pattern_visible": "Die Situation zeigt ein klares Konflikt- oder Schutzmuster.",
+    "reflection_reachable": "Die Situation ist belastend, aber noch einordbar.",
+    "safety_relevant_signal": "Die Belastung wirkt gerade sicherheitsrelevant."
   },
-  "meanings": {
-    "acute_activation_alarm": "Dein Körper war vermutlich schneller als die sachliche Einordnung.",
-    "rumination_clarifying": "Der Eintrag wirkt eher wie eine Denkschleife als wie eine Klärung.",
-    "conflict_loaded": "Die Situation wirkt konfliktgeladen und impulsanfällig.",
-    "self_devaluation_connected": "Die Belastung scheint stark mit Selbstbewertung verbunden.",
-    "overwhelm_not_unsolvable": "Die Situation wirkt eher überfordernd als unlösbar.",
-    "interpretation_not_certain": "Vieles daran klingt gerade eher nach Annahme als nach gesichertem Fakt.",
-    "reflective_ready_accessible": "Du scheinst noch gut erreichbar für einen ruhigen nächsten Schritt zu sein.",
-    "crisis_regulate_first": "Gerade zählt zuerst Stabilisierung und Unterstützung, nicht tiefe Analyse."
+  "background": {
+    "background_pressure_already_high": "Wahrscheinlich war die innere Belastung schon vorher erhöht.",
+    "background_need_hit": "Es scheint weniger nur um den Anlass zu gehen, sondern um etwas, das in dir getroffen wurde.",
+    "background_interpretation": "Ein Teil des Drucks kommt vermutlich aus Deutung, Befürchtung oder innerem Vorausdenken.",
+    "background_control": "Kontrolle, Leistungsdruck oder Verantwortung könnten hier mit hineinspielen.",
+    "background_conflict": "Respekt, Grenzen oder Gesehenwerden wirken hier als mögliches Hintergrundthema.",
+    "background_unknown": "Das eigentliche Thema dahinter ist noch nicht ganz klar, aber es wirkt größer als der Auslöser allein.",
+    "background_safety_first": "Im Moment ist nicht entscheidend, alles zu verstehen, sondern erst wieder etwas Stabilität zu bekommen."
+  },
+  "helpfulNow": {
+    "helpful_stabilize_body": "Gerade ist Stabilisierung hilfreicher als weiteres Analysieren.",
+    "helpful_reduce_input": "Weniger Reize und mehr Abstand wären jetzt wahrscheinlich hilfreicher als weitere Klärung.",
+    "helpful_pause_before_contact": "Nicht sofort reagieren ist gerade hilfreicher als das Thema direkt weiterzutreiben.",
+    "helpful_name_facts": "Zuerst den sachlichen Kern zu sortieren wäre gerade hilfreicher als weiterzudenken.",
+    "helpful_choose_small_step": "Ein kleiner nächster Schritt ist jetzt hilfreicher als die ganze Situation auf einmal lösen zu wollen.",
+    "helpful_seek_support": "Sich Unterstützung zu holen ist jetzt hilfreicher, als allein weiterzudrücken."
+  },
+  "learningPoints": {
+    "learning_before_trigger": "Der früheste Abzweig lag wahrscheinlich schon vor dem Auslöser, bei der Vorbelastung.",
+    "learning_notice_body_first": "Der früheste merkbare Punkt war wahrscheinlich im Körper und nicht erst im Verhalten.",
+    "learning_name_automatic_thought": "Ein früher Abzweig könnte sein, den ersten Gedanken schneller als Deutung zu erkennen.",
+    "learning_interrupt_pattern": "Wenn du das Muster früher bemerkst, reicht oft schon ein kleiner Bruch statt perfektes Verhalten.",
+    "learning_build_pause": "Mehr Puffer zwischen Reiz und Reaktion wäre hier vermutlich der hilfreichste Lernpunkt.",
+    "learning_stabilize_not_solve": "In sehr geladenen Momenten ist erst beruhigen oft der sinnvollere Abzweig als lösen."
+  },
+  "statusLabels": {
+    "high_tension": "Hohe Anspannung",
+    "acute_escalation": "Akute Eskalation",
+    "safety_relevant_moment": "Sicherheitsrelevanter Moment",
+    "strong_inner_pressure": "Starker innerer Druck",
+    "reflection_limited": "Reflexion gerade nur eingeschränkt sinnvoll",
+    "stabilize_before_analysis": "Erst Stabilisierung, dann Analyse"
   },
   "nextActions": {
-    "pause_now": "Jetzt kurz Abstand schaffen.",
+    "pause_now": "Jetzt kurz stoppen und Abstand schaffen.",
     "regulate_body_first": "Erst den Körper beruhigen, dann weiterdenken.",
-    "do_not_reply_now": "Nicht im ersten Impuls antworten.",
+    "do_not_reply_now": "Gerade nicht im ersten Impuls reagieren.",
     "address_later": "Das Thema später ruhiger ansprechen.",
-    "write_observation_first": "Erst den sachlichen Kern notieren.",
-    "check_facts_first": "Fakten sammeln, bevor du weiter deutest.",
-    "write_alternative_view": "Eine alternative Erklärung aufschreiben.",
-    "limit_thinking_loop": "Die Denkschleife bewusst begrenzen.",
-    "choose_one_step": "Nur einen kleinen nächsten Schritt festlegen.",
-    "reduce_stimuli": "Reize reduzieren, bevor du planst.",
+    "write_observation_first": "Erst notieren, was konkret passiert ist.",
+    "check_facts_first": "Fakten sortieren, bevor du weiter deutest.",
+    "write_alternative_view": "Eine realistischere Sicht dazuschreiben.",
+    "limit_thinking_loop": "Die Gedankenspirale bewusst begrenzen.",
+    "choose_one_step": "Nur den kleinsten nächsten Schritt festlegen.",
+    "reduce_stimuli": "Reize und Input erst einmal reduzieren.",
     "collect_counterevidence": "Gegenbelege sammeln, bevor du dich bewertest.",
-    "seek_support_now": "Jetzt Unterstützung oder sichere Begleitung holen."
+    "seek_support_now": "Jetzt eine sichere Person oder Unterstützung einbeziehen."
   }
 }

@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../app/router.dart';
 import '../../../app/theme/colors.dart';
+import '../../../application/providers/new_situation_providers.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/fact_interpretation_results.dart';
-import '../../../core/constants/impulse_types.dart';
+import '../../../core/constants/new_situation_option_lists.dart';
+import '../../../core/constants/system_reaction_types.dart';
+import '../../../core/constants/tipping_point_awareness.dart';
 import '../../../core/validators/new_situation_validators.dart';
 import '../../../domain/models/situation_draft.dart';
 import '../../../shared/widgets/app_scaffold.dart';
 import '../../../shared/widgets/buttons/app_primary_button.dart';
 import '../../../shared/widgets/buttons/app_secondary_button.dart';
 import '../../../shared/widgets/cards/app_card.dart';
-import '../../../application/providers/new_situation_providers.dart';
 import '../widgets/flow_progress_indicator.dart';
-import '../widgets/thought_impulse/automatic_thought_field.dart';
-import '../widgets/thought_impulse/impulse_selector.dart';
+import '../widgets/shared/form_text_area.dart';
+import '../widgets/shared/string_chip_selector.dart';
 
-/// Step 3 screen of the new situation flow - Thoughts and impulses.
 class SituationThoughtImpulseScreen extends ConsumerStatefulWidget {
   const SituationThoughtImpulseScreen({super.key});
 
@@ -28,96 +30,127 @@ class SituationThoughtImpulseScreen extends ConsumerStatefulWidget {
 
 class _SituationThoughtImpulseScreenState
     extends ConsumerState<SituationThoughtImpulseScreen> {
-  final _behaviorController = TextEditingController();
+  String _thoughtFocus = '';
   String _automaticThought = '';
-  ImpulseType? _firstImpulse;
   FactInterpretationResult? _factInterpretation;
-  String _actualBehavior = '';
+  SystemReactionType? _systemReaction;
+  List<String> _thoughtPatterns = const [];
+  List<String> _actualBehaviorTags = const [];
+  String _actualBehaviorNote = '';
+  TippingPointAwareness? _tippingPointAwareness;
+  String _fearOrPressurePoint = '';
+  String? _thoughtFocusError;
   String? _thoughtError;
-  String? _impulseError;
-  String? _factInterpretationError;
+  String? _behaviorError;
 
   @override
   void initState() {
     super.initState();
-    // Load existing data if available
     final existingData = ref.read(thoughtImpulseDataProvider);
     if (existingData != null) {
+      _thoughtFocus = existingData.thoughtFocus;
       _automaticThought = existingData.automaticThought;
-      _firstImpulse = existingData.firstImpulse;
       _factInterpretation = existingData.factInterpretation;
-      _actualBehavior = existingData.actualBehavior ?? '';
-      _behaviorController.text = _actualBehavior;
+      _systemReaction = existingData.systemReaction;
+      _thoughtPatterns = List<String>.from(existingData.thoughtPatterns);
+      _actualBehaviorTags = List<String>.from(existingData.actualBehaviorTags);
+      _actualBehaviorNote = existingData.actualBehaviorNote ?? '';
+      _tippingPointAwareness = existingData.tippingPointAwareness;
+      _fearOrPressurePoint = existingData.fearOrPressurePoint ?? '';
     }
-  }
-
-  @override
-  void dispose() {
-    _behaviorController.dispose();
-    super.dispose();
   }
 
   bool get _isValid {
-    final thoughtValidation =
-        NewSituationValidators.validateAutomaticThought(_automaticThought);
-    final impulseValidation =
-        NewSituationValidators.validateImpulseSelection(_firstImpulse);
-    final factValidation =
-        NewSituationValidators.validateFactInterpretation(_factInterpretation);
-    return thoughtValidation.isValid &&
-        impulseValidation.isValid &&
-        factValidation.isValid;
+    if (_factInterpretation == null ||
+        _systemReaction == null ||
+        _tippingPointAwareness == null) {
+      return false;
+    }
+
+    return NewSituationValidators.validateThoughtImpulseData(
+      SituationThoughtImpulseData(
+        thoughtFocus: _thoughtFocus,
+        automaticThought: _automaticThought,
+        factInterpretation: _factInterpretation!,
+        systemReaction: _systemReaction!,
+        thoughtPatterns: _thoughtPatterns,
+        actualBehaviorTags: _actualBehaviorTags,
+        actualBehaviorNote: _actualBehaviorNote.trim().isEmpty
+            ? null
+            : _actualBehaviorNote.trim(),
+        tippingPointAwareness: _tippingPointAwareness!,
+        fearOrPressurePoint: _fearOrPressurePoint.trim().isEmpty
+            ? null
+            : _fearOrPressurePoint.trim(),
+      ),
+    ).isValid;
   }
 
-  void _handleSave() {
-    // Validate
-    final thoughtValidation =
-        NewSituationValidators.validateAutomaticThought(_automaticThought);
-    if (!thoughtValidation.isValid) {
-      setState(() {
-        _thoughtError = thoughtValidation.firstError;
-      });
+  void _handleNext() {
+    if (_factInterpretation == null ||
+        _systemReaction == null ||
+        _tippingPointAwareness == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Bitte vervollständige die Einordnung der Reaktion.'),
+        ),
+      );
       return;
     }
 
-    if (_firstImpulse == null) {
-      setState(() {
-        _impulseError = 'Bitte wähle einen Impuls aus.';
-      });
-      return;
-    }
-
-    if (_factInterpretation == null) {
-      setState(() {
-        _factInterpretationError =
-            'Bitte schätze ein, wie sehr dein Gedanke auf Fakten oder Deutung beruht.';
-      });
-      return;
-    }
-
-    // Validate actual behavior (optional)
-    final behaviorValidation =
-        NewSituationValidators.validateActualBehavior(_actualBehavior);
-    if (!behaviorValidation.isValid) {
-      setState(() {
-        // Show behavior validation error
-        _actualBehavior = _actualBehavior.substring(
-            0, AppConstants.maxBehaviorDescriptionLength);
-      });
-    }
-
-    // Save thought and impulse data
-    final thoughtData = SituationThoughtImpulseData(
-      automaticThought: _automaticThought.trim(),
-      firstImpulse: _firstImpulse!,
-      factInterpretation: _factInterpretation!,
-      actualBehavior:
-          _actualBehavior.trim().isEmpty ? null : _actualBehavior.trim(),
+    final validation = NewSituationValidators.validateThoughtImpulseData(
+      SituationThoughtImpulseData(
+        thoughtFocus: _thoughtFocus,
+        automaticThought: _automaticThought,
+        factInterpretation: _factInterpretation!,
+        systemReaction: _systemReaction!,
+        thoughtPatterns: _thoughtPatterns,
+        actualBehaviorTags: _actualBehaviorTags,
+        actualBehaviorNote: _actualBehaviorNote.trim().isEmpty
+            ? null
+            : _actualBehaviorNote.trim(),
+        tippingPointAwareness: _tippingPointAwareness!,
+        fearOrPressurePoint: _fearOrPressurePoint.trim().isEmpty
+            ? null
+            : _fearOrPressurePoint.trim(),
+      ),
     );
+
+    setState(() {
+      _thoughtFocusError =
+          NewSituationValidators.validateThoughtFocus(_thoughtFocus).firstError;
+      _thoughtError =
+          NewSituationValidators.validateAutomaticThought(_automaticThought)
+              .firstError;
+      _behaviorError = NewSituationValidators.validateActualBehavior(
+        behaviorTags: _actualBehaviorTags,
+        note: _actualBehaviorNote,
+      ).firstError;
+    });
+
+    if (!validation.isValid) {
+      return;
+    }
 
     ref
         .read(newSituationFlowControllerProvider.notifier)
-        .updateThoughtImpulseData(thoughtData);
+        .updateThoughtImpulseData(
+          SituationThoughtImpulseData(
+            thoughtFocus: _thoughtFocus.trim(),
+            automaticThought: _automaticThought.trim(),
+            factInterpretation: _factInterpretation!,
+            systemReaction: _systemReaction!,
+            thoughtPatterns: _thoughtPatterns,
+            actualBehaviorTags: _actualBehaviorTags,
+            actualBehaviorNote: _actualBehaviorNote.trim().isEmpty
+                ? null
+                : _actualBehaviorNote.trim(),
+            tippingPointAwareness: _tippingPointAwareness!,
+            fearOrPressurePoint: _fearOrPressurePoint.trim().isEmpty
+                ? null
+                : _fearOrPressurePoint.trim(),
+          ),
+        );
 
     context.push(AppRoutes.newSituationReflection);
   }
@@ -127,7 +160,6 @@ class _SituationThoughtImpulseScreenState
   }
 
   void _handleCancel() {
-    // Show confirmation dialog
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -146,8 +178,10 @@ class _SituationThoughtImpulseScreenState
               ref.read(newSituationFlowControllerProvider.notifier).reset();
               context.go(AppRoutes.home);
             },
-            child: const Text('Verwerfen',
-                style: TextStyle(color: AppColors.error)),
+            child: const Text(
+              'Verwerfen',
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),
@@ -159,7 +193,7 @@ class _SituationThoughtImpulseScreenState
     final theme = Theme.of(context);
 
     return AppScaffold(
-      title: 'Gedanken und Impulse',
+      title: 'Gedanken, Muster und Verhalten',
       backgroundVariant: AppBackgroundVariant.focus,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
@@ -193,7 +227,7 @@ class _SituationThoughtImpulseScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Was hast du gedacht?',
+                    'Was lief gedanklich und im Verhalten ab?',
                     style: theme.textTheme.headlineMedium?.copyWith(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
@@ -201,7 +235,7 @@ class _SituationThoughtImpulseScreenState
                   ),
                   const SizedBox(height: AppConstants.spacingSmall),
                   Text(
-                    'Halte fest, was in dir direkt ablief. Es geht um Klarheit, nicht um perfekte Formulierungen.',
+                    'Hier trennen wir Gedankenspur, erste Systemreaktion, Muster und das, was du tatsächlich gemacht hast.',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -210,29 +244,42 @@ class _SituationThoughtImpulseScreenState
               ),
             ),
             const SizedBox(height: AppConstants.spacingLarge),
-            AppCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Automatischer Gedanke',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.spacingSmall),
-                  AutomaticThoughtField(
-                    initialValue: _automaticThought,
-                    onChanged: (value) {
-                      setState(() {
-                        _automaticThought = value;
-                        _thoughtError = null;
-                      });
-                    },
-                    errorText: _thoughtError,
-                  ),
-                ],
+            _buildPromptCard(
+              title:
+                  'Worin warst du gedanklich vertieft, als die Situation aufkam?',
+              child: FormTextArea(
+                initialValue: _thoughtFocus,
+                onChanged: (value) {
+                  setState(() {
+                    _thoughtFocus = value;
+                    _thoughtFocusError = null;
+                  });
+                },
+                maxLength: AppConstants.maxThoughtFocusLength,
+                hintText:
+                    'Zum Beispiel: Ich war schon bei den nächsten Problemen oder habe innerlich etwas durchgespielt.',
+                helperText: 'Kurz reicht, Hauptsache konkret.',
+                errorText: _thoughtFocusError,
+              ),
+            ),
+            _buildPromptCard(
+              title: 'Was war dein erster automatischer Gedanke?',
+              variant: AppCardVariant.soft,
+              child: FormTextArea(
+                initialValue: _automaticThought,
+                onChanged: (value) {
+                  setState(() {
+                    _automaticThought = value;
+                    _thoughtError = null;
+                  });
+                },
+                maxLength: AppConstants.maxThoughtDescriptionLength,
+                maxLines: 3,
+                hintText:
+                    'Zum Beispiel: Jetzt reicht’s. Oder: Ich mache alles schlimmer.',
+                helperText:
+                    'Nimm den ersten rohen Gedanken, nicht die spätere Erklärung.',
+                errorText: _thoughtError,
               ),
             ),
             AppCard(
@@ -241,65 +288,22 @@ class _SituationThoughtImpulseScreenState
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Erster Impuls',
+                    'Was davon war eher Fakt, was eher Deutung?',
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: AppConstants.spacingSmall),
-                  Text(
-                    'Was war dein erster automatischer Impuls?',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.spacingMedium),
-                  ImpulseSelector(
-                    selectedImpulse: _firstImpulse,
-                    onImpulseSelected: (impulse) {
-                      setState(() {
-                        _firstImpulse = impulse;
-                        _impulseError = null;
-                      });
-                    },
-                    errorText: _impulseError,
-                  ),
-                ],
-              ),
-            ),
-            AppCard(
-              variant: AppCardVariant.soft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Fakt oder Deutung?',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.spacingSmall),
-                  Text(
-                    'Wie sicher ist dein Gedanke gerade belegt?',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.spacingMedium),
                   Wrap(
                     spacing: AppConstants.spacingSmall,
                     runSpacing: AppConstants.spacingSmall,
-                    children: FactInterpretationResult.values.map((result) {
-                      final isSelected = _factInterpretation == result;
+                    children: FactInterpretationResult.values.map((value) {
                       return ChoiceChip(
-                        selected: isSelected,
-                        label: Text(result.label),
+                        selected: _factInterpretation == value,
+                        label: Text(value.label),
                         onSelected: (_) {
                           setState(() {
-                            _factInterpretation = result;
-                            _factInterpretationError = null;
+                            _factInterpretation = value;
                           });
                         },
                       );
@@ -314,13 +318,42 @@ class _SituationThoughtImpulseScreenState
                       ),
                     ),
                   ],
-                  if (_factInterpretationError != null) ...[
+                ],
+              ),
+            ),
+            AppCard(
+              variant: AppCardVariant.soft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Wie hat dein System zuerst reagiert?',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: AppConstants.spacingSmall),
+                  Wrap(
+                    spacing: AppConstants.spacingSmall,
+                    runSpacing: AppConstants.spacingSmall,
+                    children: SystemReactionType.values.map((value) {
+                      return ChoiceChip(
+                        selected: _systemReaction == value,
+                        label: Text(value.label),
+                        onSelected: (_) {
+                          setState(() {
+                            _systemReaction = value;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  if (_systemReaction != null) ...[
                     const SizedBox(height: AppConstants.spacingSmall),
                     Text(
-                      _factInterpretationError!,
+                      _systemReaction!.description,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.error,
-                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -333,28 +366,110 @@ class _SituationThoughtImpulseScreenState
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Was hast du tatsächlich getan? (Optional)',
+                    'In welches Gedankenmuster bist du gerutscht? Optional, max. 2',
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: AppConstants.spacingSmall),
-                  TextField(
-                    controller: _behaviorController,
-                    maxLines: 3,
-                    maxLength: AppConstants.maxBehaviorDescriptionLength,
-                    textInputAction: TextInputAction.done,
-                    onChanged: (value) {
+                  StringChipSelector(
+                    options: NewSituationOptionLists.thoughtPatterns,
+                    selectedValues: _thoughtPatterns,
+                    maxSelected: 2,
+                    onChanged: (values) {
                       setState(() {
-                        _actualBehavior = value;
+                        _thoughtPatterns = values;
                       });
                     },
-                    decoration: const InputDecoration(
-                      hintText: 'Beschreibe optional, wie du reagiert hast.',
-                    ),
                   ),
                 ],
+              ),
+            ),
+            AppCard(
+              variant: AppCardVariant.soft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Was hast du tatsächlich gemacht?',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: AppConstants.spacingSmall),
+                  StringChipSelector(
+                    options: NewSituationOptionLists.actualBehaviorOptions,
+                    selectedValues: _actualBehaviorTags,
+                    onChanged: (values) {
+                      setState(() {
+                        _actualBehaviorTags = values;
+                        _behaviorError = null;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: AppConstants.spacingMedium),
+                  FormTextArea(
+                    initialValue: _actualBehaviorNote,
+                    onChanged: (value) {
+                      setState(() {
+                        _actualBehaviorNote = value;
+                        _behaviorError = null;
+                      });
+                    },
+                    maxLength: AppConstants.maxBehaviorDescriptionLength,
+                    maxLines: 3,
+                    hintText:
+                        'Optional ergänzen: Was genau hast du gesagt oder getan?',
+                    errorText: _behaviorError,
+                  ),
+                ],
+              ),
+            ),
+            AppCard(
+              variant: AppCardVariant.soft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Gab es einen Moment, an dem du kurz gemerkt hast, dass es kippt?',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: AppConstants.spacingSmall),
+                  Wrap(
+                    spacing: AppConstants.spacingSmall,
+                    runSpacing: AppConstants.spacingSmall,
+                    children: TippingPointAwareness.values.map((value) {
+                      return ChoiceChip(
+                        selected: _tippingPointAwareness == value,
+                        label: Text(value.label),
+                        onSelected: (_) {
+                          setState(() {
+                            _tippingPointAwareness = value;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+            _buildPromptCard(
+              title:
+                  'Was hat dir in dem Moment am meisten Angst gemacht oder Druck gemacht? Optional',
+              variant: AppCardVariant.soft,
+              child: FormTextArea(
+                initialValue: _fearOrPressurePoint,
+                onChanged: (value) {
+                  setState(() {
+                    _fearOrPressurePoint = value;
+                  });
+                },
+                maxLength: AppConstants.maxFearPressurePointLength,
+                maxLines: 3,
+                hintText:
+                    'Zum Beispiel: Kontrolle zu verlieren, lächerlich zu wirken oder nicht ernst genommen zu werden.',
               ),
             ),
             const SizedBox(height: AppConstants.spacingXLarge),
@@ -370,13 +485,37 @@ class _SituationThoughtImpulseScreenState
                 Expanded(
                   child: AppPrimaryButton(
                     label: 'Weiter',
-                    onPressed: _isValid ? _handleSave : null,
+                    onPressed: _isValid ? _handleNext : null,
                   ),
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPromptCard({
+    required String title,
+    required Widget child,
+    AppCardVariant variant = AppCardVariant.focus,
+  }) {
+    return AppCard(
+      variant: variant,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: AppConstants.spacingSmall),
+          child,
+        ],
       ),
     );
   }

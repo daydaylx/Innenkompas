@@ -132,7 +132,8 @@ class _HistoryFilterSheetState extends State<HistoryFilterSheet> {
                   Wrap(
                     spacing: 8,
                     children: DateRangeFilter.values
-                        .where((range) => range != DateRangeFilter.benutzerdefiniert)
+                        .where((range) =>
+                            range != DateRangeFilter.benutzerdefiniert)
                         .map((range) {
                       final isSelected = _selectedDateRange == range;
                       return FilterChip(

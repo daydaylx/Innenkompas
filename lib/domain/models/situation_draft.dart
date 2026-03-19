@@ -1,41 +1,49 @@
+import '../../core/constants/context_types.dart';
 import '../../core/constants/emotion_types.dart';
 import '../../core/constants/fact_interpretation_results.dart';
-import '../../core/constants/impulse_types.dart';
-import '../../core/constants/context_types.dart';
+import '../../core/constants/pattern_familiarity.dart';
+import '../../core/constants/problem_timing.dart';
+import '../../core/constants/system_reaction_types.dart';
+import '../../core/constants/tipping_point_awareness.dart';
+import '../../core/constants/trigger_as_last_drop.dart';
 
-/// Domain model for event data captured in step 1 of the new situation flow.
 class SituationEventData {
   const SituationEventData({
     required this.description,
+    required this.preTriggerPreoccupation,
+    required this.problemTiming,
+    required this.trigger,
     required this.context,
     required this.timestamp,
-    this.involvedPerson,
+    this.involvedEntities,
   });
 
-  /// Description of what happened (3-300 characters)
   final String description;
-
-  /// Context in which the situation occurred
+  final String preTriggerPreoccupation;
+  final ProblemTiming problemTiming;
+  final String trigger;
   final ContextType context;
-
-  /// When the situation happened
   final DateTime timestamp;
+  final String? involvedEntities;
 
-  /// Optional person involved
-  final String? involvedPerson;
-
-  /// Create a copy with some fields replaced
   SituationEventData copyWith({
     String? description,
+    String? preTriggerPreoccupation,
+    ProblemTiming? problemTiming,
+    String? trigger,
     ContextType? context,
     DateTime? timestamp,
-    String? involvedPerson,
+    String? involvedEntities,
   }) {
     return SituationEventData(
       description: description ?? this.description,
+      preTriggerPreoccupation:
+          preTriggerPreoccupation ?? this.preTriggerPreoccupation,
+      problemTiming: problemTiming ?? this.problemTiming,
+      trigger: trigger ?? this.trigger,
       context: context ?? this.context,
       timestamp: timestamp ?? this.timestamp,
-      involvedPerson: involvedPerson ?? this.involvedPerson,
+      involvedEntities: involvedEntities ?? this.involvedEntities,
     );
   }
 
@@ -45,59 +53,57 @@ class SituationEventData {
 
     return other is SituationEventData &&
         other.description == description &&
+        other.preTriggerPreoccupation == preTriggerPreoccupation &&
+        other.problemTiming == problemTiming &&
+        other.trigger == trigger &&
         other.context == context &&
         other.timestamp == timestamp &&
-        other.involvedPerson == involvedPerson;
+        other.involvedEntities == involvedEntities;
   }
 
   @override
-  int get hashCode {
-    return description.hashCode ^
-        context.hashCode ^
-        timestamp.hashCode ^
-        involvedPerson.hashCode;
-  }
+  int get hashCode =>
+      description.hashCode ^
+      preTriggerPreoccupation.hashCode ^
+      problemTiming.hashCode ^
+      trigger.hashCode ^
+      context.hashCode ^
+      timestamp.hashCode ^
+      involvedEntities.hashCode;
 }
 
-/// Domain model for emotion data captured in step 2 of the new situation flow.
 class SituationEmotionData {
   const SituationEmotionData({
+    required this.preTriggerLoad,
     required this.intensity,
     required this.bodyTension,
     required this.primaryEmotion,
-    this.secondaryEmotion,
-    this.bodySymptoms = const [],
+    this.additionalEmotions = const [],
+    this.initialBodyReactions = const [],
   });
 
-  /// Intensity rating (1-10)
+  final int preTriggerLoad;
   final int intensity;
-
-  /// Body tension rating (1-10)
   final int bodyTension;
-
-  /// Primary emotion
   final EmotionType primaryEmotion;
+  final List<EmotionType> additionalEmotions;
+  final List<String> initialBodyReactions;
 
-  /// Optional secondary emotion
-  final EmotionType? secondaryEmotion;
-
-  /// List of body symptoms experienced
-  final List<String> bodySymptoms;
-
-  /// Create a copy with some fields replaced
   SituationEmotionData copyWith({
+    int? preTriggerLoad,
     int? intensity,
     int? bodyTension,
     EmotionType? primaryEmotion,
-    EmotionType? secondaryEmotion,
-    List<String>? bodySymptoms,
+    List<EmotionType>? additionalEmotions,
+    List<String>? initialBodyReactions,
   }) {
     return SituationEmotionData(
+      preTriggerLoad: preTriggerLoad ?? this.preTriggerLoad,
       intensity: intensity ?? this.intensity,
       bodyTension: bodyTension ?? this.bodyTension,
       primaryEmotion: primaryEmotion ?? this.primaryEmotion,
-      secondaryEmotion: secondaryEmotion ?? this.secondaryEmotion,
-      bodySymptoms: bodySymptoms ?? this.bodySymptoms,
+      additionalEmotions: additionalEmotions ?? this.additionalEmotions,
+      initialBodyReactions: initialBodyReactions ?? this.initialBodyReactions,
     );
   }
 
@@ -106,107 +112,145 @@ class SituationEmotionData {
     if (identical(this, other)) return true;
 
     return other is SituationEmotionData &&
+        other.preTriggerLoad == preTriggerLoad &&
         other.intensity == intensity &&
         other.bodyTension == bodyTension &&
         other.primaryEmotion == primaryEmotion &&
-        other.secondaryEmotion == secondaryEmotion &&
-        _listEquals(other.bodySymptoms, bodySymptoms);
+        _listEquals(other.additionalEmotions, additionalEmotions) &&
+        _listEquals(other.initialBodyReactions, initialBodyReactions);
   }
 
   @override
-  int get hashCode {
-    return intensity.hashCode ^
-        bodyTension.hashCode ^
-        primaryEmotion.hashCode ^
-        secondaryEmotion.hashCode ^
-        bodySymptoms.hashCode;
-  }
-
-  bool _listEquals<T>(List<T> a, List<T> b) {
-    if (a.length != b.length) return false;
-    for (int i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
+  int get hashCode =>
+      preTriggerLoad.hashCode ^
+      intensity.hashCode ^
+      bodyTension.hashCode ^
+      primaryEmotion.hashCode ^
+      additionalEmotions.hashCode ^
+      initialBodyReactions.hashCode;
 }
 
-/// Domain model for thought and impulse data captured in step 3 of the new situation flow.
 class SituationThoughtImpulseData {
   const SituationThoughtImpulseData({
+    required this.thoughtFocus,
     required this.automaticThought,
-    required this.firstImpulse,
     required this.factInterpretation,
-    this.actualBehavior,
+    required this.systemReaction,
+    required this.tippingPointAwareness,
+    this.thoughtPatterns = const [],
+    this.actualBehaviorTags = const [],
+    this.actualBehaviorNote,
+    this.fearOrPressurePoint,
   });
 
-  /// Automatic thought (max 200 characters)
+  final String thoughtFocus;
   final String automaticThought;
-
-  /// First impulse type
-  final ImpulseType firstImpulse;
-
-  /// Einschätzung, wie stark der Gedanke auf Fakten oder Deutungen beruht.
   final FactInterpretationResult factInterpretation;
+  final SystemReactionType systemReaction;
+  final List<String> thoughtPatterns;
+  final List<String> actualBehaviorTags;
+  final String? actualBehaviorNote;
+  final TippingPointAwareness tippingPointAwareness;
+  final String? fearOrPressurePoint;
 
-  /// Optional actual behavior (max 300 characters)
-  final String? actualBehavior;
-
-  /// Create a copy with some fields replaced
   SituationThoughtImpulseData copyWith({
+    String? thoughtFocus,
     String? automaticThought,
-    ImpulseType? firstImpulse,
     FactInterpretationResult? factInterpretation,
-    String? actualBehavior,
+    SystemReactionType? systemReaction,
+    List<String>? thoughtPatterns,
+    List<String>? actualBehaviorTags,
+    String? actualBehaviorNote,
+    TippingPointAwareness? tippingPointAwareness,
+    String? fearOrPressurePoint,
   }) {
     return SituationThoughtImpulseData(
+      thoughtFocus: thoughtFocus ?? this.thoughtFocus,
       automaticThought: automaticThought ?? this.automaticThought,
-      firstImpulse: firstImpulse ?? this.firstImpulse,
       factInterpretation: factInterpretation ?? this.factInterpretation,
-      actualBehavior: actualBehavior ?? this.actualBehavior,
+      systemReaction: systemReaction ?? this.systemReaction,
+      thoughtPatterns: thoughtPatterns ?? this.thoughtPatterns,
+      actualBehaviorTags: actualBehaviorTags ?? this.actualBehaviorTags,
+      actualBehaviorNote: actualBehaviorNote ?? this.actualBehaviorNote,
+      tippingPointAwareness:
+          tippingPointAwareness ?? this.tippingPointAwareness,
+      fearOrPressurePoint: fearOrPressurePoint ?? this.fearOrPressurePoint,
     );
   }
+
+  bool get hasActualBehavior =>
+      actualBehaviorTags.isNotEmpty ||
+      (actualBehaviorNote != null && actualBehaviorNote!.trim().isNotEmpty);
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
     return other is SituationThoughtImpulseData &&
+        other.thoughtFocus == thoughtFocus &&
         other.automaticThought == automaticThought &&
-        other.firstImpulse == firstImpulse &&
         other.factInterpretation == factInterpretation &&
-        other.actualBehavior == actualBehavior;
+        other.systemReaction == systemReaction &&
+        _listEquals(other.thoughtPatterns, thoughtPatterns) &&
+        _listEquals(other.actualBehaviorTags, actualBehaviorTags) &&
+        other.actualBehaviorNote == actualBehaviorNote &&
+        other.tippingPointAwareness == tippingPointAwareness &&
+        other.fearOrPressurePoint == fearOrPressurePoint;
   }
 
   @override
-  int get hashCode {
-    return automaticThought.hashCode ^
-        firstImpulse.hashCode ^
-        factInterpretation.hashCode ^
-        actualBehavior.hashCode;
-  }
+  int get hashCode =>
+      thoughtFocus.hashCode ^
+      automaticThought.hashCode ^
+      factInterpretation.hashCode ^
+      systemReaction.hashCode ^
+      thoughtPatterns.hashCode ^
+      actualBehaviorTags.hashCode ^
+      actualBehaviorNote.hashCode ^
+      tippingPointAwareness.hashCode ^
+      fearOrPressurePoint.hashCode;
 }
 
-/// Domain model for reflection data captured in step 4 of the new situation flow.
 class SituationReflectionData {
   const SituationReflectionData({
-    required this.needOrWoundedPoint,
+    required this.touchedThemes,
+    required this.neededSupports,
+    required this.realisticAlternative,
+    required this.triggerAsLastDrop,
+    required this.backgroundTheme,
     required this.nextStep,
+    this.preEscalationRelief,
+    this.patternFamiliarity,
   });
 
-  /// What feels touched, vulnerable, or needed in this situation.
-  final String needOrWoundedPoint;
-
-  /// Concrete next step after the reflection.
+  final List<String> touchedThemes;
+  final List<String> neededSupports;
+  final String realisticAlternative;
+  final TriggerAsLastDrop triggerAsLastDrop;
+  final String backgroundTheme;
   final String nextStep;
+  final String? preEscalationRelief;
+  final PatternFamiliarity? patternFamiliarity;
 
   SituationReflectionData copyWith({
-    String? needOrWoundedPoint,
+    List<String>? touchedThemes,
+    List<String>? neededSupports,
+    String? realisticAlternative,
+    TriggerAsLastDrop? triggerAsLastDrop,
+    String? backgroundTheme,
     String? nextStep,
+    String? preEscalationRelief,
+    PatternFamiliarity? patternFamiliarity,
   }) {
     return SituationReflectionData(
-      needOrWoundedPoint: needOrWoundedPoint ?? this.needOrWoundedPoint,
+      touchedThemes: touchedThemes ?? this.touchedThemes,
+      neededSupports: neededSupports ?? this.neededSupports,
+      realisticAlternative: realisticAlternative ?? this.realisticAlternative,
+      triggerAsLastDrop: triggerAsLastDrop ?? this.triggerAsLastDrop,
+      backgroundTheme: backgroundTheme ?? this.backgroundTheme,
       nextStep: nextStep ?? this.nextStep,
+      preEscalationRelief: preEscalationRelief ?? this.preEscalationRelief,
+      patternFamiliarity: patternFamiliarity ?? this.patternFamiliarity,
     );
   }
 
@@ -215,15 +259,28 @@ class SituationReflectionData {
     if (identical(this, other)) return true;
 
     return other is SituationReflectionData &&
-        other.needOrWoundedPoint == needOrWoundedPoint &&
-        other.nextStep == nextStep;
+        _listEquals(other.touchedThemes, touchedThemes) &&
+        _listEquals(other.neededSupports, neededSupports) &&
+        other.realisticAlternative == realisticAlternative &&
+        other.triggerAsLastDrop == triggerAsLastDrop &&
+        other.backgroundTheme == backgroundTheme &&
+        other.nextStep == nextStep &&
+        other.preEscalationRelief == preEscalationRelief &&
+        other.patternFamiliarity == patternFamiliarity;
   }
 
   @override
-  int get hashCode => needOrWoundedPoint.hashCode ^ nextStep.hashCode;
+  int get hashCode =>
+      touchedThemes.hashCode ^
+      neededSupports.hashCode ^
+      realisticAlternative.hashCode ^
+      triggerAsLastDrop.hashCode ^
+      backgroundTheme.hashCode ^
+      nextStep.hashCode ^
+      preEscalationRelief.hashCode ^
+      patternFamiliarity.hashCode;
 }
 
-/// Validation result for form fields
 class ValidationResult {
   const ValidationResult({
     this.isValid = true,
@@ -233,22 +290,18 @@ class ValidationResult {
   final bool isValid;
   final List<String> errorMessages;
 
-  /// Create a validation result with errors
   const ValidationResult.errors(List<String> messages)
       : isValid = false,
         errorMessages = messages;
 
-  /// Create a valid result
   const ValidationResult.valid()
       : isValid = true,
         errorMessages = const [];
 
-  /// Get the first error message
   String? get firstError =>
       errorMessages.isNotEmpty ? errorMessages.first : null;
 }
 
-/// Complete state for the new situation flow
 class NewSituationFlowState {
   const NewSituationFlowState({
     this.eventData,
@@ -264,7 +317,6 @@ class NewSituationFlowState {
   final SituationReflectionData? reflectionData;
   final bool isSaving;
 
-  /// Get current step (0-4)
   int get currentStep {
     if (reflectionData != null) return 4;
     if (thoughtImpulseData != null) return 3;
@@ -273,15 +325,12 @@ class NewSituationFlowState {
     return 0;
   }
 
-  /// Check if all data is complete
-  bool get isComplete {
-    return eventData != null &&
-        emotionData != null &&
-        thoughtImpulseData != null &&
-        reflectionData != null;
-  }
+  bool get isComplete =>
+      eventData != null &&
+      emotionData != null &&
+      thoughtImpulseData != null &&
+      reflectionData != null;
 
-  /// Create a copy with some fields replaced
   NewSituationFlowState copyWith({
     SituationEventData? eventData,
     SituationEmotionData? emotionData,
@@ -298,8 +347,15 @@ class NewSituationFlowState {
     );
   }
 
-  /// Reset to empty state
-  NewSituationFlowState reset() {
-    return const NewSituationFlowState();
+  NewSituationFlowState reset() => const NewSituationFlowState();
+}
+
+bool _listEquals<T>(List<T> a, List<T> b) {
+  if (a.length != b.length) return false;
+  for (int index = 0; index < a.length; index++) {
+    if (a[index] != b[index]) {
+      return false;
+    }
   }
+  return true;
 }

@@ -121,7 +121,8 @@ Future<UserSettingsData> _seedSettings(
 Future<int> insertSituationEntry(
   AppDatabase database, {
   DateTime? timestamp,
-  String situationDescription = 'Ein angespanntes Meeting ist plötzlich gekippt.',
+  String situationDescription =
+      'Ein angespanntes Meeting ist plötzlich gekippt.',
   String context = 'work',
   String involvedPerson = 'Kollege',
   int intensity = 7,

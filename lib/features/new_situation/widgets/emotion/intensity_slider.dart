@@ -3,18 +3,21 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/colors.dart';
 import '../../../../core/constants/app_constants.dart';
 
-/// Segmented intensity picker for intensity and body tension.
 class IntensitySlider extends StatelessWidget {
   const IntensitySlider({
     super.key,
+    required this.preTriggerLoad,
     required this.intensity,
     required this.bodyTension,
+    required this.onPreTriggerLoadChanged,
     required this.onIntensityChanged,
     required this.onBodyTensionChanged,
   });
 
+  final int preTriggerLoad;
   final int intensity;
   final int bodyTension;
+  final ValueChanged<int> onPreTriggerLoadChanged;
   final ValueChanged<int> onIntensityChanged;
   final ValueChanged<int> onBodyTensionChanged;
 
@@ -24,15 +27,22 @@ class IntensitySlider extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _SegmentSection(
-          label: 'Wie stark belastet fühlst du dich?',
-          helper: 'Wähle den Wert, der gerade am ehesten passt.',
+          label: 'Wie belastet warst du schon vor dem Auslöser?',
+          helper: '0 heißt kaum belastet, 10 heißt schon vorher maximal voll.',
+          value: preTriggerLoad,
+          onChanged: onPreTriggerLoadChanged,
+        ),
+        const SizedBox(height: AppConstants.spacingLarge),
+        _SegmentSection(
+          label: 'Wie stark war die Belastung im Moment?',
+          helper: 'Es reicht eine grobe Einschätzung.',
           value: intensity,
           onChanged: onIntensityChanged,
         ),
         const SizedBox(height: AppConstants.spacingLarge),
         _SegmentSection(
-          label: 'Wie stark ist deine Körperanspannung?',
-          helper: 'Auch grob geschätzt ist völlig ausreichend.',
+          label: 'Wie stark war die körperliche Anspannung?',
+          helper: 'Auch hier reicht eine schnelle grobe Zahl.',
           value: bodyTension,
           onChanged: onBodyTensionChanged,
         ),
@@ -57,7 +67,7 @@ class _SegmentSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tone = AppColors.intensityColor(value);
+    final tone = AppColors.intensityColor(value == 0 ? 1 : value);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,10 +114,10 @@ class _SegmentSection extends StatelessWidget {
         Wrap(
           spacing: AppConstants.spacingSmall,
           runSpacing: AppConstants.spacingSmall,
-          children: List.generate(AppConstants.maxIntensityRating, (index) {
-            final rating = index + 1;
+          children: List.generate(AppConstants.maxIntensityRating + 1, (index) {
+            final rating = index;
             final isSelected = value == rating;
-            final color = AppColors.intensityColor(rating);
+            final color = AppColors.intensityColor(rating == 0 ? 1 : rating);
 
             return InkWell(
               onTap: () => onChanged(rating),
@@ -116,8 +126,8 @@ class _SegmentSection extends StatelessWidget {
                 duration: const Duration(
                   milliseconds: AppConstants.animationDurationFast,
                 ),
-                width: 52,
-                height: 52,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   color: isSelected
                       ? color.withValues(alpha: 0.18)
@@ -146,14 +156,14 @@ class _SegmentSection extends StatelessWidget {
         Row(
           children: [
             Text(
-              'Wenig',
+              '0 kaum',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: AppColors.textTertiary,
               ),
             ),
             const Spacer(),
             Text(
-              'Stark',
+              '10 sehr stark',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: AppColors.textTertiary,
               ),

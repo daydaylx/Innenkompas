@@ -104,9 +104,12 @@ class StateClassifier {
   /// Check if the context is typically overwhelming.
   static bool _isOverwhelmingContext(ContextType context) {
     return context == ContextType.work ||
+        context == ContextType.organizationHousehold ||
+        context == ContextType.everyday ||
         context == ContextType.finances ||
         context == ContextType.family ||
-        context == ContextType.health;
+        context == ContextType.health ||
+        context == ContextType.selfWorthPerformance;
   }
 
   /// Check if the context typically involves conflicts.
@@ -114,12 +117,16 @@ class StateClassifier {
     return context == ContextType.partnership ||
         context == ContextType.family ||
         context == ContextType.work ||
-        context == ContextType.friends;
+        context == ContextType.friends ||
+        context == ContextType.selfWorthPerformance;
   }
 
   /// Check if the emotion is typically involved in conflicts.
   static bool _isConflictEmotion(EmotionType emotion) {
-    return emotion == EmotionType.anger || emotion == EmotionType.disgust;
+    return emotion == EmotionType.anger ||
+        emotion == EmotionType.annoyance ||
+        emotion == EmotionType.disgust ||
+        emotion == EmotionType.hurt;
   }
 
   /// Check if the impulse is typically involved in conflicts.
@@ -142,13 +149,21 @@ class StateClassifier {
     EmotionType? secondary,
   ) {
     return primary == EmotionType.fear ||
+        primary == EmotionType.powerlessness ||
+        primary == EmotionType.overwhelm ||
         primary == EmotionType.sadness ||
         primary == EmotionType.shame ||
         primary == EmotionType.guilt ||
+        primary == EmotionType.helplessness ||
+        primary == EmotionType.emptiness ||
         secondary == EmotionType.fear ||
+        secondary == EmotionType.powerlessness ||
+        secondary == EmotionType.overwhelm ||
         secondary == EmotionType.sadness ||
         secondary == EmotionType.shame ||
-        secondary == EmotionType.guilt;
+        secondary == EmotionType.guilt ||
+        secondary == EmotionType.helplessness ||
+        secondary == EmotionType.emptiness;
   }
 }
 
