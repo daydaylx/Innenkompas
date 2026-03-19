@@ -5,19 +5,24 @@ project: "Innenkompass"
 version: "1.0"
 status: "aktiv"
 date_created: "2026-03-16"
-last_updated: "2026-03-16"
+last_updated: "2026-03-19"
 language: "de"
 audience:
   - "Produktplanung"
   - "Entwicklung"
   - "Rechtliches Review"
 purpose: "Übersicht der Urheberrechts- und Lizenzlage für alle verwendeten oder geplanten Therapiematerialien. Entscheidungsgrundlage für MVP-Templates."
-disclaimer: "Kein Rechtsgutachten. Dient der internen Planung. Vor App-Store-Veröffentlichung juristisches Review empfohlen."
+disclaimer: "Kein Rechtsgutachten. Dient der internen Planung. Für private Nutzung sind viele Anforderungen reduziert. Vor Store-Veröffentlichung juristisches Review empfohlen."
 ---
 
 # Rechteklärung und Lizenzmatrix — Innenkompass
 
-> **Hinweis:** Dieses Dokument ist kein Rechtsgutachten. Es fasst den Recherche- und Planungsstand zusammen. Vor Veröffentlichung ist ein juristisches Review erforderlich.
+> **Hinweis:** Dieses Dokument ist kein Rechtsgutachten. Es fasst den Recherche- und Planungsstand zusammen.
+
+> **Für private Nutzung:** Bei reinem Eigengebrauch ohne Weitergabe an Dritte sind viele lizenzrechtliche Anforderungen reduziert. Konzepte und Ideen sind nicht urheberrechtlich geschützt – nur deren konkrete Ausgestaltung (Wortlaut, Layout, 1:1-Kopien). Dieses Dokument wird relevant bei:
+> - Weitergabe der App an Dritte (auch kostenlos)
+> - Kommerzieller Nutzung
+> - Store-Veröffentlichung
 
 ---
 
@@ -199,10 +204,12 @@ Im späteren Template-Registry-Konzept wird `license_tag` ein Pflichtfeld auf `W
 
 Solange die App keine medizinische Zweckbestimmung hat, ist sie kein Medizinprodukt (MDR) und muss nicht als DiGA (Digitale Gesundheitsanwendung) zugelassen werden.
 
+**Für private Nutzung:** Bei reinem Eigengebrauch ohne Store-Veröffentlichung sind regulatorische Anforderungen deutlich reduziert. Die folgenden Hinweise werden relevant bei geplanter Weitergabe oder Store-Veröffentlichung.
+
 **Safe-Harbor-Positionierung:**
 > „Digitale Arbeitsblatt-Bibliothek für Selbstreflexion und kognitive Umstrukturierung — kein Therapieersatz, kein Notfall-Dienst"
 
-**Verbotene Claims im Marketing:**
+**Verbotene Claims im Marketing** (relevant bei Store-Veröffentlichung):
 - „Behandelt Burnout"
 - „Therapiert Depression"
 - „Medizinisch validiert"
@@ -217,12 +224,14 @@ Solange die App keine medizinische Zweckbestimmung hat, ist sie kein Medizinprod
 
 Emotionale Zustände und Belastungswerte gelten als Gesundheitsdaten nach DSGVO Art. 9.
 
-**MVP-Pflichten:**
-- Ausdrückliche Einwilligung bei Erststart
+**Für private Nutzung:** Bei reinem Eigengebrauch ohne kommerzielle Verarbeitung sind viele DSGVO-Anforderungen reduziert (Haushaltsausnahme, Art. 2 Abs. 2 lit. c DSGVO). Dennoch sind die folgenden Prinzipien gute Praxis:
+
 - Lokal-first (kein Cloud-Sync ohne explizite Zustimmung)
 - Datenlöschung muss möglich sein
 - Kein automatischer Export
 - App-Lock optional anbieten
+
+**Bei Weitergabe/Store-Veröffentlichung:** DSGVO voll anwendbar → ausdrückliche Einwilligung bei Erststart erforderlich.
 
 ### 5.3 DiGA-Pfad (optional, später)
 
@@ -233,7 +242,7 @@ Falls DiGA angestrebt wird:
 4. Datenschutz-Konzept nach DiGAV
 5. BfArM-Bewertungszeit: ca. 3 Monate nach vollständigem Antrag
 
-**Empfehlung:** DiGA-Pfad erst nach erfolgreichem Product-Market-Fit einschlagen.
+**Empfehlung:** DiGA-Pfad erst nach erfolgreichem Product-Market-Fit einschlagen. Für private Nutzung irrelevant.
 
 ---
 
@@ -241,12 +250,14 @@ Falls DiGA angestrebt wird:
 
 | Risiko | Wahrscheinlichkeit | Schwere | Mitigation |
 |---|---|---|---|
-| Urheberrechtsverletzung (IBT) | Mittel | Hoch | Keine 1:1-Kopie; eigene Formulierungen |
-| Urheberrechtsverletzung (Hogrefe/UP) | Mittel | Hoch | Keine 1:1-Kopie; Lizenz anfragen |
+| Urheberrechtsverletzung (IBT) | Niedrig (bei eigenen Formulierungen) | Hoch | Keine 1:1-Kopie; eigene Formulierungen |
+| Urheberrechtsverletzung (Hogrefe/UP) | Niedrig (bei eigenen Formulierungen) | Hoch | Keine 1:1-Kopie; Lizenz anfragen |
 | ODSIS ohne Lizenz verwenden | Hoch (wenn 1:1 kopiert) | Hoch | Eigenentwickelte SelbsteinschätzungsSkala nutzen |
-| „Krankheits-Claims" → Medizinprodukt-Pflicht | Mittel | Sehr hoch | Positionierung als Selbstreflexions-Tool; kein medizinisches Wording |
-| DSGVO Art. 9 Verstoss | Niedrig (local-first) | Sehr hoch | Local-first Architektur; explizite Einwilligung |
+| „Krankheits-Claims" → Medizinprodukt-Pflicht | Niedrig (bei korrekter Positionierung) | Sehr hoch | Positionierung als Selbstreflexions-Tool; kein medizinisches Wording |
+| DSGVO Art. 9 Verstoss | Niedrig (local-first, private Nutzung) | Sehr hoch | Local-first Architektur; Haushaltsausnahme nutzbar |
 | DiGA-Pflicht bei Marktzugang | Niedrig im MVP | Hoch | Keine Heilsversprechen; Wellness-Positionierung |
+
+**Hinweis zur privaten Nutzung:** Bei reinem Eigengebrauch ohne Weitergabe sind die Risiken deutlich reduziert. Die Tabelle wird relevant bei geplanter Weitergabe oder Store-Veröffentlichung.
 
 ---
 
@@ -255,9 +266,11 @@ Falls DiGA angestrebt wird:
 | # | Aufgabe | Priorität | Status |
 |---|---|---|---|
 | 7.1 | Rechte-Matrix: vollständige Liste aller geplanten Templates + Quelle + Rechtestatus | Prio 1 | ✓ In diesem Dokument |
-| 7.2 | Kontaktaufnahme Hogrefe (Rights & Permissions) | Prio 2 | offen |
-| 7.3 | Kontaktaufnahme Kohlhammer (Licensing) | Prio 2 | offen |
-| 7.4 | ODSIS-Lizenz klären (OUP + Hogrefe) — für spätere Version | Prio 3 | offen |
+| 7.2 | Kontaktaufnahme Hogrefe (Rights & Permissions) | Prio 3 | offen (nur bei Store-Veröffentlichung) |
+| 7.3 | Kontaktaufnahme Kohlhammer (Licensing) | Prio 3 | offen (nur bei Store-Veröffentlichung) |
+| 7.4 | ODSIS-Lizenz klären (OUP + Hogrefe) — für spätere Version | Prio 3 | offen (nur bei Store-Veröffentlichung) |
 | 7.5 | MVP ohne lizenzpflichtige Skalen finalisieren | Prio 1 | ✓ SelbsteinschätzungsSkala implementiert |
-| 7.6 | Juristisches Review vor App-Store-Veröffentlichung | Pflicht | offen |
-| 7.7 | DSGVO-Einwilligungstext für Erststart formulieren | Prio 1 | offen |
+| 7.6 | Juristisches Review vor Store-Veröffentlichung | Pflicht (bei Store) | offen |
+| 7.7 | DSGVO-Einwilligungstext für Erststart formulieren | Prio 2 | offen |
+
+**Hinweis:** Die Aufgaben 7.2–7.4 und 7.6 sind nur bei geplanter Store-Veröffentlichung oder Weitergabe an Dritte relevant. Für reine private Nutzung können diese Schritte entfallen.

@@ -1,14 +1,16 @@
 # Innenkompass
 
-**Lokal-first, regelbasiertes mobiles System zur situationsbasierten Selbstwahrnehmung und Selbstregulation**
+**Lokal-first, regelbasierte Android-App zur situationsbasierten Selbstwahrnehmung und Selbstregulation**
 
-Version: 1.0.0+1 · Plattform: Android (iOS vorbereitet) · Sprache: Deutsch
+> **Hinweis:** Dieses Projekt ist für die **private Nutzung** gedacht. Die App wird nicht über einen offiziellen Store vertrieben, sondern als APK direkt installiert (Sideloading).
+
+Version: 1.0.0+1 · Plattform: Android · Sprache: Deutsch
 
 ---
 
 ## Was ist Innenkompass?
 
-Innenkompass ist eine mobile App, die Menschen dabei unterstützt, schwierige Situationen strukturiert zu erfassen, emotionale Reaktionen zu verstehen und gezielt zu regulieren – vollständig offline und ohne Cloud-Anbindung.
+Innenkompass ist eine mobile App für den privaten Gebrauch, die Menschen dabei unterstützt, schwierige Situationen strukturiert zu erfassen, emotionale Reaktionen zu verstehen und gezielt zu regulieren – vollständig offline und ohne Cloud-Anbindung.
 
 Die App führt durch eine **4-Phasen-Situations-Erfassung** (Ereignis → Emotion → Gedanke/Impuls → Reflexion), wählt automatisch passende Interventionen aus und analysiert langfristige Muster im Erleben. Ein integrierter Krisenplan ist jederzeit erreichbar.
 
@@ -17,6 +19,7 @@ Die App führt durch eine **4-Phasen-Situations-Erfassung** (Ereignis → Emotio
 - **Kognitiv entlastend** – geführte Schritte, keine Freitext-Flut
 - **Regelbasiert** – automatische Klassifikation statt manueller Kategorisierung
 - **Datenschutz by Design** – App-Sperre, sicherer Speicher, kein Telemetrie
+- **Privates Projekt** – kein Store, kein Tracking, kein kommerzieller Vertrieb
 
 ---
 
@@ -38,7 +41,7 @@ Die App führt durch eine **4-Phasen-Situations-Erfassung** (Ereignis → Emotio
 
 | Technologie | Version | Verwendungszweck |
 |---|---|---|
-| Flutter / Dart | SDK ≥ 3.6.1 | Cross-Platform UI |
+| Flutter / Dart | SDK ≥ 3.6.1 | Android-App |
 | flutter_riverpod | 2.4.9 | State Management |
 | go_router | 13.0.0 | Deklaratives Routing |
 | drift | 2.14.1 | SQLite ORM |
@@ -125,12 +128,12 @@ Migrationen sind versioniert implementiert (Schema-Version 1 → 2).
 ```
 emotion/
 ├── lib/                  Flutter-Quellcode
-├── android/              Android Build-Konfiguration
+├── android/              Android Build-Konfiguration (Hauptzielplattform)
 ├── test/                 Tests
 ├── docs/
 │   ├── konzept/          Konzept- & Planungsdokumente
-│   ├── legal/            Datenschutz & Support-Templates
-│   └── release/          Release-Checkliste, Signing-Setup, Smoke-Tests
+│   ├── legal/            Datenschutzhinweise & Support-Infos (private Nutzung)
+│   └── release/          APK-Build-Anleitung, Signing-Setup (optional)
 ├── pubspec.yaml
 └── README.md
 ```
@@ -148,11 +151,21 @@ flutter pub get
 # Code-Generierung (Drift, Freezed, Riverpod)
 dart run build_runner build --delete-conflicting-outputs
 
-# App starten
+# App starten (während der Entwicklung)
 flutter run
+
+# Debug-APK für private Installation bauen
+flutter build apk --debug
+# Die APK liegt unter: build/app/outputs/flutter-apk/app-debug.apk
 ```
 
-Für Android-Releases: siehe `docs/release/` für Signing-Setup und Release-Checkliste.
+Die APK kann direkt per USB auf ein Android-Gerät installiert werden (Sideloading):
+
+```bash
+adb install -r build/app/outputs/flutter-apk/app-debug.apk
+```
+
+Für optionales Release-Signing (nur bei Verteilung außerhalb des eigenen Geräts): siehe `docs/release/signing-setup.md`.
 
 ---
 
@@ -162,12 +175,18 @@ Unter `docs/konzept/`:
 
 - `03_technischer_umsetzungsplan_innenkompass.md` – technische Umsetzungsplanung
 - `04_gap_analyse_konzeptv2neu.md` – Gap-Analyse zwischen Konzept und Implementierung
-- `05_rechteklärung_lizenzen.md` – Lizenz- und Rechteklärung
+- `05_rechteklärung_lizenzen.md` – Lizenz- und Rechteklärung (mit Fokus auf private Nutzung)
 - `07_visuelles_designkonzept_innenkompass.md` – visuelles Designkonzept
 - `08_plan_fuer_auswertung_und_praktische_tipps.md` – Plan für Auswertung und praktische Tipps
 
 ---
 
-## Lizenz
+## Lizenz & Rechtliches
 
-Siehe `docs/konzept/05_rechteklärung_lizenzen.md`.
+Dieses Projekt ist für die **private Nutzung** konzipiert. Für die reine Eigennutzung gelten reduzierte Anforderungen im Vergleich zu einer Store-Veröffentlichung.
+
+- **Datenschutzhinweis:** `docs/legal/privacy-policy-template.md`
+- **Support-Information:** `docs/legal/support-template.md`
+- **Lizenzklärung:** `docs/konzept/05_rechteklärung_lizenzen.md`
+
+> **Wichtig:** Bei geplanter Weitergabe an Dritte (auch kostenlos) sollten die rechtlichen Hinweise geprüft und ggf. angepasst werden.

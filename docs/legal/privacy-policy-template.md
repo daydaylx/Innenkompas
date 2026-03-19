@@ -1,43 +1,111 @@
-# Innenkompass Privacy Policy Template
+# Innenkompass – Datenschutzhinweis für private Nutzung
 
-Status: Release blocker. Publish only after every `TODO-LEGAL` field below has been replaced with real legal and contact data.
+> **Hinweis:** Dieses Dokument ist als Vorlage für die **private Nutzung** gedacht. Bei reinem Eigengebrauch sind viele formale Anforderungen reduziert. Bei Weitergabe an Dritte (auch kostenlos) sollten die Hinweise geprüft und angepasst werden.
 
-## Publication gate
-- `TODO-LEGAL`: legal entity / sole proprietor name
-- `TODO-LEGAL`: postal address
-- `TODO-LEGAL`: privacy contact email
-- `TODO-LEGAL`: support website or support contact page
-- `TODO-LEGAL`: jurisdiction-specific legal review, if required
+---
 
-## Controller
-- Legal entity: `TODO-LEGAL`
-- Address: `TODO-LEGAL`
-- Contact email: `TODO-LEGAL`
+## Verantwortlicher (für private Nutzung optional)
 
-## What the app does
-Innenkompass is a local-first mobile application for self-reflection and self-regulation. It stores situation entries, crisis-plan content, and app settings primarily on the user device.
+Bei reiner Eigennutzung entfällt die Angabe eines Verantwortlichen. Bei Weitergabe der App sollten folgende Felder ausgefüllt werden:
 
-## Data processed
-- Situation entries entered by the user
-- Crisis-plan content entered by the user
-- App settings such as language, lock preference, and notification preferences
-- Optional local lock credentials stored via platform-secure storage
-- Optional export files that are created only when the user explicitly triggers an export
+- Name: `[Dein Name]`
+- Adresse: `[Deine Adresse]`
+- Kontakt-E-Mail: `[Deine E-Mail]`
 
-## Storage model
-- Data is stored locally on the device
-- No mandatory cloud account is required
-- No analytics or third-party data transfer should be claimed unless actually enabled in the shipped build
-- If build-time integrations change this behavior, this section must be updated before release
+---
 
-## Notifications
-If the user enables reminders, the app schedules local notifications on-device. Notification content may be configured in a discrete mode to avoid sensitive text on the lock screen.
+## Was die App macht
 
-## Export
-If the user exports data, a file is created locally and shared only through the OS share flow initiated by the user.
+Innenkompass ist eine lokal-first Mobile App zur Selbstreflexion und Selbstregulation. Sie speichert Situationseinträge, Krisenplan-Inhalte und App-Einstellungen primär auf dem Gerät des Nutzers.
 
-## Contact and data rights
-Users can contact `TODO-LEGAL` via `TODO-LEGAL` for privacy requests, support, deletion questions, and complaints about the local data export or deletion flow.
+---
 
-## Crisis disclaimer
-Innenkompass is a self-help tool and does not replace emergency or professional medical care. The app is not a crisis hotline and must not be presented as one.
+## Verarbeitete Daten
+
+- Vom Nutzer eingegebene Situationseinträge (Ereignis, Emotion, Gedanken, Impulse)
+- Vom Nutzer eingegebene Krisenplan-Inhalte (Warnsignale, Coping-Strategien, Kontakte, Ressourcen)
+- App-Einstellungen wie Sprache, Lock-Präferenz, Notification-Einstellungen
+- Optional: Lokale Lock-Zugangsdaten (PIN, biometrische Daten) – gespeichert via platform-eigenem Secure Storage
+- Optional: Export-Dateien, die nur bei expliziter Nutzeraktion erstellt werden
+
+---
+
+## Speichermodell
+
+- **Lokale Speicherung:** Alle Daten werden ausschließlich lokal auf dem Gerät gespeichert
+- **Keine Cloud:** Es gibt keine Cloud-Anbindung, kein Account-Zwang, kein Server-Backend
+- **Kein Tracking:** Die App enthält keine Analytics- oder Telemetrie-Komponenten
+- **Keine Datenweitergabe:** Es findet keine Übermittlung an Dritte statt (sofern nicht vom Nutzer explizit via Export gewünscht)
+
+---
+
+## Benachrichtigungen
+
+Wenn der Nutzer Erinnerungen aktiviert, plant die App lokale Benachrichtigungen auf dem Gerät. Der Inhalt kann im diskreten Modus konfiguriert werden, um sensible Texte auf dem Sperrbildschirm zu vermeiden.
+
+---
+
+## Datenexport
+
+Wenn der Nutzer Daten exportiert, wird eine Datei lokal erstellt und kann über den System-Share-Flow geteilt werden (z.B. per E-Mail, Cloud-Speicher). Dieser Vorgang wird ausschließlich vom Nutzer initiiert und kontrolliert.
+
+---
+
+## App-Sperre (Lock)
+
+Die App bietet eine optionale Sperre via Biometrie (Fingerabdruck, Face ID) oder PIN. Die Zugangsdaten werden im platform-eigenen Secure Storage gespeichert und sind für andere Apps nicht zugänglich.
+
+---
+
+## Datenlöschung
+
+Der Nutzer kann alle gespeicherten Daten jederzeit über die Einstellungen löschen ("Alle Daten löschen"). Diese Aktion entfernt:
+- Alle Situationseinträge
+- Alle Krisenplan-Inhalte
+- Alle App-Einstellungen
+- Gespeicherte Lock-Zugangsdaten
+
+---
+
+## Rechte des Nutzers
+
+Da alle Daten lokal gespeichert sind, hat der Nutzer volle Kontrolle über seine Daten:
+- **Auskunft:** Der Nutzer kann alle gespeicherten Daten im Verlauf und Krisenplan einsehen
+- **Export:** Der Nutzer kann Daten exportieren (Einstellungen → Datenexport)
+- **Löschung:** Der Nutzer kann alle Daten löschen (Einstellungen → Alle Daten löschen)
+
+---
+
+## Kontakt für Datenschutzanfragen
+
+Bei Fragen zum Datenschutz (bei Weitergabe der App):
+
+- E-Mail: `[Deine E-Mail-Adresse]`
+
+---
+
+## Krisen-Hinweis
+
+Innenkompass ist ein Selbsthilfe-Tool und ersetzt keine Notfallversorgung oder professionelle medizinische Betreuung. Die App ist kein Krisendienst und sollte nicht als solcher verstanden werden.
+
+Bei akuter Gefahr oder Suizidalität wenden Sie sich bitte an:
+- **Notruf:** 112 (EU-weit)
+- **Telefonseelsorge:** 0800 111 0 111 (kostenlos, 24/7, Deutschland)
+- **Örtliche Krisendienste** (in der App im Krisenplan hinterlegbar)
+
+---
+
+## Änderungen dieses Hinweises
+
+Dieser Datenschutzhinweis kann bei Bedarf angepasst werden. Der aktuelle Stand ist direkt in der App oder im Repository einsehbar.
+
+---
+
+## Hinweis für Entwickler
+
+Bei reiner **privater Eigennutzung** sind viele formale Datenschutz-Anforderungen reduziert. Dieses Dokument dient als Vorlage und sollte bei:
+- **Weitergabe an Dritte** (auch kostenlos)
+- **Kommerzieller Nutzung**
+- **Store-Veröffentlichung**
+
+rechtlich geprüft und angepasst werden.

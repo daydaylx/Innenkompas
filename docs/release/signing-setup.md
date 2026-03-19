@@ -1,8 +1,8 @@
-# Innenkompass APK Build Setup
+# Innenkompass APK Build Setup für private Nutzung
 
-## Standardweg: Debug-APK
+## Standardweg: Debug-APK (empfohlen für private Nutzung)
 
-Für den aktuellen Zielzustand reicht eine installierbare Debug-APK.
+Für die private Eigennutzung reicht eine Debug-APK vollständig aus. Diese ist ohne Signierung sofort installierbar.
 
 ```bash
 flutter build apk --debug
@@ -14,37 +14,64 @@ Die fertige Datei liegt danach unter:
 build/app/outputs/flutter-apk/app-debug.apk
 ```
 
-Optional kann sie direkt per `adb` installiert werden:
+Installation auf dem Android-Gerät per USB:
 
 ```bash
 adb install -r build/app/outputs/flutter-apk/app-debug.apk
 ```
 
-## Optional: Release-APK
+**Hinweis:** Auf dem Zielgerät muss ggf. "Installation aus unbekannten Quellen" erlaubt werden (Android-Einstellung).
 
-Nur nötig, wenn die APK außerhalb des Entwicklungskontexts verteilt werden soll.
+---
 
-1. Create a release keystore outside git, for example in `android/keystore/`.
-2. Copy `android/key.properties.example` to `android/key.properties`.
-3. Fill in the real values:
+## Optional: Release-APK (nur bei Verteilung an Dritte)
+
+Eine Release-APK ist **nur nötig**, wenn:
+- Die App an Dritte weitergegeben werden soll
+- Eine optimierte Performance benötigt wird
+- Die App langfristig auf mehreren Geräten laufen soll
+
+### Signing-Setup (nur für Release-APK)
+
+1. Keystore außerhalb von Git erstellen, z.B. in `android/keystore/`:
+
+```bash
+keytool -genkey -v -keystore android/keystore/release-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias innenkompass
+```
+
+2. `android/key.properties.example` nach `android/key.properties` kopieren:
+
+```bash
+cp android/key.properties.example android/key.properties
+```
+
+3. Werte in `android/key.properties` anpassen:
 
 ```properties
-storePassword=REPLACE_WITH_STORE_PASSWORD
-keyPassword=REPLACE_WITH_KEY_PASSWORD
-keyAlias=REPLACE_WITH_KEY_ALIAS
+storePassword=DEIN_STORE_PASSWORT
+keyPassword=DEIN_KEY_PASSWORT
+keyAlias=innenkompass
 storeFile=../keystore/release-keystore.jks
 ```
 
-4. Build the release APK:
+4. Release-APK bauen:
 
 ```bash
 flutter build apk --release
 ```
 
-The Gradle configuration now fails fast if `android/key.properties` is missing, so unsigned release builds are blocked intentionally.
+Die signierte APK liegt unter: `build/app/outputs/flutter-apk/release/app-release.apk`
 
-## Prüfpunkte
+---
 
-- Debug-APK builds without signing setup.
-- `android/key.properties` is only required for `--release`.
-- Release keystore exists and is not committed if a release APK is needed later.
+## Prüfpunkte für private Nutzung
+
+- [ ] Debug-APK baut ohne Signing-Setup
+- [ ] APK lässt sich auf eigenem Gerät installieren
+- [ ] App startet und funktioniert wie erwartet
+
+## Prüfpunkte bei Verteilung (optional)
+
+- [ ] `android/key.properties` existiert nur lokal (nicht in Git committen!)
+- [ ] Keystore existiert und ist gesichert (bei Verlust keine Updates mehr möglich)
+- [ ] Release-APK baut erfolgreich mit Signierung

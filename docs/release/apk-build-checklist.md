@@ -1,11 +1,10 @@
-# Innenkompass APK-Checklist
+# Innenkompass APK-Checklist für private Nutzung
 
 ## Build
 - Debug-APK baut erfolgreich mit `flutter build apk --debug`
-- APK lässt sich auf Android installieren
-- Optional: Release-APK nur dann bauen, wenn echte Signierung vorhanden ist
-- Follow `docs/release/signing-setup.md`
-- Flutter-Version für lokale Builds und CI ist konkret festgelegt, nicht nur `stable`
+- APK lässt sich auf Android-Gerät installieren
+- Optional: Release-APK nur dann bauen, wenn Verteilung an Dritte geplant ist
+- Follow `docs/release/signing-setup.md` (nur bei Release-Builds nötig)
 
 ## Produktvalidierung
 - First launch, onboarding, lock screen, and splash verified
@@ -25,12 +24,12 @@
 - Biometrics / app lock tested on physical Android device
 - Phone-call shortcuts tested on device
 
-## Recht & Support
-- `docs/legal/privacy-policy-template.md` enthält keine unbehandelten `TODO-LEGAL` Felder mehr
-- `docs/legal/support-template.md` enthält keine unbehandelten `TODO-SUPPORT` Felder mehr
-- Die veröffentlichte Datenschutzerklärung beschreibt den tatsächlichen Datenfluss der Release-Builds
-- Support-Kanal ist erreichbar und verwechselt sich nicht mit einem Krisendienst
+## Hinweis zur privaten Nutzung
+- Keine Store-Veröffentlichung geplant → keine Store-spezifischen Anforderungen
+- Datenschutz für Eigennutzung ausreichend umgesetzt
+- Bei Weitergabe an Dritte: Rechtliche Hinweise prüfen und anpassen
 
-## Optional später
+## Optional (nur bei Verteilung)
 - Release-Signing mit eigenem Keystore ergänzen
-- CI green on the release branch
+- `docs/legal/privacy-policy-template.md` für Empfänger verfügbar machen
+- `docs/legal/support-template.md` mit Kontaktmöglichkeit füllen
