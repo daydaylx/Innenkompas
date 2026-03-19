@@ -7,8 +7,11 @@ import {
   corsHeaders,
   enforceRateLimit,
   isEvaluationPath,
+  isReflectionPath,
   resolveAllowedOrigin,
   sanitizeEntry,
+  validateReflection,
+  validateReflectionRequest,
   validateRequest,
 } from './worker.js';
 
@@ -16,6 +19,12 @@ test('isEvaluationPath accepts root and sub-path endpoints', () => {
   assert.equal(isEvaluationPath('/ai-evaluations'), true);
   assert.equal(isEvaluationPath('/v1/ai-evaluations'), true);
   assert.equal(isEvaluationPath('/v1/other'), false);
+});
+
+test('isReflectionPath accepts root and sub-path endpoints', () => {
+  assert.equal(isReflectionPath('/ai-reflections'), true);
+  assert.equal(isReflectionPath('/v1/ai-reflections'), true);
+  assert.equal(isReflectionPath('/v1/other'), false);
 });
 
 test('validateRequest rejects oversized text payloads', () => {
@@ -29,6 +38,32 @@ test('validateRequest rejects oversized text payloads', () => {
   });
 
   assert.equal(error, 'Entry description is too long');
+});
+
+test('validateReflectionRequest requires phase, mode and user reply for completion', () => {
+  const missingReplyError = validateReflectionRequest({
+    phase: 'complete',
+    mode: 'understand',
+    entry: {
+      situation_description: 'Eintrag',
+      automatic_thought: 'Gedanke',
+      first_impulse: 'withdraw',
+    },
+  });
+
+  assert.equal(missingReplyError, 'User reply is required');
+
+  const validStart = validateReflectionRequest({
+    phase: 'start',
+    mode: 'redirect',
+    entry: {
+      situation_description: 'Eintrag',
+      automatic_thought: 'Gedanke',
+      first_impulse: 'withdraw',
+    },
+  });
+
+  assert.equal(validStart, null);
 });
 
 test('sanitizeEntry trims free-text fields consistently', () => {
@@ -99,6 +134,33 @@ test('buildModelInputPayload maps internal codes to readable hints', () => {
     'Fakten sammeln, bevor weiter gedeutet wird.',
   );
   assert.deepEqual(payload.entry.body_symptoms, ['Enge in der Brust']);
+});
+
+test('validateReflection normalizes start and completion payloads', () => {
+  const startPayload = validateReflection({
+    observation: ' Hohe Voranspannung vor dem Trigger. ',
+    question: ' Was war vorher schon das grössere Thema? ',
+    helper_starters: ['Ich glaube eher ...', 'Eigentlich ging es darum ...'],
+  }, 'start');
+
+  assert.equal(startPayload.observation, 'Hohe Voranspannung vor dem Trigger.');
+  assert.equal(startPayload.question, 'Was war vorher schon das grössere Thema?');
+  assert.deepEqual(startPayload.helper_starters, [
+    'Ich glaube eher ...',
+    'Eigentlich ging es darum ...',
+  ]);
+
+  const completePayload = validateReflection({
+    summary: ' Nicht nur der Anlass war belastend. ',
+    likely_core: ' Vorbelastung plus Trigger. ',
+    early_turning_point: ' Als selbst kleine Dinge gereizt haben. ',
+    alternative: ' Kurz stoppen statt direkt reagieren. ',
+    next_step: ' Erst runterfahren und später neu ansehen. ',
+    mantra: ' Voller Kopf plus Trigger. ',
+  }, 'complete');
+
+  assert.equal(completePayload.likely_core, 'Vorbelastung plus Trigger.');
+  assert.equal(completePayload.mantra, 'Voller Kopf plus Trigger.');
 });
 
 test('corsHeaders only allows configured origins', () => {

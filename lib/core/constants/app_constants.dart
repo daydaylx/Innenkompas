@@ -44,7 +44,7 @@ class AppConstants {
 
   // Database
   static const String databaseName = 'innenkompass.db';
-  static const int databaseVersion = 5;
+  static const int databaseVersion = 7;
 
   // Pagination
   static const int defaultHistoryPageSize = 20;

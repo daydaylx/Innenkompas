@@ -346,6 +346,157 @@ class $SituationEntriesTable extends SituationEntries
   late final GeneratedColumn<int> aiEvaluationSchemaVersion =
       GeneratedColumn<int>('ai_evaluation_schema_version', aliasedName, true,
           type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionModeMeta =
+      const VerificationMeta('aiReflectionMode');
+  @override
+  late final GeneratedColumn<String> aiReflectionMode = GeneratedColumn<String>(
+      'ai_reflection_mode', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionStatusMeta =
+      const VerificationMeta('aiReflectionStatus');
+  @override
+  late final GeneratedColumn<String> aiReflectionStatus =
+      GeneratedColumn<String>('ai_reflection_status', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionPhaseMeta =
+      const VerificationMeta('aiReflectionPhase');
+  @override
+  late final GeneratedColumn<String> aiReflectionPhase =
+      GeneratedColumn<String>('ai_reflection_phase', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionSessionIdMeta =
+      const VerificationMeta('aiReflectionSessionId');
+  @override
+  late final GeneratedColumn<String> aiReflectionSessionId =
+      GeneratedColumn<String>('ai_reflection_session_id', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionInputHashMeta =
+      const VerificationMeta('aiReflectionInputHash');
+  @override
+  late final GeneratedColumn<String> aiReflectionInputHash =
+      GeneratedColumn<String>('ai_reflection_input_hash', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionStartedAtMeta =
+      const VerificationMeta('aiReflectionStartedAt');
+  @override
+  late final GeneratedColumn<DateTime> aiReflectionStartedAt =
+      GeneratedColumn<DateTime>('ai_reflection_started_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionProviderMeta =
+      const VerificationMeta('aiReflectionProvider');
+  @override
+  late final GeneratedColumn<String> aiReflectionProvider =
+      GeneratedColumn<String>('ai_reflection_provider', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionModelMeta =
+      const VerificationMeta('aiReflectionModel');
+  @override
+  late final GeneratedColumn<String> aiReflectionModel =
+      GeneratedColumn<String>('ai_reflection_model', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionSchemaVersionMeta =
+      const VerificationMeta('aiReflectionSchemaVersion');
+  @override
+  late final GeneratedColumn<int> aiReflectionSchemaVersion =
+      GeneratedColumn<int>('ai_reflection_schema_version', aliasedName, true,
+          type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionStartObservationMeta =
+      const VerificationMeta('aiReflectionStartObservation');
+  @override
+  late final GeneratedColumn<String> aiReflectionStartObservation =
+      GeneratedColumn<String>(
+          'ai_reflection_start_observation', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionStartQuestionMeta =
+      const VerificationMeta('aiReflectionStartQuestion');
+  @override
+  late final GeneratedColumn<String> aiReflectionStartQuestion =
+      GeneratedColumn<String>('ai_reflection_start_question', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionStartHelperStartersMeta =
+      const VerificationMeta('aiReflectionStartHelperStarters');
+  @override
+  late final GeneratedColumn<String> aiReflectionStartHelperStarters =
+      GeneratedColumn<String>(
+          'ai_reflection_start_helper_starters', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionSummaryMeta =
+      const VerificationMeta('aiReflectionSummary');
+  @override
+  late final GeneratedColumn<String> aiReflectionSummary =
+      GeneratedColumn<String>('ai_reflection_summary', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionLikelyCoreMeta =
+      const VerificationMeta('aiReflectionLikelyCore');
+  @override
+  late final GeneratedColumn<String> aiReflectionLikelyCore =
+      GeneratedColumn<String>('ai_reflection_likely_core', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionEarlyTurningPointMeta =
+      const VerificationMeta('aiReflectionEarlyTurningPoint');
+  @override
+  late final GeneratedColumn<String> aiReflectionEarlyTurningPoint =
+      GeneratedColumn<String>(
+          'ai_reflection_early_turning_point', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionAlternativeMeta =
+      const VerificationMeta('aiReflectionAlternative');
+  @override
+  late final GeneratedColumn<String> aiReflectionAlternative =
+      GeneratedColumn<String>('ai_reflection_alternative', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionNextStepMeta =
+      const VerificationMeta('aiReflectionNextStep');
+  @override
+  late final GeneratedColumn<String> aiReflectionNextStep =
+      GeneratedColumn<String>('ai_reflection_next_step', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionMantraMeta =
+      const VerificationMeta('aiReflectionMantra');
+  @override
+  late final GeneratedColumn<String> aiReflectionMantra =
+      GeneratedColumn<String>('ai_reflection_mantra', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionLastErrorCodeMeta =
+      const VerificationMeta('aiReflectionLastErrorCode');
+  @override
+  late final GeneratedColumn<String> aiReflectionLastErrorCode =
+      GeneratedColumn<String>(
+          'ai_reflection_last_error_code', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionLastErrorMessageMeta =
+      const VerificationMeta('aiReflectionLastErrorMessage');
+  @override
+  late final GeneratedColumn<String> aiReflectionLastErrorMessage =
+      GeneratedColumn<String>(
+          'ai_reflection_last_error_message', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionDeferredAtMeta =
+      const VerificationMeta('aiReflectionDeferredAt');
+  @override
+  late final GeneratedColumn<DateTime> aiReflectionDeferredAt =
+      GeneratedColumn<DateTime>('ai_reflection_deferred_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionResumeSuggestedAtMeta =
+      const VerificationMeta('aiReflectionResumeSuggestedAt');
+  @override
+  late final GeneratedColumn<DateTime> aiReflectionResumeSuggestedAt =
+      GeneratedColumn<DateTime>(
+          'ai_reflection_resume_suggested_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionDeferredUntilMeta =
+      const VerificationMeta('aiReflectionDeferredUntil');
+  @override
+  late final GeneratedColumn<DateTime> aiReflectionDeferredUntil =
+      GeneratedColumn<DateTime>(
+          'ai_reflection_deferred_until', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _aiReflectionCompletedAtMeta =
+      const VerificationMeta('aiReflectionCompletedAt');
+  @override
+  late final GeneratedColumn<DateTime> aiReflectionCompletedAt =
+      GeneratedColumn<DateTime>('ai_reflection_completed_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
   static const VerificationMeta _interventionTypeMeta =
       const VerificationMeta('interventionType');
   @override
@@ -486,6 +637,30 @@ class $SituationEntriesTable extends SituationEntries
         aiEvaluationConsentGiven,
         aiEvaluationText,
         aiEvaluationSchemaVersion,
+        aiReflectionMode,
+        aiReflectionStatus,
+        aiReflectionPhase,
+        aiReflectionSessionId,
+        aiReflectionInputHash,
+        aiReflectionStartedAt,
+        aiReflectionProvider,
+        aiReflectionModel,
+        aiReflectionSchemaVersion,
+        aiReflectionStartObservation,
+        aiReflectionStartQuestion,
+        aiReflectionStartHelperStarters,
+        aiReflectionSummary,
+        aiReflectionLikelyCore,
+        aiReflectionEarlyTurningPoint,
+        aiReflectionAlternative,
+        aiReflectionNextStep,
+        aiReflectionMantra,
+        aiReflectionLastErrorCode,
+        aiReflectionLastErrorMessage,
+        aiReflectionDeferredAt,
+        aiReflectionResumeSuggestedAt,
+        aiReflectionDeferredUntil,
+        aiReflectionCompletedAt,
         interventionType,
         interventionId,
         interventionCompleted,
@@ -846,6 +1021,161 @@ class $SituationEntriesTable extends SituationEntries
               data['ai_evaluation_schema_version']!,
               _aiEvaluationSchemaVersionMeta));
     }
+    if (data.containsKey('ai_reflection_mode')) {
+      context.handle(
+          _aiReflectionModeMeta,
+          aiReflectionMode.isAcceptableOrUnknown(
+              data['ai_reflection_mode']!, _aiReflectionModeMeta));
+    }
+    if (data.containsKey('ai_reflection_status')) {
+      context.handle(
+          _aiReflectionStatusMeta,
+          aiReflectionStatus.isAcceptableOrUnknown(
+              data['ai_reflection_status']!, _aiReflectionStatusMeta));
+    }
+    if (data.containsKey('ai_reflection_phase')) {
+      context.handle(
+          _aiReflectionPhaseMeta,
+          aiReflectionPhase.isAcceptableOrUnknown(
+              data['ai_reflection_phase']!, _aiReflectionPhaseMeta));
+    }
+    if (data.containsKey('ai_reflection_session_id')) {
+      context.handle(
+          _aiReflectionSessionIdMeta,
+          aiReflectionSessionId.isAcceptableOrUnknown(
+              data['ai_reflection_session_id']!, _aiReflectionSessionIdMeta));
+    }
+    if (data.containsKey('ai_reflection_input_hash')) {
+      context.handle(
+          _aiReflectionInputHashMeta,
+          aiReflectionInputHash.isAcceptableOrUnknown(
+              data['ai_reflection_input_hash']!, _aiReflectionInputHashMeta));
+    }
+    if (data.containsKey('ai_reflection_started_at')) {
+      context.handle(
+          _aiReflectionStartedAtMeta,
+          aiReflectionStartedAt.isAcceptableOrUnknown(
+              data['ai_reflection_started_at']!, _aiReflectionStartedAtMeta));
+    }
+    if (data.containsKey('ai_reflection_provider')) {
+      context.handle(
+          _aiReflectionProviderMeta,
+          aiReflectionProvider.isAcceptableOrUnknown(
+              data['ai_reflection_provider']!, _aiReflectionProviderMeta));
+    }
+    if (data.containsKey('ai_reflection_model')) {
+      context.handle(
+          _aiReflectionModelMeta,
+          aiReflectionModel.isAcceptableOrUnknown(
+              data['ai_reflection_model']!, _aiReflectionModelMeta));
+    }
+    if (data.containsKey('ai_reflection_schema_version')) {
+      context.handle(
+          _aiReflectionSchemaVersionMeta,
+          aiReflectionSchemaVersion.isAcceptableOrUnknown(
+              data['ai_reflection_schema_version']!,
+              _aiReflectionSchemaVersionMeta));
+    }
+    if (data.containsKey('ai_reflection_start_observation')) {
+      context.handle(
+          _aiReflectionStartObservationMeta,
+          aiReflectionStartObservation.isAcceptableOrUnknown(
+              data['ai_reflection_start_observation']!,
+              _aiReflectionStartObservationMeta));
+    }
+    if (data.containsKey('ai_reflection_start_question')) {
+      context.handle(
+          _aiReflectionStartQuestionMeta,
+          aiReflectionStartQuestion.isAcceptableOrUnknown(
+              data['ai_reflection_start_question']!,
+              _aiReflectionStartQuestionMeta));
+    }
+    if (data.containsKey('ai_reflection_start_helper_starters')) {
+      context.handle(
+          _aiReflectionStartHelperStartersMeta,
+          aiReflectionStartHelperStarters.isAcceptableOrUnknown(
+              data['ai_reflection_start_helper_starters']!,
+              _aiReflectionStartHelperStartersMeta));
+    }
+    if (data.containsKey('ai_reflection_summary')) {
+      context.handle(
+          _aiReflectionSummaryMeta,
+          aiReflectionSummary.isAcceptableOrUnknown(
+              data['ai_reflection_summary']!, _aiReflectionSummaryMeta));
+    }
+    if (data.containsKey('ai_reflection_likely_core')) {
+      context.handle(
+          _aiReflectionLikelyCoreMeta,
+          aiReflectionLikelyCore.isAcceptableOrUnknown(
+              data['ai_reflection_likely_core']!, _aiReflectionLikelyCoreMeta));
+    }
+    if (data.containsKey('ai_reflection_early_turning_point')) {
+      context.handle(
+          _aiReflectionEarlyTurningPointMeta,
+          aiReflectionEarlyTurningPoint.isAcceptableOrUnknown(
+              data['ai_reflection_early_turning_point']!,
+              _aiReflectionEarlyTurningPointMeta));
+    }
+    if (data.containsKey('ai_reflection_alternative')) {
+      context.handle(
+          _aiReflectionAlternativeMeta,
+          aiReflectionAlternative.isAcceptableOrUnknown(
+              data['ai_reflection_alternative']!,
+              _aiReflectionAlternativeMeta));
+    }
+    if (data.containsKey('ai_reflection_next_step')) {
+      context.handle(
+          _aiReflectionNextStepMeta,
+          aiReflectionNextStep.isAcceptableOrUnknown(
+              data['ai_reflection_next_step']!, _aiReflectionNextStepMeta));
+    }
+    if (data.containsKey('ai_reflection_mantra')) {
+      context.handle(
+          _aiReflectionMantraMeta,
+          aiReflectionMantra.isAcceptableOrUnknown(
+              data['ai_reflection_mantra']!, _aiReflectionMantraMeta));
+    }
+    if (data.containsKey('ai_reflection_last_error_code')) {
+      context.handle(
+          _aiReflectionLastErrorCodeMeta,
+          aiReflectionLastErrorCode.isAcceptableOrUnknown(
+              data['ai_reflection_last_error_code']!,
+              _aiReflectionLastErrorCodeMeta));
+    }
+    if (data.containsKey('ai_reflection_last_error_message')) {
+      context.handle(
+          _aiReflectionLastErrorMessageMeta,
+          aiReflectionLastErrorMessage.isAcceptableOrUnknown(
+              data['ai_reflection_last_error_message']!,
+              _aiReflectionLastErrorMessageMeta));
+    }
+    if (data.containsKey('ai_reflection_deferred_at')) {
+      context.handle(
+          _aiReflectionDeferredAtMeta,
+          aiReflectionDeferredAt.isAcceptableOrUnknown(
+              data['ai_reflection_deferred_at']!, _aiReflectionDeferredAtMeta));
+    }
+    if (data.containsKey('ai_reflection_resume_suggested_at')) {
+      context.handle(
+          _aiReflectionResumeSuggestedAtMeta,
+          aiReflectionResumeSuggestedAt.isAcceptableOrUnknown(
+              data['ai_reflection_resume_suggested_at']!,
+              _aiReflectionResumeSuggestedAtMeta));
+    }
+    if (data.containsKey('ai_reflection_deferred_until')) {
+      context.handle(
+          _aiReflectionDeferredUntilMeta,
+          aiReflectionDeferredUntil.isAcceptableOrUnknown(
+              data['ai_reflection_deferred_until']!,
+              _aiReflectionDeferredUntilMeta));
+    }
+    if (data.containsKey('ai_reflection_completed_at')) {
+      context.handle(
+          _aiReflectionCompletedAtMeta,
+          aiReflectionCompletedAt.isAcceptableOrUnknown(
+              data['ai_reflection_completed_at']!,
+              _aiReflectionCompletedAtMeta));
+    }
     if (data.containsKey('intervention_type')) {
       context.handle(
           _interventionTypeMeta,
@@ -1046,6 +1376,72 @@ class $SituationEntriesTable extends SituationEntries
       aiEvaluationSchemaVersion: attachedDatabase.typeMapping.read(
           DriftSqlType.int,
           data['${effectivePrefix}ai_evaluation_schema_version']),
+      aiReflectionMode: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}ai_reflection_mode']),
+      aiReflectionStatus: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}ai_reflection_status']),
+      aiReflectionPhase: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}ai_reflection_phase']),
+      aiReflectionSessionId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}ai_reflection_session_id']),
+      aiReflectionInputHash: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}ai_reflection_input_hash']),
+      aiReflectionStartedAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime,
+          data['${effectivePrefix}ai_reflection_started_at']),
+      aiReflectionProvider: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}ai_reflection_provider']),
+      aiReflectionModel: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}ai_reflection_model']),
+      aiReflectionSchemaVersion: attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}ai_reflection_schema_version']),
+      aiReflectionStartObservation: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}ai_reflection_start_observation']),
+      aiReflectionStartQuestion: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}ai_reflection_start_question']),
+      aiReflectionStartHelperStarters: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}ai_reflection_start_helper_starters']),
+      aiReflectionSummary: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}ai_reflection_summary']),
+      aiReflectionLikelyCore: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}ai_reflection_likely_core']),
+      aiReflectionEarlyTurningPoint: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}ai_reflection_early_turning_point']),
+      aiReflectionAlternative: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}ai_reflection_alternative']),
+      aiReflectionNextStep: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}ai_reflection_next_step']),
+      aiReflectionMantra: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}ai_reflection_mantra']),
+      aiReflectionLastErrorCode: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}ai_reflection_last_error_code']),
+      aiReflectionLastErrorMessage: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}ai_reflection_last_error_message']),
+      aiReflectionDeferredAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime,
+          data['${effectivePrefix}ai_reflection_deferred_at']),
+      aiReflectionResumeSuggestedAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime,
+          data['${effectivePrefix}ai_reflection_resume_suggested_at']),
+      aiReflectionDeferredUntil: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime,
+          data['${effectivePrefix}ai_reflection_deferred_until']),
+      aiReflectionCompletedAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime,
+          data['${effectivePrefix}ai_reflection_completed_at']),
       interventionType: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}intervention_type']),
       interventionId: attachedDatabase.typeMapping
@@ -1136,6 +1532,30 @@ class SituationEntryData extends DataClass
   final bool aiEvaluationConsentGiven;
   final String? aiEvaluationText;
   final int? aiEvaluationSchemaVersion;
+  final String? aiReflectionMode;
+  final String? aiReflectionStatus;
+  final String? aiReflectionPhase;
+  final String? aiReflectionSessionId;
+  final String? aiReflectionInputHash;
+  final DateTime? aiReflectionStartedAt;
+  final String? aiReflectionProvider;
+  final String? aiReflectionModel;
+  final int? aiReflectionSchemaVersion;
+  final String? aiReflectionStartObservation;
+  final String? aiReflectionStartQuestion;
+  final String? aiReflectionStartHelperStarters;
+  final String? aiReflectionSummary;
+  final String? aiReflectionLikelyCore;
+  final String? aiReflectionEarlyTurningPoint;
+  final String? aiReflectionAlternative;
+  final String? aiReflectionNextStep;
+  final String? aiReflectionMantra;
+  final String? aiReflectionLastErrorCode;
+  final String? aiReflectionLastErrorMessage;
+  final DateTime? aiReflectionDeferredAt;
+  final DateTime? aiReflectionResumeSuggestedAt;
+  final DateTime? aiReflectionDeferredUntil;
+  final DateTime? aiReflectionCompletedAt;
   final String? interventionType;
   final String? interventionId;
   final bool interventionCompleted;
@@ -1203,6 +1623,30 @@ class SituationEntryData extends DataClass
       required this.aiEvaluationConsentGiven,
       this.aiEvaluationText,
       this.aiEvaluationSchemaVersion,
+      this.aiReflectionMode,
+      this.aiReflectionStatus,
+      this.aiReflectionPhase,
+      this.aiReflectionSessionId,
+      this.aiReflectionInputHash,
+      this.aiReflectionStartedAt,
+      this.aiReflectionProvider,
+      this.aiReflectionModel,
+      this.aiReflectionSchemaVersion,
+      this.aiReflectionStartObservation,
+      this.aiReflectionStartQuestion,
+      this.aiReflectionStartHelperStarters,
+      this.aiReflectionSummary,
+      this.aiReflectionLikelyCore,
+      this.aiReflectionEarlyTurningPoint,
+      this.aiReflectionAlternative,
+      this.aiReflectionNextStep,
+      this.aiReflectionMantra,
+      this.aiReflectionLastErrorCode,
+      this.aiReflectionLastErrorMessage,
+      this.aiReflectionDeferredAt,
+      this.aiReflectionResumeSuggestedAt,
+      this.aiReflectionDeferredUntil,
+      this.aiReflectionCompletedAt,
       this.interventionType,
       this.interventionId,
       required this.interventionCompleted,
@@ -1364,6 +1808,92 @@ class SituationEntryData extends DataClass
     if (!nullToAbsent || aiEvaluationSchemaVersion != null) {
       map['ai_evaluation_schema_version'] =
           Variable<int>(aiEvaluationSchemaVersion);
+    }
+    if (!nullToAbsent || aiReflectionMode != null) {
+      map['ai_reflection_mode'] = Variable<String>(aiReflectionMode);
+    }
+    if (!nullToAbsent || aiReflectionStatus != null) {
+      map['ai_reflection_status'] = Variable<String>(aiReflectionStatus);
+    }
+    if (!nullToAbsent || aiReflectionPhase != null) {
+      map['ai_reflection_phase'] = Variable<String>(aiReflectionPhase);
+    }
+    if (!nullToAbsent || aiReflectionSessionId != null) {
+      map['ai_reflection_session_id'] = Variable<String>(aiReflectionSessionId);
+    }
+    if (!nullToAbsent || aiReflectionInputHash != null) {
+      map['ai_reflection_input_hash'] = Variable<String>(aiReflectionInputHash);
+    }
+    if (!nullToAbsent || aiReflectionStartedAt != null) {
+      map['ai_reflection_started_at'] =
+          Variable<DateTime>(aiReflectionStartedAt);
+    }
+    if (!nullToAbsent || aiReflectionProvider != null) {
+      map['ai_reflection_provider'] = Variable<String>(aiReflectionProvider);
+    }
+    if (!nullToAbsent || aiReflectionModel != null) {
+      map['ai_reflection_model'] = Variable<String>(aiReflectionModel);
+    }
+    if (!nullToAbsent || aiReflectionSchemaVersion != null) {
+      map['ai_reflection_schema_version'] =
+          Variable<int>(aiReflectionSchemaVersion);
+    }
+    if (!nullToAbsent || aiReflectionStartObservation != null) {
+      map['ai_reflection_start_observation'] =
+          Variable<String>(aiReflectionStartObservation);
+    }
+    if (!nullToAbsent || aiReflectionStartQuestion != null) {
+      map['ai_reflection_start_question'] =
+          Variable<String>(aiReflectionStartQuestion);
+    }
+    if (!nullToAbsent || aiReflectionStartHelperStarters != null) {
+      map['ai_reflection_start_helper_starters'] =
+          Variable<String>(aiReflectionStartHelperStarters);
+    }
+    if (!nullToAbsent || aiReflectionSummary != null) {
+      map['ai_reflection_summary'] = Variable<String>(aiReflectionSummary);
+    }
+    if (!nullToAbsent || aiReflectionLikelyCore != null) {
+      map['ai_reflection_likely_core'] =
+          Variable<String>(aiReflectionLikelyCore);
+    }
+    if (!nullToAbsent || aiReflectionEarlyTurningPoint != null) {
+      map['ai_reflection_early_turning_point'] =
+          Variable<String>(aiReflectionEarlyTurningPoint);
+    }
+    if (!nullToAbsent || aiReflectionAlternative != null) {
+      map['ai_reflection_alternative'] =
+          Variable<String>(aiReflectionAlternative);
+    }
+    if (!nullToAbsent || aiReflectionNextStep != null) {
+      map['ai_reflection_next_step'] = Variable<String>(aiReflectionNextStep);
+    }
+    if (!nullToAbsent || aiReflectionMantra != null) {
+      map['ai_reflection_mantra'] = Variable<String>(aiReflectionMantra);
+    }
+    if (!nullToAbsent || aiReflectionLastErrorCode != null) {
+      map['ai_reflection_last_error_code'] =
+          Variable<String>(aiReflectionLastErrorCode);
+    }
+    if (!nullToAbsent || aiReflectionLastErrorMessage != null) {
+      map['ai_reflection_last_error_message'] =
+          Variable<String>(aiReflectionLastErrorMessage);
+    }
+    if (!nullToAbsent || aiReflectionDeferredAt != null) {
+      map['ai_reflection_deferred_at'] =
+          Variable<DateTime>(aiReflectionDeferredAt);
+    }
+    if (!nullToAbsent || aiReflectionResumeSuggestedAt != null) {
+      map['ai_reflection_resume_suggested_at'] =
+          Variable<DateTime>(aiReflectionResumeSuggestedAt);
+    }
+    if (!nullToAbsent || aiReflectionDeferredUntil != null) {
+      map['ai_reflection_deferred_until'] =
+          Variable<DateTime>(aiReflectionDeferredUntil);
+    }
+    if (!nullToAbsent || aiReflectionCompletedAt != null) {
+      map['ai_reflection_completed_at'] =
+          Variable<DateTime>(aiReflectionCompletedAt);
     }
     if (!nullToAbsent || interventionType != null) {
       map['intervention_type'] = Variable<String>(interventionType);
@@ -1538,6 +2068,87 @@ class SituationEntryData extends DataClass
           aiEvaluationSchemaVersion == null && nullToAbsent
               ? const Value.absent()
               : Value(aiEvaluationSchemaVersion),
+      aiReflectionMode: aiReflectionMode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionMode),
+      aiReflectionStatus: aiReflectionStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionStatus),
+      aiReflectionPhase: aiReflectionPhase == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionPhase),
+      aiReflectionSessionId: aiReflectionSessionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionSessionId),
+      aiReflectionInputHash: aiReflectionInputHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionInputHash),
+      aiReflectionStartedAt: aiReflectionStartedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionStartedAt),
+      aiReflectionProvider: aiReflectionProvider == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionProvider),
+      aiReflectionModel: aiReflectionModel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionModel),
+      aiReflectionSchemaVersion:
+          aiReflectionSchemaVersion == null && nullToAbsent
+              ? const Value.absent()
+              : Value(aiReflectionSchemaVersion),
+      aiReflectionStartObservation:
+          aiReflectionStartObservation == null && nullToAbsent
+              ? const Value.absent()
+              : Value(aiReflectionStartObservation),
+      aiReflectionStartQuestion:
+          aiReflectionStartQuestion == null && nullToAbsent
+              ? const Value.absent()
+              : Value(aiReflectionStartQuestion),
+      aiReflectionStartHelperStarters:
+          aiReflectionStartHelperStarters == null && nullToAbsent
+              ? const Value.absent()
+              : Value(aiReflectionStartHelperStarters),
+      aiReflectionSummary: aiReflectionSummary == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionSummary),
+      aiReflectionLikelyCore: aiReflectionLikelyCore == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionLikelyCore),
+      aiReflectionEarlyTurningPoint:
+          aiReflectionEarlyTurningPoint == null && nullToAbsent
+              ? const Value.absent()
+              : Value(aiReflectionEarlyTurningPoint),
+      aiReflectionAlternative: aiReflectionAlternative == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionAlternative),
+      aiReflectionNextStep: aiReflectionNextStep == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionNextStep),
+      aiReflectionMantra: aiReflectionMantra == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionMantra),
+      aiReflectionLastErrorCode:
+          aiReflectionLastErrorCode == null && nullToAbsent
+              ? const Value.absent()
+              : Value(aiReflectionLastErrorCode),
+      aiReflectionLastErrorMessage:
+          aiReflectionLastErrorMessage == null && nullToAbsent
+              ? const Value.absent()
+              : Value(aiReflectionLastErrorMessage),
+      aiReflectionDeferredAt: aiReflectionDeferredAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionDeferredAt),
+      aiReflectionResumeSuggestedAt:
+          aiReflectionResumeSuggestedAt == null && nullToAbsent
+              ? const Value.absent()
+              : Value(aiReflectionResumeSuggestedAt),
+      aiReflectionDeferredUntil:
+          aiReflectionDeferredUntil == null && nullToAbsent
+              ? const Value.absent()
+              : Value(aiReflectionDeferredUntil),
+      aiReflectionCompletedAt: aiReflectionCompletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiReflectionCompletedAt),
       interventionType: interventionType == null && nullToAbsent
           ? const Value.absent()
           : Value(interventionType),
@@ -1655,6 +2266,53 @@ class SituationEntryData extends DataClass
       aiEvaluationText: serializer.fromJson<String?>(json['aiEvaluationText']),
       aiEvaluationSchemaVersion:
           serializer.fromJson<int?>(json['aiEvaluationSchemaVersion']),
+      aiReflectionMode: serializer.fromJson<String?>(json['aiReflectionMode']),
+      aiReflectionStatus:
+          serializer.fromJson<String?>(json['aiReflectionStatus']),
+      aiReflectionPhase:
+          serializer.fromJson<String?>(json['aiReflectionPhase']),
+      aiReflectionSessionId:
+          serializer.fromJson<String?>(json['aiReflectionSessionId']),
+      aiReflectionInputHash:
+          serializer.fromJson<String?>(json['aiReflectionInputHash']),
+      aiReflectionStartedAt:
+          serializer.fromJson<DateTime?>(json['aiReflectionStartedAt']),
+      aiReflectionProvider:
+          serializer.fromJson<String?>(json['aiReflectionProvider']),
+      aiReflectionModel:
+          serializer.fromJson<String?>(json['aiReflectionModel']),
+      aiReflectionSchemaVersion:
+          serializer.fromJson<int?>(json['aiReflectionSchemaVersion']),
+      aiReflectionStartObservation:
+          serializer.fromJson<String?>(json['aiReflectionStartObservation']),
+      aiReflectionStartQuestion:
+          serializer.fromJson<String?>(json['aiReflectionStartQuestion']),
+      aiReflectionStartHelperStarters:
+          serializer.fromJson<String?>(json['aiReflectionStartHelperStarters']),
+      aiReflectionSummary:
+          serializer.fromJson<String?>(json['aiReflectionSummary']),
+      aiReflectionLikelyCore:
+          serializer.fromJson<String?>(json['aiReflectionLikelyCore']),
+      aiReflectionEarlyTurningPoint:
+          serializer.fromJson<String?>(json['aiReflectionEarlyTurningPoint']),
+      aiReflectionAlternative:
+          serializer.fromJson<String?>(json['aiReflectionAlternative']),
+      aiReflectionNextStep:
+          serializer.fromJson<String?>(json['aiReflectionNextStep']),
+      aiReflectionMantra:
+          serializer.fromJson<String?>(json['aiReflectionMantra']),
+      aiReflectionLastErrorCode:
+          serializer.fromJson<String?>(json['aiReflectionLastErrorCode']),
+      aiReflectionLastErrorMessage:
+          serializer.fromJson<String?>(json['aiReflectionLastErrorMessage']),
+      aiReflectionDeferredAt:
+          serializer.fromJson<DateTime?>(json['aiReflectionDeferredAt']),
+      aiReflectionResumeSuggestedAt:
+          serializer.fromJson<DateTime?>(json['aiReflectionResumeSuggestedAt']),
+      aiReflectionDeferredUntil:
+          serializer.fromJson<DateTime?>(json['aiReflectionDeferredUntil']),
+      aiReflectionCompletedAt:
+          serializer.fromJson<DateTime?>(json['aiReflectionCompletedAt']),
       interventionType: serializer.fromJson<String?>(json['interventionType']),
       interventionId: serializer.fromJson<String?>(json['interventionId']),
       interventionCompleted:
@@ -1741,6 +2399,46 @@ class SituationEntryData extends DataClass
       'aiEvaluationText': serializer.toJson<String?>(aiEvaluationText),
       'aiEvaluationSchemaVersion':
           serializer.toJson<int?>(aiEvaluationSchemaVersion),
+      'aiReflectionMode': serializer.toJson<String?>(aiReflectionMode),
+      'aiReflectionStatus': serializer.toJson<String?>(aiReflectionStatus),
+      'aiReflectionPhase': serializer.toJson<String?>(aiReflectionPhase),
+      'aiReflectionSessionId':
+          serializer.toJson<String?>(aiReflectionSessionId),
+      'aiReflectionInputHash':
+          serializer.toJson<String?>(aiReflectionInputHash),
+      'aiReflectionStartedAt':
+          serializer.toJson<DateTime?>(aiReflectionStartedAt),
+      'aiReflectionProvider': serializer.toJson<String?>(aiReflectionProvider),
+      'aiReflectionModel': serializer.toJson<String?>(aiReflectionModel),
+      'aiReflectionSchemaVersion':
+          serializer.toJson<int?>(aiReflectionSchemaVersion),
+      'aiReflectionStartObservation':
+          serializer.toJson<String?>(aiReflectionStartObservation),
+      'aiReflectionStartQuestion':
+          serializer.toJson<String?>(aiReflectionStartQuestion),
+      'aiReflectionStartHelperStarters':
+          serializer.toJson<String?>(aiReflectionStartHelperStarters),
+      'aiReflectionSummary': serializer.toJson<String?>(aiReflectionSummary),
+      'aiReflectionLikelyCore':
+          serializer.toJson<String?>(aiReflectionLikelyCore),
+      'aiReflectionEarlyTurningPoint':
+          serializer.toJson<String?>(aiReflectionEarlyTurningPoint),
+      'aiReflectionAlternative':
+          serializer.toJson<String?>(aiReflectionAlternative),
+      'aiReflectionNextStep': serializer.toJson<String?>(aiReflectionNextStep),
+      'aiReflectionMantra': serializer.toJson<String?>(aiReflectionMantra),
+      'aiReflectionLastErrorCode':
+          serializer.toJson<String?>(aiReflectionLastErrorCode),
+      'aiReflectionLastErrorMessage':
+          serializer.toJson<String?>(aiReflectionLastErrorMessage),
+      'aiReflectionDeferredAt':
+          serializer.toJson<DateTime?>(aiReflectionDeferredAt),
+      'aiReflectionResumeSuggestedAt':
+          serializer.toJson<DateTime?>(aiReflectionResumeSuggestedAt),
+      'aiReflectionDeferredUntil':
+          serializer.toJson<DateTime?>(aiReflectionDeferredUntil),
+      'aiReflectionCompletedAt':
+          serializer.toJson<DateTime?>(aiReflectionCompletedAt),
       'interventionType': serializer.toJson<String?>(interventionType),
       'interventionId': serializer.toJson<String?>(interventionId),
       'interventionCompleted': serializer.toJson<bool>(interventionCompleted),
@@ -1812,6 +2510,30 @@ class SituationEntryData extends DataClass
           bool? aiEvaluationConsentGiven,
           Value<String?> aiEvaluationText = const Value.absent(),
           Value<int?> aiEvaluationSchemaVersion = const Value.absent(),
+          Value<String?> aiReflectionMode = const Value.absent(),
+          Value<String?> aiReflectionStatus = const Value.absent(),
+          Value<String?> aiReflectionPhase = const Value.absent(),
+          Value<String?> aiReflectionSessionId = const Value.absent(),
+          Value<String?> aiReflectionInputHash = const Value.absent(),
+          Value<DateTime?> aiReflectionStartedAt = const Value.absent(),
+          Value<String?> aiReflectionProvider = const Value.absent(),
+          Value<String?> aiReflectionModel = const Value.absent(),
+          Value<int?> aiReflectionSchemaVersion = const Value.absent(),
+          Value<String?> aiReflectionStartObservation = const Value.absent(),
+          Value<String?> aiReflectionStartQuestion = const Value.absent(),
+          Value<String?> aiReflectionStartHelperStarters = const Value.absent(),
+          Value<String?> aiReflectionSummary = const Value.absent(),
+          Value<String?> aiReflectionLikelyCore = const Value.absent(),
+          Value<String?> aiReflectionEarlyTurningPoint = const Value.absent(),
+          Value<String?> aiReflectionAlternative = const Value.absent(),
+          Value<String?> aiReflectionNextStep = const Value.absent(),
+          Value<String?> aiReflectionMantra = const Value.absent(),
+          Value<String?> aiReflectionLastErrorCode = const Value.absent(),
+          Value<String?> aiReflectionLastErrorMessage = const Value.absent(),
+          Value<DateTime?> aiReflectionDeferredAt = const Value.absent(),
+          Value<DateTime?> aiReflectionResumeSuggestedAt = const Value.absent(),
+          Value<DateTime?> aiReflectionDeferredUntil = const Value.absent(),
+          Value<DateTime?> aiReflectionCompletedAt = const Value.absent(),
           Value<String?> interventionType = const Value.absent(),
           Value<String?> interventionId = const Value.absent(),
           bool? interventionCompleted,
@@ -1953,6 +2675,78 @@ class SituationEntryData extends DataClass
         aiEvaluationSchemaVersion: aiEvaluationSchemaVersion.present
             ? aiEvaluationSchemaVersion.value
             : this.aiEvaluationSchemaVersion,
+        aiReflectionMode: aiReflectionMode.present
+            ? aiReflectionMode.value
+            : this.aiReflectionMode,
+        aiReflectionStatus: aiReflectionStatus.present
+            ? aiReflectionStatus.value
+            : this.aiReflectionStatus,
+        aiReflectionPhase: aiReflectionPhase.present
+            ? aiReflectionPhase.value
+            : this.aiReflectionPhase,
+        aiReflectionSessionId: aiReflectionSessionId.present
+            ? aiReflectionSessionId.value
+            : this.aiReflectionSessionId,
+        aiReflectionInputHash: aiReflectionInputHash.present
+            ? aiReflectionInputHash.value
+            : this.aiReflectionInputHash,
+        aiReflectionStartedAt: aiReflectionStartedAt.present
+            ? aiReflectionStartedAt.value
+            : this.aiReflectionStartedAt,
+        aiReflectionProvider: aiReflectionProvider.present
+            ? aiReflectionProvider.value
+            : this.aiReflectionProvider,
+        aiReflectionModel: aiReflectionModel.present
+            ? aiReflectionModel.value
+            : this.aiReflectionModel,
+        aiReflectionSchemaVersion: aiReflectionSchemaVersion.present
+            ? aiReflectionSchemaVersion.value
+            : this.aiReflectionSchemaVersion,
+        aiReflectionStartObservation: aiReflectionStartObservation.present
+            ? aiReflectionStartObservation.value
+            : this.aiReflectionStartObservation,
+        aiReflectionStartQuestion: aiReflectionStartQuestion.present
+            ? aiReflectionStartQuestion.value
+            : this.aiReflectionStartQuestion,
+        aiReflectionStartHelperStarters: aiReflectionStartHelperStarters.present
+            ? aiReflectionStartHelperStarters.value
+            : this.aiReflectionStartHelperStarters,
+        aiReflectionSummary: aiReflectionSummary.present
+            ? aiReflectionSummary.value
+            : this.aiReflectionSummary,
+        aiReflectionLikelyCore: aiReflectionLikelyCore.present
+            ? aiReflectionLikelyCore.value
+            : this.aiReflectionLikelyCore,
+        aiReflectionEarlyTurningPoint: aiReflectionEarlyTurningPoint.present
+            ? aiReflectionEarlyTurningPoint.value
+            : this.aiReflectionEarlyTurningPoint,
+        aiReflectionAlternative: aiReflectionAlternative.present
+            ? aiReflectionAlternative.value
+            : this.aiReflectionAlternative,
+        aiReflectionNextStep: aiReflectionNextStep.present
+            ? aiReflectionNextStep.value
+            : this.aiReflectionNextStep,
+        aiReflectionMantra: aiReflectionMantra.present
+            ? aiReflectionMantra.value
+            : this.aiReflectionMantra,
+        aiReflectionLastErrorCode: aiReflectionLastErrorCode.present
+            ? aiReflectionLastErrorCode.value
+            : this.aiReflectionLastErrorCode,
+        aiReflectionLastErrorMessage: aiReflectionLastErrorMessage.present
+            ? aiReflectionLastErrorMessage.value
+            : this.aiReflectionLastErrorMessage,
+        aiReflectionDeferredAt: aiReflectionDeferredAt.present
+            ? aiReflectionDeferredAt.value
+            : this.aiReflectionDeferredAt,
+        aiReflectionResumeSuggestedAt: aiReflectionResumeSuggestedAt.present
+            ? aiReflectionResumeSuggestedAt.value
+            : this.aiReflectionResumeSuggestedAt,
+        aiReflectionDeferredUntil: aiReflectionDeferredUntil.present
+            ? aiReflectionDeferredUntil.value
+            : this.aiReflectionDeferredUntil,
+        aiReflectionCompletedAt: aiReflectionCompletedAt.present
+            ? aiReflectionCompletedAt.value
+            : this.aiReflectionCompletedAt,
         interventionType: interventionType.present
             ? interventionType.value
             : this.interventionType,
@@ -2127,6 +2921,79 @@ class SituationEntryData extends DataClass
       aiEvaluationSchemaVersion: data.aiEvaluationSchemaVersion.present
           ? data.aiEvaluationSchemaVersion.value
           : this.aiEvaluationSchemaVersion,
+      aiReflectionMode: data.aiReflectionMode.present
+          ? data.aiReflectionMode.value
+          : this.aiReflectionMode,
+      aiReflectionStatus: data.aiReflectionStatus.present
+          ? data.aiReflectionStatus.value
+          : this.aiReflectionStatus,
+      aiReflectionPhase: data.aiReflectionPhase.present
+          ? data.aiReflectionPhase.value
+          : this.aiReflectionPhase,
+      aiReflectionSessionId: data.aiReflectionSessionId.present
+          ? data.aiReflectionSessionId.value
+          : this.aiReflectionSessionId,
+      aiReflectionInputHash: data.aiReflectionInputHash.present
+          ? data.aiReflectionInputHash.value
+          : this.aiReflectionInputHash,
+      aiReflectionStartedAt: data.aiReflectionStartedAt.present
+          ? data.aiReflectionStartedAt.value
+          : this.aiReflectionStartedAt,
+      aiReflectionProvider: data.aiReflectionProvider.present
+          ? data.aiReflectionProvider.value
+          : this.aiReflectionProvider,
+      aiReflectionModel: data.aiReflectionModel.present
+          ? data.aiReflectionModel.value
+          : this.aiReflectionModel,
+      aiReflectionSchemaVersion: data.aiReflectionSchemaVersion.present
+          ? data.aiReflectionSchemaVersion.value
+          : this.aiReflectionSchemaVersion,
+      aiReflectionStartObservation: data.aiReflectionStartObservation.present
+          ? data.aiReflectionStartObservation.value
+          : this.aiReflectionStartObservation,
+      aiReflectionStartQuestion: data.aiReflectionStartQuestion.present
+          ? data.aiReflectionStartQuestion.value
+          : this.aiReflectionStartQuestion,
+      aiReflectionStartHelperStarters:
+          data.aiReflectionStartHelperStarters.present
+              ? data.aiReflectionStartHelperStarters.value
+              : this.aiReflectionStartHelperStarters,
+      aiReflectionSummary: data.aiReflectionSummary.present
+          ? data.aiReflectionSummary.value
+          : this.aiReflectionSummary,
+      aiReflectionLikelyCore: data.aiReflectionLikelyCore.present
+          ? data.aiReflectionLikelyCore.value
+          : this.aiReflectionLikelyCore,
+      aiReflectionEarlyTurningPoint: data.aiReflectionEarlyTurningPoint.present
+          ? data.aiReflectionEarlyTurningPoint.value
+          : this.aiReflectionEarlyTurningPoint,
+      aiReflectionAlternative: data.aiReflectionAlternative.present
+          ? data.aiReflectionAlternative.value
+          : this.aiReflectionAlternative,
+      aiReflectionNextStep: data.aiReflectionNextStep.present
+          ? data.aiReflectionNextStep.value
+          : this.aiReflectionNextStep,
+      aiReflectionMantra: data.aiReflectionMantra.present
+          ? data.aiReflectionMantra.value
+          : this.aiReflectionMantra,
+      aiReflectionLastErrorCode: data.aiReflectionLastErrorCode.present
+          ? data.aiReflectionLastErrorCode.value
+          : this.aiReflectionLastErrorCode,
+      aiReflectionLastErrorMessage: data.aiReflectionLastErrorMessage.present
+          ? data.aiReflectionLastErrorMessage.value
+          : this.aiReflectionLastErrorMessage,
+      aiReflectionDeferredAt: data.aiReflectionDeferredAt.present
+          ? data.aiReflectionDeferredAt.value
+          : this.aiReflectionDeferredAt,
+      aiReflectionResumeSuggestedAt: data.aiReflectionResumeSuggestedAt.present
+          ? data.aiReflectionResumeSuggestedAt.value
+          : this.aiReflectionResumeSuggestedAt,
+      aiReflectionDeferredUntil: data.aiReflectionDeferredUntil.present
+          ? data.aiReflectionDeferredUntil.value
+          : this.aiReflectionDeferredUntil,
+      aiReflectionCompletedAt: data.aiReflectionCompletedAt.present
+          ? data.aiReflectionCompletedAt.value
+          : this.aiReflectionCompletedAt,
       interventionType: data.interventionType.present
           ? data.interventionType.value
           : this.interventionType,
@@ -2214,6 +3081,35 @@ class SituationEntryData extends DataClass
           ..write('aiEvaluationConsentGiven: $aiEvaluationConsentGiven, ')
           ..write('aiEvaluationText: $aiEvaluationText, ')
           ..write('aiEvaluationSchemaVersion: $aiEvaluationSchemaVersion, ')
+          ..write('aiReflectionMode: $aiReflectionMode, ')
+          ..write('aiReflectionStatus: $aiReflectionStatus, ')
+          ..write('aiReflectionPhase: $aiReflectionPhase, ')
+          ..write('aiReflectionSessionId: $aiReflectionSessionId, ')
+          ..write('aiReflectionInputHash: $aiReflectionInputHash, ')
+          ..write('aiReflectionStartedAt: $aiReflectionStartedAt, ')
+          ..write('aiReflectionProvider: $aiReflectionProvider, ')
+          ..write('aiReflectionModel: $aiReflectionModel, ')
+          ..write('aiReflectionSchemaVersion: $aiReflectionSchemaVersion, ')
+          ..write(
+              'aiReflectionStartObservation: $aiReflectionStartObservation, ')
+          ..write('aiReflectionStartQuestion: $aiReflectionStartQuestion, ')
+          ..write(
+              'aiReflectionStartHelperStarters: $aiReflectionStartHelperStarters, ')
+          ..write('aiReflectionSummary: $aiReflectionSummary, ')
+          ..write('aiReflectionLikelyCore: $aiReflectionLikelyCore, ')
+          ..write(
+              'aiReflectionEarlyTurningPoint: $aiReflectionEarlyTurningPoint, ')
+          ..write('aiReflectionAlternative: $aiReflectionAlternative, ')
+          ..write('aiReflectionNextStep: $aiReflectionNextStep, ')
+          ..write('aiReflectionMantra: $aiReflectionMantra, ')
+          ..write('aiReflectionLastErrorCode: $aiReflectionLastErrorCode, ')
+          ..write(
+              'aiReflectionLastErrorMessage: $aiReflectionLastErrorMessage, ')
+          ..write('aiReflectionDeferredAt: $aiReflectionDeferredAt, ')
+          ..write(
+              'aiReflectionResumeSuggestedAt: $aiReflectionResumeSuggestedAt, ')
+          ..write('aiReflectionDeferredUntil: $aiReflectionDeferredUntil, ')
+          ..write('aiReflectionCompletedAt: $aiReflectionCompletedAt, ')
           ..write('interventionType: $interventionType, ')
           ..write('interventionId: $interventionId, ')
           ..write('interventionCompleted: $interventionCompleted, ')
@@ -2286,6 +3182,30 @@ class SituationEntryData extends DataClass
         aiEvaluationConsentGiven,
         aiEvaluationText,
         aiEvaluationSchemaVersion,
+        aiReflectionMode,
+        aiReflectionStatus,
+        aiReflectionPhase,
+        aiReflectionSessionId,
+        aiReflectionInputHash,
+        aiReflectionStartedAt,
+        aiReflectionProvider,
+        aiReflectionModel,
+        aiReflectionSchemaVersion,
+        aiReflectionStartObservation,
+        aiReflectionStartQuestion,
+        aiReflectionStartHelperStarters,
+        aiReflectionSummary,
+        aiReflectionLikelyCore,
+        aiReflectionEarlyTurningPoint,
+        aiReflectionAlternative,
+        aiReflectionNextStep,
+        aiReflectionMantra,
+        aiReflectionLastErrorCode,
+        aiReflectionLastErrorMessage,
+        aiReflectionDeferredAt,
+        aiReflectionResumeSuggestedAt,
+        aiReflectionDeferredUntil,
+        aiReflectionCompletedAt,
         interventionType,
         interventionId,
         interventionCompleted,
@@ -2357,6 +3277,35 @@ class SituationEntryData extends DataClass
           other.aiEvaluationConsentGiven == this.aiEvaluationConsentGiven &&
           other.aiEvaluationText == this.aiEvaluationText &&
           other.aiEvaluationSchemaVersion == this.aiEvaluationSchemaVersion &&
+          other.aiReflectionMode == this.aiReflectionMode &&
+          other.aiReflectionStatus == this.aiReflectionStatus &&
+          other.aiReflectionPhase == this.aiReflectionPhase &&
+          other.aiReflectionSessionId == this.aiReflectionSessionId &&
+          other.aiReflectionInputHash == this.aiReflectionInputHash &&
+          other.aiReflectionStartedAt == this.aiReflectionStartedAt &&
+          other.aiReflectionProvider == this.aiReflectionProvider &&
+          other.aiReflectionModel == this.aiReflectionModel &&
+          other.aiReflectionSchemaVersion == this.aiReflectionSchemaVersion &&
+          other.aiReflectionStartObservation ==
+              this.aiReflectionStartObservation &&
+          other.aiReflectionStartQuestion == this.aiReflectionStartQuestion &&
+          other.aiReflectionStartHelperStarters ==
+              this.aiReflectionStartHelperStarters &&
+          other.aiReflectionSummary == this.aiReflectionSummary &&
+          other.aiReflectionLikelyCore == this.aiReflectionLikelyCore &&
+          other.aiReflectionEarlyTurningPoint ==
+              this.aiReflectionEarlyTurningPoint &&
+          other.aiReflectionAlternative == this.aiReflectionAlternative &&
+          other.aiReflectionNextStep == this.aiReflectionNextStep &&
+          other.aiReflectionMantra == this.aiReflectionMantra &&
+          other.aiReflectionLastErrorCode == this.aiReflectionLastErrorCode &&
+          other.aiReflectionLastErrorMessage ==
+              this.aiReflectionLastErrorMessage &&
+          other.aiReflectionDeferredAt == this.aiReflectionDeferredAt &&
+          other.aiReflectionResumeSuggestedAt ==
+              this.aiReflectionResumeSuggestedAt &&
+          other.aiReflectionDeferredUntil == this.aiReflectionDeferredUntil &&
+          other.aiReflectionCompletedAt == this.aiReflectionCompletedAt &&
           other.interventionType == this.interventionType &&
           other.interventionId == this.interventionId &&
           other.interventionCompleted == this.interventionCompleted &&
@@ -2426,6 +3375,30 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
   final Value<bool> aiEvaluationConsentGiven;
   final Value<String?> aiEvaluationText;
   final Value<int?> aiEvaluationSchemaVersion;
+  final Value<String?> aiReflectionMode;
+  final Value<String?> aiReflectionStatus;
+  final Value<String?> aiReflectionPhase;
+  final Value<String?> aiReflectionSessionId;
+  final Value<String?> aiReflectionInputHash;
+  final Value<DateTime?> aiReflectionStartedAt;
+  final Value<String?> aiReflectionProvider;
+  final Value<String?> aiReflectionModel;
+  final Value<int?> aiReflectionSchemaVersion;
+  final Value<String?> aiReflectionStartObservation;
+  final Value<String?> aiReflectionStartQuestion;
+  final Value<String?> aiReflectionStartHelperStarters;
+  final Value<String?> aiReflectionSummary;
+  final Value<String?> aiReflectionLikelyCore;
+  final Value<String?> aiReflectionEarlyTurningPoint;
+  final Value<String?> aiReflectionAlternative;
+  final Value<String?> aiReflectionNextStep;
+  final Value<String?> aiReflectionMantra;
+  final Value<String?> aiReflectionLastErrorCode;
+  final Value<String?> aiReflectionLastErrorMessage;
+  final Value<DateTime?> aiReflectionDeferredAt;
+  final Value<DateTime?> aiReflectionResumeSuggestedAt;
+  final Value<DateTime?> aiReflectionDeferredUntil;
+  final Value<DateTime?> aiReflectionCompletedAt;
   final Value<String?> interventionType;
   final Value<String?> interventionId;
   final Value<bool> interventionCompleted;
@@ -2493,6 +3466,30 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     this.aiEvaluationConsentGiven = const Value.absent(),
     this.aiEvaluationText = const Value.absent(),
     this.aiEvaluationSchemaVersion = const Value.absent(),
+    this.aiReflectionMode = const Value.absent(),
+    this.aiReflectionStatus = const Value.absent(),
+    this.aiReflectionPhase = const Value.absent(),
+    this.aiReflectionSessionId = const Value.absent(),
+    this.aiReflectionInputHash = const Value.absent(),
+    this.aiReflectionStartedAt = const Value.absent(),
+    this.aiReflectionProvider = const Value.absent(),
+    this.aiReflectionModel = const Value.absent(),
+    this.aiReflectionSchemaVersion = const Value.absent(),
+    this.aiReflectionStartObservation = const Value.absent(),
+    this.aiReflectionStartQuestion = const Value.absent(),
+    this.aiReflectionStartHelperStarters = const Value.absent(),
+    this.aiReflectionSummary = const Value.absent(),
+    this.aiReflectionLikelyCore = const Value.absent(),
+    this.aiReflectionEarlyTurningPoint = const Value.absent(),
+    this.aiReflectionAlternative = const Value.absent(),
+    this.aiReflectionNextStep = const Value.absent(),
+    this.aiReflectionMantra = const Value.absent(),
+    this.aiReflectionLastErrorCode = const Value.absent(),
+    this.aiReflectionLastErrorMessage = const Value.absent(),
+    this.aiReflectionDeferredAt = const Value.absent(),
+    this.aiReflectionResumeSuggestedAt = const Value.absent(),
+    this.aiReflectionDeferredUntil = const Value.absent(),
+    this.aiReflectionCompletedAt = const Value.absent(),
     this.interventionType = const Value.absent(),
     this.interventionId = const Value.absent(),
     this.interventionCompleted = const Value.absent(),
@@ -2561,6 +3558,30 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     this.aiEvaluationConsentGiven = const Value.absent(),
     this.aiEvaluationText = const Value.absent(),
     this.aiEvaluationSchemaVersion = const Value.absent(),
+    this.aiReflectionMode = const Value.absent(),
+    this.aiReflectionStatus = const Value.absent(),
+    this.aiReflectionPhase = const Value.absent(),
+    this.aiReflectionSessionId = const Value.absent(),
+    this.aiReflectionInputHash = const Value.absent(),
+    this.aiReflectionStartedAt = const Value.absent(),
+    this.aiReflectionProvider = const Value.absent(),
+    this.aiReflectionModel = const Value.absent(),
+    this.aiReflectionSchemaVersion = const Value.absent(),
+    this.aiReflectionStartObservation = const Value.absent(),
+    this.aiReflectionStartQuestion = const Value.absent(),
+    this.aiReflectionStartHelperStarters = const Value.absent(),
+    this.aiReflectionSummary = const Value.absent(),
+    this.aiReflectionLikelyCore = const Value.absent(),
+    this.aiReflectionEarlyTurningPoint = const Value.absent(),
+    this.aiReflectionAlternative = const Value.absent(),
+    this.aiReflectionNextStep = const Value.absent(),
+    this.aiReflectionMantra = const Value.absent(),
+    this.aiReflectionLastErrorCode = const Value.absent(),
+    this.aiReflectionLastErrorMessage = const Value.absent(),
+    this.aiReflectionDeferredAt = const Value.absent(),
+    this.aiReflectionResumeSuggestedAt = const Value.absent(),
+    this.aiReflectionDeferredUntil = const Value.absent(),
+    this.aiReflectionCompletedAt = const Value.absent(),
     this.interventionType = const Value.absent(),
     this.interventionId = const Value.absent(),
     this.interventionCompleted = const Value.absent(),
@@ -2637,6 +3658,30 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     Expression<bool>? aiEvaluationConsentGiven,
     Expression<String>? aiEvaluationText,
     Expression<int>? aiEvaluationSchemaVersion,
+    Expression<String>? aiReflectionMode,
+    Expression<String>? aiReflectionStatus,
+    Expression<String>? aiReflectionPhase,
+    Expression<String>? aiReflectionSessionId,
+    Expression<String>? aiReflectionInputHash,
+    Expression<DateTime>? aiReflectionStartedAt,
+    Expression<String>? aiReflectionProvider,
+    Expression<String>? aiReflectionModel,
+    Expression<int>? aiReflectionSchemaVersion,
+    Expression<String>? aiReflectionStartObservation,
+    Expression<String>? aiReflectionStartQuestion,
+    Expression<String>? aiReflectionStartHelperStarters,
+    Expression<String>? aiReflectionSummary,
+    Expression<String>? aiReflectionLikelyCore,
+    Expression<String>? aiReflectionEarlyTurningPoint,
+    Expression<String>? aiReflectionAlternative,
+    Expression<String>? aiReflectionNextStep,
+    Expression<String>? aiReflectionMantra,
+    Expression<String>? aiReflectionLastErrorCode,
+    Expression<String>? aiReflectionLastErrorMessage,
+    Expression<DateTime>? aiReflectionDeferredAt,
+    Expression<DateTime>? aiReflectionResumeSuggestedAt,
+    Expression<DateTime>? aiReflectionDeferredUntil,
+    Expression<DateTime>? aiReflectionCompletedAt,
     Expression<String>? interventionType,
     Expression<String>? interventionId,
     Expression<bool>? interventionCompleted,
@@ -2728,6 +3773,51 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
       if (aiEvaluationText != null) 'ai_evaluation_text': aiEvaluationText,
       if (aiEvaluationSchemaVersion != null)
         'ai_evaluation_schema_version': aiEvaluationSchemaVersion,
+      if (aiReflectionMode != null) 'ai_reflection_mode': aiReflectionMode,
+      if (aiReflectionStatus != null)
+        'ai_reflection_status': aiReflectionStatus,
+      if (aiReflectionPhase != null) 'ai_reflection_phase': aiReflectionPhase,
+      if (aiReflectionSessionId != null)
+        'ai_reflection_session_id': aiReflectionSessionId,
+      if (aiReflectionInputHash != null)
+        'ai_reflection_input_hash': aiReflectionInputHash,
+      if (aiReflectionStartedAt != null)
+        'ai_reflection_started_at': aiReflectionStartedAt,
+      if (aiReflectionProvider != null)
+        'ai_reflection_provider': aiReflectionProvider,
+      if (aiReflectionModel != null) 'ai_reflection_model': aiReflectionModel,
+      if (aiReflectionSchemaVersion != null)
+        'ai_reflection_schema_version': aiReflectionSchemaVersion,
+      if (aiReflectionStartObservation != null)
+        'ai_reflection_start_observation': aiReflectionStartObservation,
+      if (aiReflectionStartQuestion != null)
+        'ai_reflection_start_question': aiReflectionStartQuestion,
+      if (aiReflectionStartHelperStarters != null)
+        'ai_reflection_start_helper_starters': aiReflectionStartHelperStarters,
+      if (aiReflectionSummary != null)
+        'ai_reflection_summary': aiReflectionSummary,
+      if (aiReflectionLikelyCore != null)
+        'ai_reflection_likely_core': aiReflectionLikelyCore,
+      if (aiReflectionEarlyTurningPoint != null)
+        'ai_reflection_early_turning_point': aiReflectionEarlyTurningPoint,
+      if (aiReflectionAlternative != null)
+        'ai_reflection_alternative': aiReflectionAlternative,
+      if (aiReflectionNextStep != null)
+        'ai_reflection_next_step': aiReflectionNextStep,
+      if (aiReflectionMantra != null)
+        'ai_reflection_mantra': aiReflectionMantra,
+      if (aiReflectionLastErrorCode != null)
+        'ai_reflection_last_error_code': aiReflectionLastErrorCode,
+      if (aiReflectionLastErrorMessage != null)
+        'ai_reflection_last_error_message': aiReflectionLastErrorMessage,
+      if (aiReflectionDeferredAt != null)
+        'ai_reflection_deferred_at': aiReflectionDeferredAt,
+      if (aiReflectionResumeSuggestedAt != null)
+        'ai_reflection_resume_suggested_at': aiReflectionResumeSuggestedAt,
+      if (aiReflectionDeferredUntil != null)
+        'ai_reflection_deferred_until': aiReflectionDeferredUntil,
+      if (aiReflectionCompletedAt != null)
+        'ai_reflection_completed_at': aiReflectionCompletedAt,
       if (interventionType != null) 'intervention_type': interventionType,
       if (interventionId != null) 'intervention_id': interventionId,
       if (interventionCompleted != null)
@@ -2800,6 +3890,30 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
       Value<bool>? aiEvaluationConsentGiven,
       Value<String?>? aiEvaluationText,
       Value<int?>? aiEvaluationSchemaVersion,
+      Value<String?>? aiReflectionMode,
+      Value<String?>? aiReflectionStatus,
+      Value<String?>? aiReflectionPhase,
+      Value<String?>? aiReflectionSessionId,
+      Value<String?>? aiReflectionInputHash,
+      Value<DateTime?>? aiReflectionStartedAt,
+      Value<String?>? aiReflectionProvider,
+      Value<String?>? aiReflectionModel,
+      Value<int?>? aiReflectionSchemaVersion,
+      Value<String?>? aiReflectionStartObservation,
+      Value<String?>? aiReflectionStartQuestion,
+      Value<String?>? aiReflectionStartHelperStarters,
+      Value<String?>? aiReflectionSummary,
+      Value<String?>? aiReflectionLikelyCore,
+      Value<String?>? aiReflectionEarlyTurningPoint,
+      Value<String?>? aiReflectionAlternative,
+      Value<String?>? aiReflectionNextStep,
+      Value<String?>? aiReflectionMantra,
+      Value<String?>? aiReflectionLastErrorCode,
+      Value<String?>? aiReflectionLastErrorMessage,
+      Value<DateTime?>? aiReflectionDeferredAt,
+      Value<DateTime?>? aiReflectionResumeSuggestedAt,
+      Value<DateTime?>? aiReflectionDeferredUntil,
+      Value<DateTime?>? aiReflectionCompletedAt,
       Value<String?>? interventionType,
       Value<String?>? interventionId,
       Value<bool>? interventionCompleted,
@@ -2879,6 +3993,46 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
       aiEvaluationText: aiEvaluationText ?? this.aiEvaluationText,
       aiEvaluationSchemaVersion:
           aiEvaluationSchemaVersion ?? this.aiEvaluationSchemaVersion,
+      aiReflectionMode: aiReflectionMode ?? this.aiReflectionMode,
+      aiReflectionStatus: aiReflectionStatus ?? this.aiReflectionStatus,
+      aiReflectionPhase: aiReflectionPhase ?? this.aiReflectionPhase,
+      aiReflectionSessionId:
+          aiReflectionSessionId ?? this.aiReflectionSessionId,
+      aiReflectionInputHash:
+          aiReflectionInputHash ?? this.aiReflectionInputHash,
+      aiReflectionStartedAt:
+          aiReflectionStartedAt ?? this.aiReflectionStartedAt,
+      aiReflectionProvider: aiReflectionProvider ?? this.aiReflectionProvider,
+      aiReflectionModel: aiReflectionModel ?? this.aiReflectionModel,
+      aiReflectionSchemaVersion:
+          aiReflectionSchemaVersion ?? this.aiReflectionSchemaVersion,
+      aiReflectionStartObservation:
+          aiReflectionStartObservation ?? this.aiReflectionStartObservation,
+      aiReflectionStartQuestion:
+          aiReflectionStartQuestion ?? this.aiReflectionStartQuestion,
+      aiReflectionStartHelperStarters: aiReflectionStartHelperStarters ??
+          this.aiReflectionStartHelperStarters,
+      aiReflectionSummary: aiReflectionSummary ?? this.aiReflectionSummary,
+      aiReflectionLikelyCore:
+          aiReflectionLikelyCore ?? this.aiReflectionLikelyCore,
+      aiReflectionEarlyTurningPoint:
+          aiReflectionEarlyTurningPoint ?? this.aiReflectionEarlyTurningPoint,
+      aiReflectionAlternative:
+          aiReflectionAlternative ?? this.aiReflectionAlternative,
+      aiReflectionNextStep: aiReflectionNextStep ?? this.aiReflectionNextStep,
+      aiReflectionMantra: aiReflectionMantra ?? this.aiReflectionMantra,
+      aiReflectionLastErrorCode:
+          aiReflectionLastErrorCode ?? this.aiReflectionLastErrorCode,
+      aiReflectionLastErrorMessage:
+          aiReflectionLastErrorMessage ?? this.aiReflectionLastErrorMessage,
+      aiReflectionDeferredAt:
+          aiReflectionDeferredAt ?? this.aiReflectionDeferredAt,
+      aiReflectionResumeSuggestedAt:
+          aiReflectionResumeSuggestedAt ?? this.aiReflectionResumeSuggestedAt,
+      aiReflectionDeferredUntil:
+          aiReflectionDeferredUntil ?? this.aiReflectionDeferredUntil,
+      aiReflectionCompletedAt:
+          aiReflectionCompletedAt ?? this.aiReflectionCompletedAt,
       interventionType: interventionType ?? this.interventionType,
       interventionId: interventionId ?? this.interventionId,
       interventionCompleted:
@@ -3081,6 +4235,97 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
       map['ai_evaluation_schema_version'] =
           Variable<int>(aiEvaluationSchemaVersion.value);
     }
+    if (aiReflectionMode.present) {
+      map['ai_reflection_mode'] = Variable<String>(aiReflectionMode.value);
+    }
+    if (aiReflectionStatus.present) {
+      map['ai_reflection_status'] = Variable<String>(aiReflectionStatus.value);
+    }
+    if (aiReflectionPhase.present) {
+      map['ai_reflection_phase'] = Variable<String>(aiReflectionPhase.value);
+    }
+    if (aiReflectionSessionId.present) {
+      map['ai_reflection_session_id'] =
+          Variable<String>(aiReflectionSessionId.value);
+    }
+    if (aiReflectionInputHash.present) {
+      map['ai_reflection_input_hash'] =
+          Variable<String>(aiReflectionInputHash.value);
+    }
+    if (aiReflectionStartedAt.present) {
+      map['ai_reflection_started_at'] =
+          Variable<DateTime>(aiReflectionStartedAt.value);
+    }
+    if (aiReflectionProvider.present) {
+      map['ai_reflection_provider'] =
+          Variable<String>(aiReflectionProvider.value);
+    }
+    if (aiReflectionModel.present) {
+      map['ai_reflection_model'] = Variable<String>(aiReflectionModel.value);
+    }
+    if (aiReflectionSchemaVersion.present) {
+      map['ai_reflection_schema_version'] =
+          Variable<int>(aiReflectionSchemaVersion.value);
+    }
+    if (aiReflectionStartObservation.present) {
+      map['ai_reflection_start_observation'] =
+          Variable<String>(aiReflectionStartObservation.value);
+    }
+    if (aiReflectionStartQuestion.present) {
+      map['ai_reflection_start_question'] =
+          Variable<String>(aiReflectionStartQuestion.value);
+    }
+    if (aiReflectionStartHelperStarters.present) {
+      map['ai_reflection_start_helper_starters'] =
+          Variable<String>(aiReflectionStartHelperStarters.value);
+    }
+    if (aiReflectionSummary.present) {
+      map['ai_reflection_summary'] =
+          Variable<String>(aiReflectionSummary.value);
+    }
+    if (aiReflectionLikelyCore.present) {
+      map['ai_reflection_likely_core'] =
+          Variable<String>(aiReflectionLikelyCore.value);
+    }
+    if (aiReflectionEarlyTurningPoint.present) {
+      map['ai_reflection_early_turning_point'] =
+          Variable<String>(aiReflectionEarlyTurningPoint.value);
+    }
+    if (aiReflectionAlternative.present) {
+      map['ai_reflection_alternative'] =
+          Variable<String>(aiReflectionAlternative.value);
+    }
+    if (aiReflectionNextStep.present) {
+      map['ai_reflection_next_step'] =
+          Variable<String>(aiReflectionNextStep.value);
+    }
+    if (aiReflectionMantra.present) {
+      map['ai_reflection_mantra'] = Variable<String>(aiReflectionMantra.value);
+    }
+    if (aiReflectionLastErrorCode.present) {
+      map['ai_reflection_last_error_code'] =
+          Variable<String>(aiReflectionLastErrorCode.value);
+    }
+    if (aiReflectionLastErrorMessage.present) {
+      map['ai_reflection_last_error_message'] =
+          Variable<String>(aiReflectionLastErrorMessage.value);
+    }
+    if (aiReflectionDeferredAt.present) {
+      map['ai_reflection_deferred_at'] =
+          Variable<DateTime>(aiReflectionDeferredAt.value);
+    }
+    if (aiReflectionResumeSuggestedAt.present) {
+      map['ai_reflection_resume_suggested_at'] =
+          Variable<DateTime>(aiReflectionResumeSuggestedAt.value);
+    }
+    if (aiReflectionDeferredUntil.present) {
+      map['ai_reflection_deferred_until'] =
+          Variable<DateTime>(aiReflectionDeferredUntil.value);
+    }
+    if (aiReflectionCompletedAt.present) {
+      map['ai_reflection_completed_at'] =
+          Variable<DateTime>(aiReflectionCompletedAt.value);
+    }
     if (interventionType.present) {
       map['intervention_type'] = Variable<String>(interventionType.value);
     }
@@ -3179,6 +4424,35 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
           ..write('aiEvaluationConsentGiven: $aiEvaluationConsentGiven, ')
           ..write('aiEvaluationText: $aiEvaluationText, ')
           ..write('aiEvaluationSchemaVersion: $aiEvaluationSchemaVersion, ')
+          ..write('aiReflectionMode: $aiReflectionMode, ')
+          ..write('aiReflectionStatus: $aiReflectionStatus, ')
+          ..write('aiReflectionPhase: $aiReflectionPhase, ')
+          ..write('aiReflectionSessionId: $aiReflectionSessionId, ')
+          ..write('aiReflectionInputHash: $aiReflectionInputHash, ')
+          ..write('aiReflectionStartedAt: $aiReflectionStartedAt, ')
+          ..write('aiReflectionProvider: $aiReflectionProvider, ')
+          ..write('aiReflectionModel: $aiReflectionModel, ')
+          ..write('aiReflectionSchemaVersion: $aiReflectionSchemaVersion, ')
+          ..write(
+              'aiReflectionStartObservation: $aiReflectionStartObservation, ')
+          ..write('aiReflectionStartQuestion: $aiReflectionStartQuestion, ')
+          ..write(
+              'aiReflectionStartHelperStarters: $aiReflectionStartHelperStarters, ')
+          ..write('aiReflectionSummary: $aiReflectionSummary, ')
+          ..write('aiReflectionLikelyCore: $aiReflectionLikelyCore, ')
+          ..write(
+              'aiReflectionEarlyTurningPoint: $aiReflectionEarlyTurningPoint, ')
+          ..write('aiReflectionAlternative: $aiReflectionAlternative, ')
+          ..write('aiReflectionNextStep: $aiReflectionNextStep, ')
+          ..write('aiReflectionMantra: $aiReflectionMantra, ')
+          ..write('aiReflectionLastErrorCode: $aiReflectionLastErrorCode, ')
+          ..write(
+              'aiReflectionLastErrorMessage: $aiReflectionLastErrorMessage, ')
+          ..write('aiReflectionDeferredAt: $aiReflectionDeferredAt, ')
+          ..write(
+              'aiReflectionResumeSuggestedAt: $aiReflectionResumeSuggestedAt, ')
+          ..write('aiReflectionDeferredUntil: $aiReflectionDeferredUntil, ')
+          ..write('aiReflectionCompletedAt: $aiReflectionCompletedAt, ')
           ..write('interventionType: $interventionType, ')
           ..write('interventionId: $interventionId, ')
           ..write('interventionCompleted: $interventionCompleted, ')
@@ -4679,6 +5953,30 @@ typedef $$SituationEntriesTableCreateCompanionBuilder
   Value<bool> aiEvaluationConsentGiven,
   Value<String?> aiEvaluationText,
   Value<int?> aiEvaluationSchemaVersion,
+  Value<String?> aiReflectionMode,
+  Value<String?> aiReflectionStatus,
+  Value<String?> aiReflectionPhase,
+  Value<String?> aiReflectionSessionId,
+  Value<String?> aiReflectionInputHash,
+  Value<DateTime?> aiReflectionStartedAt,
+  Value<String?> aiReflectionProvider,
+  Value<String?> aiReflectionModel,
+  Value<int?> aiReflectionSchemaVersion,
+  Value<String?> aiReflectionStartObservation,
+  Value<String?> aiReflectionStartQuestion,
+  Value<String?> aiReflectionStartHelperStarters,
+  Value<String?> aiReflectionSummary,
+  Value<String?> aiReflectionLikelyCore,
+  Value<String?> aiReflectionEarlyTurningPoint,
+  Value<String?> aiReflectionAlternative,
+  Value<String?> aiReflectionNextStep,
+  Value<String?> aiReflectionMantra,
+  Value<String?> aiReflectionLastErrorCode,
+  Value<String?> aiReflectionLastErrorMessage,
+  Value<DateTime?> aiReflectionDeferredAt,
+  Value<DateTime?> aiReflectionResumeSuggestedAt,
+  Value<DateTime?> aiReflectionDeferredUntil,
+  Value<DateTime?> aiReflectionCompletedAt,
   Value<String?> interventionType,
   Value<String?> interventionId,
   Value<bool> interventionCompleted,
@@ -4748,6 +6046,30 @@ typedef $$SituationEntriesTableUpdateCompanionBuilder
   Value<bool> aiEvaluationConsentGiven,
   Value<String?> aiEvaluationText,
   Value<int?> aiEvaluationSchemaVersion,
+  Value<String?> aiReflectionMode,
+  Value<String?> aiReflectionStatus,
+  Value<String?> aiReflectionPhase,
+  Value<String?> aiReflectionSessionId,
+  Value<String?> aiReflectionInputHash,
+  Value<DateTime?> aiReflectionStartedAt,
+  Value<String?> aiReflectionProvider,
+  Value<String?> aiReflectionModel,
+  Value<int?> aiReflectionSchemaVersion,
+  Value<String?> aiReflectionStartObservation,
+  Value<String?> aiReflectionStartQuestion,
+  Value<String?> aiReflectionStartHelperStarters,
+  Value<String?> aiReflectionSummary,
+  Value<String?> aiReflectionLikelyCore,
+  Value<String?> aiReflectionEarlyTurningPoint,
+  Value<String?> aiReflectionAlternative,
+  Value<String?> aiReflectionNextStep,
+  Value<String?> aiReflectionMantra,
+  Value<String?> aiReflectionLastErrorCode,
+  Value<String?> aiReflectionLastErrorMessage,
+  Value<DateTime?> aiReflectionDeferredAt,
+  Value<DateTime?> aiReflectionResumeSuggestedAt,
+  Value<DateTime?> aiReflectionDeferredUntil,
+  Value<DateTime?> aiReflectionCompletedAt,
   Value<String?> interventionType,
   Value<String?> interventionId,
   Value<bool> interventionCompleted,
@@ -4972,6 +6294,104 @@ class $$SituationEntriesTableFilterComposer
 
   ColumnFilters<int> get aiEvaluationSchemaVersion => $composableBuilder(
       column: $table.aiEvaluationSchemaVersion,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionMode => $composableBuilder(
+      column: $table.aiReflectionMode,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionStatus => $composableBuilder(
+      column: $table.aiReflectionStatus,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionPhase => $composableBuilder(
+      column: $table.aiReflectionPhase,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionSessionId => $composableBuilder(
+      column: $table.aiReflectionSessionId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionInputHash => $composableBuilder(
+      column: $table.aiReflectionInputHash,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get aiReflectionStartedAt => $composableBuilder(
+      column: $table.aiReflectionStartedAt,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionProvider => $composableBuilder(
+      column: $table.aiReflectionProvider,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionModel => $composableBuilder(
+      column: $table.aiReflectionModel,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get aiReflectionSchemaVersion => $composableBuilder(
+      column: $table.aiReflectionSchemaVersion,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionStartObservation => $composableBuilder(
+      column: $table.aiReflectionStartObservation,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionStartQuestion => $composableBuilder(
+      column: $table.aiReflectionStartQuestion,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionStartHelperStarters =>
+      $composableBuilder(
+          column: $table.aiReflectionStartHelperStarters,
+          builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionSummary => $composableBuilder(
+      column: $table.aiReflectionSummary,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionLikelyCore => $composableBuilder(
+      column: $table.aiReflectionLikelyCore,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionEarlyTurningPoint => $composableBuilder(
+      column: $table.aiReflectionEarlyTurningPoint,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionAlternative => $composableBuilder(
+      column: $table.aiReflectionAlternative,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionNextStep => $composableBuilder(
+      column: $table.aiReflectionNextStep,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionMantra => $composableBuilder(
+      column: $table.aiReflectionMantra,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionLastErrorCode => $composableBuilder(
+      column: $table.aiReflectionLastErrorCode,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiReflectionLastErrorMessage => $composableBuilder(
+      column: $table.aiReflectionLastErrorMessage,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get aiReflectionDeferredAt => $composableBuilder(
+      column: $table.aiReflectionDeferredAt,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get aiReflectionResumeSuggestedAt =>
+      $composableBuilder(
+          column: $table.aiReflectionResumeSuggestedAt,
+          builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get aiReflectionDeferredUntil => $composableBuilder(
+      column: $table.aiReflectionDeferredUntil,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get aiReflectionCompletedAt => $composableBuilder(
+      column: $table.aiReflectionCompletedAt,
       builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get interventionType => $composableBuilder(
@@ -5234,6 +6654,107 @@ class $$SituationEntriesTableOrderingComposer
       column: $table.aiEvaluationSchemaVersion,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get aiReflectionMode => $composableBuilder(
+      column: $table.aiReflectionMode,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionStatus => $composableBuilder(
+      column: $table.aiReflectionStatus,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionPhase => $composableBuilder(
+      column: $table.aiReflectionPhase,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionSessionId => $composableBuilder(
+      column: $table.aiReflectionSessionId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionInputHash => $composableBuilder(
+      column: $table.aiReflectionInputHash,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get aiReflectionStartedAt => $composableBuilder(
+      column: $table.aiReflectionStartedAt,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionProvider => $composableBuilder(
+      column: $table.aiReflectionProvider,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionModel => $composableBuilder(
+      column: $table.aiReflectionModel,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get aiReflectionSchemaVersion => $composableBuilder(
+      column: $table.aiReflectionSchemaVersion,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionStartObservation =>
+      $composableBuilder(
+          column: $table.aiReflectionStartObservation,
+          builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionStartQuestion => $composableBuilder(
+      column: $table.aiReflectionStartQuestion,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionStartHelperStarters =>
+      $composableBuilder(
+          column: $table.aiReflectionStartHelperStarters,
+          builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionSummary => $composableBuilder(
+      column: $table.aiReflectionSummary,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionLikelyCore => $composableBuilder(
+      column: $table.aiReflectionLikelyCore,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionEarlyTurningPoint =>
+      $composableBuilder(
+          column: $table.aiReflectionEarlyTurningPoint,
+          builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionAlternative => $composableBuilder(
+      column: $table.aiReflectionAlternative,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionNextStep => $composableBuilder(
+      column: $table.aiReflectionNextStep,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionMantra => $composableBuilder(
+      column: $table.aiReflectionMantra,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionLastErrorCode => $composableBuilder(
+      column: $table.aiReflectionLastErrorCode,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiReflectionLastErrorMessage =>
+      $composableBuilder(
+          column: $table.aiReflectionLastErrorMessage,
+          builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get aiReflectionDeferredAt => $composableBuilder(
+      column: $table.aiReflectionDeferredAt,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get aiReflectionResumeSuggestedAt =>
+      $composableBuilder(
+          column: $table.aiReflectionResumeSuggestedAt,
+          builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get aiReflectionDeferredUntil => $composableBuilder(
+      column: $table.aiReflectionDeferredUntil,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get aiReflectionCompletedAt => $composableBuilder(
+      column: $table.aiReflectionCompletedAt,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get interventionType => $composableBuilder(
       column: $table.interventionType,
       builder: (column) => ColumnOrderings(column));
@@ -5449,6 +6970,88 @@ class $$SituationEntriesTableAnnotationComposer
   GeneratedColumn<int> get aiEvaluationSchemaVersion => $composableBuilder(
       column: $table.aiEvaluationSchemaVersion, builder: (column) => column);
 
+  GeneratedColumn<String> get aiReflectionMode => $composableBuilder(
+      column: $table.aiReflectionMode, builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionStatus => $composableBuilder(
+      column: $table.aiReflectionStatus, builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionPhase => $composableBuilder(
+      column: $table.aiReflectionPhase, builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionSessionId => $composableBuilder(
+      column: $table.aiReflectionSessionId, builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionInputHash => $composableBuilder(
+      column: $table.aiReflectionInputHash, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get aiReflectionStartedAt => $composableBuilder(
+      column: $table.aiReflectionStartedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionProvider => $composableBuilder(
+      column: $table.aiReflectionProvider, builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionModel => $composableBuilder(
+      column: $table.aiReflectionModel, builder: (column) => column);
+
+  GeneratedColumn<int> get aiReflectionSchemaVersion => $composableBuilder(
+      column: $table.aiReflectionSchemaVersion, builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionStartObservation =>
+      $composableBuilder(
+          column: $table.aiReflectionStartObservation,
+          builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionStartQuestion => $composableBuilder(
+      column: $table.aiReflectionStartQuestion, builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionStartHelperStarters =>
+      $composableBuilder(
+          column: $table.aiReflectionStartHelperStarters,
+          builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionSummary => $composableBuilder(
+      column: $table.aiReflectionSummary, builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionLikelyCore => $composableBuilder(
+      column: $table.aiReflectionLikelyCore, builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionEarlyTurningPoint =>
+      $composableBuilder(
+          column: $table.aiReflectionEarlyTurningPoint,
+          builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionAlternative => $composableBuilder(
+      column: $table.aiReflectionAlternative, builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionNextStep => $composableBuilder(
+      column: $table.aiReflectionNextStep, builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionMantra => $composableBuilder(
+      column: $table.aiReflectionMantra, builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionLastErrorCode => $composableBuilder(
+      column: $table.aiReflectionLastErrorCode, builder: (column) => column);
+
+  GeneratedColumn<String> get aiReflectionLastErrorMessage =>
+      $composableBuilder(
+          column: $table.aiReflectionLastErrorMessage,
+          builder: (column) => column);
+
+  GeneratedColumn<DateTime> get aiReflectionDeferredAt => $composableBuilder(
+      column: $table.aiReflectionDeferredAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get aiReflectionResumeSuggestedAt =>
+      $composableBuilder(
+          column: $table.aiReflectionResumeSuggestedAt,
+          builder: (column) => column);
+
+  GeneratedColumn<DateTime> get aiReflectionDeferredUntil => $composableBuilder(
+      column: $table.aiReflectionDeferredUntil, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get aiReflectionCompletedAt => $composableBuilder(
+      column: $table.aiReflectionCompletedAt, builder: (column) => column);
+
   GeneratedColumn<String> get interventionType => $composableBuilder(
       column: $table.interventionType, builder: (column) => column);
 
@@ -5567,6 +7170,32 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             Value<bool> aiEvaluationConsentGiven = const Value.absent(),
             Value<String?> aiEvaluationText = const Value.absent(),
             Value<int?> aiEvaluationSchemaVersion = const Value.absent(),
+            Value<String?> aiReflectionMode = const Value.absent(),
+            Value<String?> aiReflectionStatus = const Value.absent(),
+            Value<String?> aiReflectionPhase = const Value.absent(),
+            Value<String?> aiReflectionSessionId = const Value.absent(),
+            Value<String?> aiReflectionInputHash = const Value.absent(),
+            Value<DateTime?> aiReflectionStartedAt = const Value.absent(),
+            Value<String?> aiReflectionProvider = const Value.absent(),
+            Value<String?> aiReflectionModel = const Value.absent(),
+            Value<int?> aiReflectionSchemaVersion = const Value.absent(),
+            Value<String?> aiReflectionStartObservation = const Value.absent(),
+            Value<String?> aiReflectionStartQuestion = const Value.absent(),
+            Value<String?> aiReflectionStartHelperStarters =
+                const Value.absent(),
+            Value<String?> aiReflectionSummary = const Value.absent(),
+            Value<String?> aiReflectionLikelyCore = const Value.absent(),
+            Value<String?> aiReflectionEarlyTurningPoint = const Value.absent(),
+            Value<String?> aiReflectionAlternative = const Value.absent(),
+            Value<String?> aiReflectionNextStep = const Value.absent(),
+            Value<String?> aiReflectionMantra = const Value.absent(),
+            Value<String?> aiReflectionLastErrorCode = const Value.absent(),
+            Value<String?> aiReflectionLastErrorMessage = const Value.absent(),
+            Value<DateTime?> aiReflectionDeferredAt = const Value.absent(),
+            Value<DateTime?> aiReflectionResumeSuggestedAt =
+                const Value.absent(),
+            Value<DateTime?> aiReflectionDeferredUntil = const Value.absent(),
+            Value<DateTime?> aiReflectionCompletedAt = const Value.absent(),
             Value<String?> interventionType = const Value.absent(),
             Value<String?> interventionId = const Value.absent(),
             Value<bool> interventionCompleted = const Value.absent(),
@@ -5635,6 +7264,30 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             aiEvaluationConsentGiven: aiEvaluationConsentGiven,
             aiEvaluationText: aiEvaluationText,
             aiEvaluationSchemaVersion: aiEvaluationSchemaVersion,
+            aiReflectionMode: aiReflectionMode,
+            aiReflectionStatus: aiReflectionStatus,
+            aiReflectionPhase: aiReflectionPhase,
+            aiReflectionSessionId: aiReflectionSessionId,
+            aiReflectionInputHash: aiReflectionInputHash,
+            aiReflectionStartedAt: aiReflectionStartedAt,
+            aiReflectionProvider: aiReflectionProvider,
+            aiReflectionModel: aiReflectionModel,
+            aiReflectionSchemaVersion: aiReflectionSchemaVersion,
+            aiReflectionStartObservation: aiReflectionStartObservation,
+            aiReflectionStartQuestion: aiReflectionStartQuestion,
+            aiReflectionStartHelperStarters: aiReflectionStartHelperStarters,
+            aiReflectionSummary: aiReflectionSummary,
+            aiReflectionLikelyCore: aiReflectionLikelyCore,
+            aiReflectionEarlyTurningPoint: aiReflectionEarlyTurningPoint,
+            aiReflectionAlternative: aiReflectionAlternative,
+            aiReflectionNextStep: aiReflectionNextStep,
+            aiReflectionMantra: aiReflectionMantra,
+            aiReflectionLastErrorCode: aiReflectionLastErrorCode,
+            aiReflectionLastErrorMessage: aiReflectionLastErrorMessage,
+            aiReflectionDeferredAt: aiReflectionDeferredAt,
+            aiReflectionResumeSuggestedAt: aiReflectionResumeSuggestedAt,
+            aiReflectionDeferredUntil: aiReflectionDeferredUntil,
+            aiReflectionCompletedAt: aiReflectionCompletedAt,
             interventionType: interventionType,
             interventionId: interventionId,
             interventionCompleted: interventionCompleted,
@@ -5703,6 +7356,32 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             Value<bool> aiEvaluationConsentGiven = const Value.absent(),
             Value<String?> aiEvaluationText = const Value.absent(),
             Value<int?> aiEvaluationSchemaVersion = const Value.absent(),
+            Value<String?> aiReflectionMode = const Value.absent(),
+            Value<String?> aiReflectionStatus = const Value.absent(),
+            Value<String?> aiReflectionPhase = const Value.absent(),
+            Value<String?> aiReflectionSessionId = const Value.absent(),
+            Value<String?> aiReflectionInputHash = const Value.absent(),
+            Value<DateTime?> aiReflectionStartedAt = const Value.absent(),
+            Value<String?> aiReflectionProvider = const Value.absent(),
+            Value<String?> aiReflectionModel = const Value.absent(),
+            Value<int?> aiReflectionSchemaVersion = const Value.absent(),
+            Value<String?> aiReflectionStartObservation = const Value.absent(),
+            Value<String?> aiReflectionStartQuestion = const Value.absent(),
+            Value<String?> aiReflectionStartHelperStarters =
+                const Value.absent(),
+            Value<String?> aiReflectionSummary = const Value.absent(),
+            Value<String?> aiReflectionLikelyCore = const Value.absent(),
+            Value<String?> aiReflectionEarlyTurningPoint = const Value.absent(),
+            Value<String?> aiReflectionAlternative = const Value.absent(),
+            Value<String?> aiReflectionNextStep = const Value.absent(),
+            Value<String?> aiReflectionMantra = const Value.absent(),
+            Value<String?> aiReflectionLastErrorCode = const Value.absent(),
+            Value<String?> aiReflectionLastErrorMessage = const Value.absent(),
+            Value<DateTime?> aiReflectionDeferredAt = const Value.absent(),
+            Value<DateTime?> aiReflectionResumeSuggestedAt =
+                const Value.absent(),
+            Value<DateTime?> aiReflectionDeferredUntil = const Value.absent(),
+            Value<DateTime?> aiReflectionCompletedAt = const Value.absent(),
             Value<String?> interventionType = const Value.absent(),
             Value<String?> interventionId = const Value.absent(),
             Value<bool> interventionCompleted = const Value.absent(),
@@ -5771,6 +7450,30 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             aiEvaluationConsentGiven: aiEvaluationConsentGiven,
             aiEvaluationText: aiEvaluationText,
             aiEvaluationSchemaVersion: aiEvaluationSchemaVersion,
+            aiReflectionMode: aiReflectionMode,
+            aiReflectionStatus: aiReflectionStatus,
+            aiReflectionPhase: aiReflectionPhase,
+            aiReflectionSessionId: aiReflectionSessionId,
+            aiReflectionInputHash: aiReflectionInputHash,
+            aiReflectionStartedAt: aiReflectionStartedAt,
+            aiReflectionProvider: aiReflectionProvider,
+            aiReflectionModel: aiReflectionModel,
+            aiReflectionSchemaVersion: aiReflectionSchemaVersion,
+            aiReflectionStartObservation: aiReflectionStartObservation,
+            aiReflectionStartQuestion: aiReflectionStartQuestion,
+            aiReflectionStartHelperStarters: aiReflectionStartHelperStarters,
+            aiReflectionSummary: aiReflectionSummary,
+            aiReflectionLikelyCore: aiReflectionLikelyCore,
+            aiReflectionEarlyTurningPoint: aiReflectionEarlyTurningPoint,
+            aiReflectionAlternative: aiReflectionAlternative,
+            aiReflectionNextStep: aiReflectionNextStep,
+            aiReflectionMantra: aiReflectionMantra,
+            aiReflectionLastErrorCode: aiReflectionLastErrorCode,
+            aiReflectionLastErrorMessage: aiReflectionLastErrorMessage,
+            aiReflectionDeferredAt: aiReflectionDeferredAt,
+            aiReflectionResumeSuggestedAt: aiReflectionResumeSuggestedAt,
+            aiReflectionDeferredUntil: aiReflectionDeferredUntil,
+            aiReflectionCompletedAt: aiReflectionCompletedAt,
             interventionType: interventionType,
             interventionId: interventionId,
             interventionCompleted: interventionCompleted,

@@ -72,6 +72,30 @@ class SituationEntries extends Table {
       boolean().withDefault(const Constant(false))();
   TextColumn get aiEvaluationText => text().nullable()();
   IntColumn get aiEvaluationSchemaVersion => integer().nullable()();
+  TextColumn get aiReflectionMode => text().nullable()();
+  TextColumn get aiReflectionStatus => text().nullable()();
+  TextColumn get aiReflectionPhase => text().nullable()();
+  TextColumn get aiReflectionSessionId => text().nullable()();
+  TextColumn get aiReflectionInputHash => text().nullable()();
+  DateTimeColumn get aiReflectionStartedAt => dateTime().nullable()();
+  TextColumn get aiReflectionProvider => text().nullable()();
+  TextColumn get aiReflectionModel => text().nullable()();
+  IntColumn get aiReflectionSchemaVersion => integer().nullable()();
+  TextColumn get aiReflectionStartObservation => text().nullable()();
+  TextColumn get aiReflectionStartQuestion => text().nullable()();
+  TextColumn get aiReflectionStartHelperStarters => text().nullable()();
+  TextColumn get aiReflectionSummary => text().nullable()();
+  TextColumn get aiReflectionLikelyCore => text().nullable()();
+  TextColumn get aiReflectionEarlyTurningPoint => text().nullable()();
+  TextColumn get aiReflectionAlternative => text().nullable()();
+  TextColumn get aiReflectionNextStep => text().nullable()();
+  TextColumn get aiReflectionMantra => text().nullable()();
+  TextColumn get aiReflectionLastErrorCode => text().nullable()();
+  TextColumn get aiReflectionLastErrorMessage => text().nullable()();
+  DateTimeColumn get aiReflectionDeferredAt => dateTime().nullable()();
+  DateTimeColumn get aiReflectionResumeSuggestedAt => dateTime().nullable()();
+  DateTimeColumn get aiReflectionDeferredUntil => dateTime().nullable()();
+  DateTimeColumn get aiReflectionCompletedAt => dateTime().nullable()();
 
   // Intervention fields (Phase 5)
   TextColumn get interventionType =>

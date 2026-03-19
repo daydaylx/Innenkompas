@@ -9,7 +9,7 @@ import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:innenkompass/data/db/app_database.dart';
 
 void main() {
-  test('migrates schema version 1 entries to version 5 without data loss',
+  test('migrates schema version 1 entries to version 7 without data loss',
       () async {
     final tempDir = await Directory.systemTemp.createTemp(
       'innenkompass_migration_test',
@@ -166,6 +166,30 @@ void main() {
     expect(columnNames, contains('evaluation_helpful_now_key'));
     expect(columnNames, contains('evaluation_learning_point_key'));
     expect(columnNames, contains('evaluation_status_keys'));
+    expect(columnNames, contains('ai_reflection_mode'));
+    expect(columnNames, contains('ai_reflection_status'));
+    expect(columnNames, contains('ai_reflection_summary'));
+    expect(columnNames, contains('ai_reflection_likely_core'));
+    expect(columnNames, contains('ai_reflection_early_turning_point'));
+    expect(columnNames, contains('ai_reflection_alternative'));
+    expect(columnNames, contains('ai_reflection_next_step'));
+    expect(columnNames, contains('ai_reflection_mantra'));
+    expect(columnNames, contains('ai_reflection_phase'));
+    expect(columnNames, contains('ai_reflection_session_id'));
+    expect(columnNames, contains('ai_reflection_input_hash'));
+    expect(columnNames, contains('ai_reflection_started_at'));
+    expect(columnNames, contains('ai_reflection_provider'));
+    expect(columnNames, contains('ai_reflection_model'));
+    expect(columnNames, contains('ai_reflection_schema_version'));
+    expect(columnNames, contains('ai_reflection_start_observation'));
+    expect(columnNames, contains('ai_reflection_start_question'));
+    expect(columnNames, contains('ai_reflection_start_helper_starters'));
+    expect(columnNames, contains('ai_reflection_last_error_code'));
+    expect(columnNames, contains('ai_reflection_last_error_message'));
+    expect(columnNames, contains('ai_reflection_deferred_at'));
+    expect(columnNames, contains('ai_reflection_resume_suggested_at'));
+    expect(columnNames, contains('ai_reflection_deferred_until'));
+    expect(columnNames, contains('ai_reflection_completed_at'));
 
     final upgradedEntry = await database.getSituationEntryById(1);
     expect(upgradedEntry, isNotNull);
@@ -192,6 +216,30 @@ void main() {
     expect(upgradedEntry.thoughtFocus, isNull);
     expect(upgradedEntry.systemReaction, isNull);
     expect(upgradedEntry.realisticAlternative, isNull);
+    expect(upgradedEntry.aiReflectionMode, isNull);
+    expect(upgradedEntry.aiReflectionStatus, isNull);
+    expect(upgradedEntry.aiReflectionPhase, isNull);
+    expect(upgradedEntry.aiReflectionSessionId, isNull);
+    expect(upgradedEntry.aiReflectionInputHash, isNull);
+    expect(upgradedEntry.aiReflectionStartedAt, isNull);
+    expect(upgradedEntry.aiReflectionProvider, isNull);
+    expect(upgradedEntry.aiReflectionModel, isNull);
+    expect(upgradedEntry.aiReflectionSchemaVersion, isNull);
+    expect(upgradedEntry.aiReflectionStartObservation, isNull);
+    expect(upgradedEntry.aiReflectionStartQuestion, isNull);
+    expect(upgradedEntry.aiReflectionStartHelperStarters, isNull);
+    expect(upgradedEntry.aiReflectionLastErrorCode, isNull);
+    expect(upgradedEntry.aiReflectionLastErrorMessage, isNull);
+    expect(upgradedEntry.aiReflectionDeferredAt, isNull);
+    expect(upgradedEntry.aiReflectionResumeSuggestedAt, isNull);
+    expect(upgradedEntry.aiReflectionSummary, isNull);
+    expect(upgradedEntry.aiReflectionLikelyCore, isNull);
+    expect(upgradedEntry.aiReflectionEarlyTurningPoint, isNull);
+    expect(upgradedEntry.aiReflectionAlternative, isNull);
+    expect(upgradedEntry.aiReflectionNextStep, isNull);
+    expect(upgradedEntry.aiReflectionMantra, isNull);
+    expect(upgradedEntry.aiReflectionDeferredUntil, isNull);
+    expect(upgradedEntry.aiReflectionCompletedAt, isNull);
     expect(upgradedEntry.evaluationHelpfulNowKey, isNull);
     expect(upgradedEntry.evaluationLearningPointKey, isNull);
     expect(upgradedEntry.evaluationStatusKeys, isNull);
@@ -210,6 +258,6 @@ void main() {
 
     final versionRow =
         await database.customSelect('PRAGMA user_version;').getSingle();
-    expect(versionRow.data['user_version'], 5);
+    expect(versionRow.data['user_version'], 7);
   });
 }

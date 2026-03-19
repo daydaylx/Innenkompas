@@ -20,7 +20,9 @@ import '../../features/patterns/screens/patterns_screen.dart';
 import '../../features/intervention/screens/intervention_screen.dart';
 import '../../features/intervention/screens/post_evaluation_screen.dart';
 import '../../features/evaluation/screens/entry_evaluation_screen.dart';
+import '../../features/evaluation/screens/ai_reflection_screen.dart';
 import '../../features/new_situation/screens/quick_checkin_screen.dart';
+import '../../domain/models/ai_reflection.dart';
 import 'bootstrap_provider.dart';
 import 'database_provider.dart';
 import 'lock_provider.dart';
@@ -85,6 +87,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         );
       }
       return EntryEvaluationScreen(entryId: id);
+    },
+    aiReflectionScreen: (context, state) {
+      final id = int.tryParse(state.pathParameters['id'] ?? '');
+      final mode = AiReflectionMode.fromRaw(state.pathParameters['mode']);
+      if (id == null || mode == null) {
+        return const Scaffold(
+          body: Center(
+            child: Text('KI-Nachreflexion nicht gefunden'),
+          ),
+        );
+      }
+      return AiReflectionScreen(entryId: id, mode: mode);
     },
     entryDetailScreen: (context, state) {
       final id = int.tryParse(state.pathParameters['id'] ?? '');

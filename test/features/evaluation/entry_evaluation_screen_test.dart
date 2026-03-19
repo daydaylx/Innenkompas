@@ -97,6 +97,60 @@ void main() {
       );
       expect(find.text('Erneut anfordern'), findsOneWidget);
     });
+
+    testWidgets('shows reflection modes for regular entries',
+        (WidgetTester tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+
+      final entryId = await _insertEntry(
+        database,
+        status: 'failed',
+        consentGiven: true,
+        requestedAt: DateTime.now().subtract(const Duration(minutes: 1)),
+      );
+
+      await _pumpScreen(
+        tester,
+        database: database,
+        entryId: entryId,
+      );
+
+      expect(find.text('Mit KI weiter sortieren'), findsOneWidget);
+      expect(find.text('Verstehen'), findsOneWidget);
+      expect(find.text('Anders abbiegen'), findsOneWidget);
+      expect(find.text('Kurz ordnen'), findsOneWidget);
+      expect(find.text('Erst runterkommen'), findsNothing);
+      expect(find.text('Später mit Abstand reflektieren'), findsOneWidget);
+    });
+
+    testWidgets('prioritizes stabilize mode for high escalation',
+        (WidgetTester tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+
+      final entryId = await _insertEntry(
+        database,
+        status: 'failed',
+        consentGiven: true,
+        requestedAt: DateTime.now().subtract(const Duration(minutes: 1)),
+        intensity: 9,
+        bodyTension: 9,
+        evaluationStatusKeys: const ['acute_escalation'],
+      );
+
+      await _pumpScreen(
+        tester,
+        database: database,
+        entryId: entryId,
+      );
+
+      expect(find.text('Erst runterkommen'), findsOneWidget);
+      expect(find.text('Verstehen'), findsNothing);
+      expect(find.text('Anders abbiegen'), findsNothing);
+      expect(find.text('Kurz ordnen'), findsNothing);
+      expect(find.text('Später mit Abstand reflektieren'), findsOneWidget);
+    });
   });
 }
 
@@ -135,6 +189,9 @@ Future<int> _insertEntry(
   required String status,
   required bool consentGiven,
   required DateTime requestedAt,
+  int intensity = 7,
+  int bodyTension = 8,
+  List<String>? evaluationStatusKeys,
 }) {
   final now = DateTime(2026, 3, 19, 10, 0);
   return database.createSituationEntry(
@@ -143,8 +200,8 @@ Future<int> _insertEntry(
       context: 'work',
       timestamp: now,
       involvedPerson: const Value('Kollege'),
-      intensity: 7,
-      bodyTension: 8,
+      intensity: intensity,
+      bodyTension: bodyTension,
       primaryEmotion: 'fear',
       secondaryEmotion: const Value('shame'),
       bodySymptoms: Value(jsonEncode(const ['Enge in der Brust', 'Zittern'])),
@@ -158,6 +215,9 @@ Future<int> _insertEntry(
       isCrisis: const Value(false),
       evaluationHeadlineKey: const Value('interpretation_uncertain_facts'),
       evaluationMeaningKey: const Value('interpretation_not_certain'),
+      evaluationStatusKeys: evaluationStatusKeys == null
+          ? const Value(null)
+          : Value(jsonEncode(evaluationStatusKeys)),
       suggestedTipIds: Value(
         jsonEncode(const [
           'check_facts_not_assumptions',

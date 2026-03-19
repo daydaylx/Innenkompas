@@ -1,3 +1,4 @@
+import 'package:innenkompass/core/constants/actual_behavior_types.dart';
 import 'package:innenkompass/core/constants/context_types.dart';
 import 'package:innenkompass/core/constants/emotion_types.dart';
 import 'package:innenkompass/core/constants/fact_interpretation_results.dart';
@@ -97,6 +98,8 @@ class EvaluationEngine {
     required TriggerAsLastDrop triggerAsLastDrop,
   }) {
     final ordered = <String>{};
+    final normalizedBehaviorTags =
+        ActualBehaviorTypes.normalizeAll(actualBehaviorTags).toSet();
 
     if (systemState == SystemState.crisis) {
       ordered.add('safety_relevant_moment');
@@ -110,8 +113,10 @@ class EvaluationEngine {
 
     if ((intensity >= 8 && bodyTension >= 7) ||
         systemReaction == SystemReactionType.attack ||
-        actualBehaviorTags.contains('geschrien') ||
-        actualBehaviorTags.contains('Dinge geworfen')) {
+        normalizedBehaviorTags.contains('scream') ||
+        normalizedBehaviorTags.contains('throw_objects') ||
+        normalizedBehaviorTags.contains('raise_voice') ||
+        normalizedBehaviorTags.contains('freeze_block')) {
       ordered.add('acute_escalation');
     }
 

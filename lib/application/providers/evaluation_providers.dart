@@ -1,9 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:innenkompass/core/config/ai_evaluation_config.dart';
+import 'package:innenkompass/data/services/direct_open_router_ai_reflection_service.dart';
 import 'package:innenkompass/data/services/direct_open_router_ai_evaluation_service.dart';
+import 'package:innenkompass/data/services/open_router_ai_reflection_service.dart';
 import 'package:innenkompass/data/services/open_router_ai_evaluation_service.dart';
 import 'package:innenkompass/data/db/app_database.dart';
 import 'package:innenkompass/domain/models/evaluation.dart';
+import 'package:innenkompass/domain/services/ai_reflection_service.dart';
 import 'package:innenkompass/domain/services/ai_evaluation_service.dart';
 import 'package:innenkompass/domain/services/pattern_analyzer.dart';
 
@@ -63,6 +66,44 @@ final aiEvaluationServiceProvider = Provider<AiEvaluationService?>((ref) {
     ref.onDispose(service.dispose);
     return service;
   } on AiEvaluationException {
+    return null;
+  }
+});
+
+final aiReflectionServiceProvider = Provider<AiReflectionService?>((ref) {
+  final config = ref.watch(aiEvaluationConfigProvider);
+  if (!config.isEnabled) {
+    return null;
+  }
+
+  try {
+    if (config.hasDirectOpenRouterAccess && config.openRouterApiKey != null) {
+      final service = DirectOpenRouterAiReflectionService(
+        apiKey: config.openRouterApiKey!,
+        httpReferer: config.openRouterHttpReferer,
+        appTitle: config.openRouterAppTitle,
+        provider: config.provider,
+        model: config.model,
+        schemaVersion: config.schemaVersion,
+      );
+      ref.onDispose(service.dispose);
+      return service;
+    }
+
+    if (config.baseUrl == null) {
+      return null;
+    }
+
+    final service = OpenRouterAiReflectionService(
+      baseUrl: config.baseUrl!,
+      appToken: config.appToken,
+      provider: config.provider,
+      model: config.model,
+      schemaVersion: config.schemaVersion,
+    );
+    ref.onDispose(service.dispose);
+    return service;
+  } on AiReflectionException {
     return null;
   }
 });

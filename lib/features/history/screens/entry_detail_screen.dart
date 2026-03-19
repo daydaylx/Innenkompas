@@ -9,6 +9,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:innenkompass/app/theme/colors.dart';
 import 'package:innenkompass/application/providers/database_provider.dart';
 import 'package:innenkompass/application/providers/evaluation_providers.dart';
+import 'package:innenkompass/core/constants/actual_behavior_types.dart';
 import 'package:innenkompass/core/constants/app_constants.dart';
 import 'package:innenkompass/core/constants/context_types.dart';
 import 'package:innenkompass/core/constants/emotion_types.dart';
@@ -20,8 +21,10 @@ import 'package:innenkompass/core/constants/system_reaction_types.dart';
 import 'package:innenkompass/core/constants/tipping_point_awareness.dart';
 import 'package:innenkompass/core/constants/trigger_as_last_drop.dart';
 import 'package:innenkompass/data/db/app_database.dart';
+import 'package:innenkompass/domain/models/ai_reflection.dart';
 import 'package:innenkompass/domain/models/ai_evaluation.dart';
 import 'package:innenkompass/shared/widgets/app_scaffold.dart';
+import 'package:innenkompass/shared/widgets/ai/ai_reflection_result_card.dart';
 
 part 'entry_detail_screen.g.dart';
 
@@ -64,8 +67,11 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
           final additionalEmotions =
               _decodeStringList(entry.additionalEmotions);
           final thoughtPatterns = _decodeStringList(entry.thoughtPatterns);
-          final actualBehaviorTags =
-              _decodeStringList(entry.actualBehaviorTags);
+          final actualBehaviorTags = ActualBehaviorTypes.labelsFor(
+            ActualBehaviorTypes.normalizeAll(
+              _decodeStringList(entry.actualBehaviorTags),
+            ),
+          );
           final touchedThemes = _decodeStringList(entry.touchedThemes);
           final neededSupports = _decodeStringList(entry.neededSupports);
           final evaluationStatusKeys =
@@ -447,6 +453,14 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
                     ),
                   ),
                 ),
+                if (_hasAiReflectionData(entry)) ...[
+                  const SizedBox(height: AppConstants.spacingMedium),
+                  _buildCard(
+                    title: 'KI-Nachreflexion',
+                    icon: Icons.auto_fix_high_outlined,
+                    child: _buildAiReflectionSection(entry),
+                  ),
+                ],
                 if ((entry.aiEvaluationStatus ?? '').isNotEmpty ||
                     (entry.aiEvaluationText ?? '').isNotEmpty) ...[
                   const SizedBox(height: AppConstants.spacingMedium),
@@ -579,6 +593,89 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
     );
   }
 
+  Widget _buildAiReflectionSection(SituationEntryData entry) {
+    final status = AiReflectionStatus.fromRaw(entry.aiReflectionStatus);
+    final mode = AiReflectionMode.fromRaw(entry.aiReflectionMode);
+    final result = _storedAiReflectionResult(entry);
+    final metaParts = <String>[
+      if (mode != null) 'Modus: ${mode.label}',
+      'Status: ${_getAiReflectionStatusLabel(status)}',
+      if ((entry.aiReflectionProvider ?? '').isNotEmpty)
+        'Provider: ${entry.aiReflectionProvider}',
+      if ((entry.aiReflectionModel ?? '').isNotEmpty)
+        'Modell: ${entry.aiReflectionModel}',
+      if (entry.aiReflectionCompletedAt != null)
+        _formatAiTimestamp(entry.aiReflectionCompletedAt!),
+    ];
+
+    if (status == AiReflectionStatus.completed && result != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (metaParts.isNotEmpty) ...[
+            Text(
+              metaParts.join(' · '),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: AppConstants.spacingMedium),
+          ],
+          AiReflectionResultCard(result: result),
+        ],
+      );
+    }
+
+    if (status == AiReflectionStatus.deferred) {
+      final deferredText = entry.aiReflectionDeferredUntil == null
+          ? 'Für Nachreflexion vorgemerkt.'
+          : 'Für Nachreflexion vorgemerkt. Sinnvoll erneut ab ${_formatShortTimestamp(entry.aiReflectionDeferredUntil!)}.';
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (metaParts.isNotEmpty) ...[
+            Text(
+              metaParts.join(' · '),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: AppConstants.spacingMedium),
+          ],
+          Text(deferredText),
+          if ((entry.aiReflectionLastErrorMessage ?? '').isNotEmpty) ...[
+            const SizedBox(height: AppConstants.spacingSmall),
+            Text(entry.aiReflectionLastErrorMessage!),
+          ],
+        ],
+      );
+    }
+
+    if (status == AiReflectionStatus.inProgress) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (metaParts.isNotEmpty) ...[
+            Text(
+              metaParts.join(' · '),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: AppConstants.spacingMedium),
+          ],
+          Text(
+            entry.aiReflectionPhase == AiReflectionPhase.failedComplete.rawValue
+                ? 'Die KI-Nachreflexion wurde begonnen, die letzte Verdichtung ist aber fehlgeschlagen.'
+                : 'Die KI-Nachreflexion wurde begonnen, aber noch nicht abgeschlossen.',
+          ),
+          if ((entry.aiReflectionLastErrorMessage ?? '').isNotEmpty) ...[
+            const SizedBox(height: AppConstants.spacingSmall),
+            Text(entry.aiReflectionLastErrorMessage!),
+          ],
+        ],
+      );
+    }
+
+    return const Text(
+      'Für diesen Eintrag liegt noch keine gespeicherte KI-Nachreflexion vor.',
+    );
+  }
+
   Widget _buildSectionHeader(IconData icon, String text) {
     return Row(
       children: [
@@ -638,6 +735,10 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
     return 'Erstellt am ${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}.${dt.year} um ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 
+  String _formatShortTimestamp(DateTime dt) {
+    return '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}.${dt.year} um ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  }
+
   String _getContextLabel(String contextName) {
     return ContextType.fromRaw(contextName)?.label ?? contextName;
   }
@@ -685,6 +786,56 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
 
   String _getPatternFamiliarityLabel(String rawValue) {
     return PatternFamiliarity.fromRaw(rawValue)?.label ?? rawValue;
+  }
+
+  String _getAiReflectionStatusLabel(AiReflectionStatus status) {
+    switch (status) {
+      case AiReflectionStatus.notStarted:
+        return 'Noch nicht gestartet';
+      case AiReflectionStatus.inProgress:
+        return 'In Bearbeitung';
+      case AiReflectionStatus.completed:
+        return 'Abgeschlossen';
+      case AiReflectionStatus.deferred:
+        return 'Für später markiert';
+    }
+  }
+
+  bool _hasAiReflectionData(SituationEntryData entry) {
+    return (entry.aiReflectionStatus ?? '').isNotEmpty ||
+        (entry.aiReflectionMode ?? '').isNotEmpty ||
+        (entry.aiReflectionSummary ?? '').isNotEmpty ||
+        (entry.aiReflectionLikelyCore ?? '').isNotEmpty ||
+        (entry.aiReflectionEarlyTurningPoint ?? '').isNotEmpty ||
+        (entry.aiReflectionAlternative ?? '').isNotEmpty ||
+        (entry.aiReflectionNextStep ?? '').isNotEmpty ||
+        (entry.aiReflectionMantra ?? '').isNotEmpty;
+  }
+
+  AiReflectionResult? _storedAiReflectionResult(SituationEntryData entry) {
+    final summary = entry.aiReflectionSummary?.trim() ?? '';
+    final likelyCore = entry.aiReflectionLikelyCore?.trim() ?? '';
+    final earlyTurningPoint = entry.aiReflectionEarlyTurningPoint?.trim() ?? '';
+    final alternative = entry.aiReflectionAlternative?.trim() ?? '';
+    final nextStep = entry.aiReflectionNextStep?.trim() ?? '';
+    final mantra = entry.aiReflectionMantra?.trim();
+
+    if (summary.isEmpty ||
+        likelyCore.isEmpty ||
+        earlyTurningPoint.isEmpty ||
+        alternative.isEmpty ||
+        nextStep.isEmpty) {
+      return null;
+    }
+
+    return AiReflectionResult(
+      summary: summary,
+      likelyCore: likelyCore,
+      earlyTurningPoint: earlyTurningPoint,
+      alternative: alternative,
+      nextStep: nextStep,
+      mantra: (mantra == null || mantra.isEmpty) ? null : mantra,
+    );
   }
 
   String _legacyNeedSummary(SituationEntryData entry) {

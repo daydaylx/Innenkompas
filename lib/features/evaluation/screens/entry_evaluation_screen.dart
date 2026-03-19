@@ -14,11 +14,14 @@ import 'package:innenkompass/core/constants/app_constants.dart';
 import 'package:innenkompass/core/constants/intervention_types.dart';
 import 'package:innenkompass/core/constants/system_states.dart';
 import 'package:innenkompass/data/db/app_database.dart';
+import 'package:innenkompass/domain/models/ai_reflection.dart';
 import 'package:innenkompass/domain/models/ai_evaluation.dart';
+import 'package:innenkompass/domain/services/ai_reflection_policy.dart';
 import 'package:innenkompass/domain/models/intervention_library.dart';
 import 'package:innenkompass/domain/services/ai_evaluation_service.dart';
 import 'package:innenkompass/domain/services/pattern_analyzer.dart';
 import 'package:innenkompass/shared/widgets/app_scaffold.dart';
+import 'package:innenkompass/shared/widgets/ai/ai_reflection_result_card.dart';
 import 'package:innenkompass/shared/widgets/buttons/app_primary_button.dart';
 import 'package:innenkompass/shared/widgets/buttons/app_secondary_button.dart';
 
@@ -55,6 +58,8 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
     final contentAsync = ref.watch(evaluationContentProvider);
     final aiConfig = ref.watch(aiEvaluationConfigProvider);
     final hasAiService = ref.watch(aiEvaluationServiceProvider) != null;
+    final hasAiReflectionService =
+        ref.watch(aiReflectionServiceProvider) != null;
 
     return AppScaffold(
       title: 'Deine Auswertung',
@@ -204,6 +209,13 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
                       ),
                     ),
                     const SizedBox(height: AppConstants.spacingMedium),
+                    _buildAiReflectionSection(
+                      context: context,
+                      entry: entry,
+                      aiConfig: aiConfig,
+                      hasAiService: hasAiReflectionService,
+                    ),
+                    const SizedBox(height: AppConstants.spacingMedium),
                     _buildAiSection(
                       context: context,
                       entry: entry,
@@ -309,6 +321,153 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
     ref.read(newSituationFlowControllerProvider.notifier).reset();
     if (!mounted) return;
     context.go(AppRoutes.home);
+  }
+
+  Widget _buildAiReflectionSection({
+    required BuildContext context,
+    required SituationEntryData entry,
+    required AiEvaluationConfig aiConfig,
+    required bool hasAiService,
+  }) {
+    final policy = AiReflectionPolicy.evaluateEntry(entry);
+    final reflectionStatus =
+        AiReflectionStatus.fromRaw(entry.aiReflectionStatus);
+    final reflectionMode = AiReflectionMode.fromRaw(entry.aiReflectionMode);
+    final result = _storedAiReflectionResult(entry);
+    final phase = AiReflectionPhase.fromRaw(entry.aiReflectionPhase);
+    final lastErrorMessage = entry.aiReflectionLastErrorMessage?.trim();
+    final children = <Widget>[
+      const Text(
+        'Die KI hilft beim Strukturieren deines Eintrags. Bei hoher Anspannung bleibt der Fokus zuerst auf Stabilisierung, nicht auf tiefer Analyse.',
+      ),
+    ];
+
+    if (!aiConfig.isEnabled || !hasAiService) {
+      children.addAll([
+        const SizedBox(height: AppConstants.spacingMedium),
+        const Text(
+          'Wenn die KI gerade nicht erreichbar ist, erstellt die App eine reduzierte lokale Verdichtung statt die Nachreflexion abzubrechen.',
+        ),
+      ]);
+    }
+
+    if (policy.hintText != null) {
+      children.addAll([
+        const SizedBox(height: AppConstants.spacingMedium),
+        Text(policy.hintText!),
+      ]);
+    }
+
+    if (reflectionStatus == AiReflectionStatus.completed && result != null) {
+      children.addAll([
+        const SizedBox(height: AppConstants.spacingMedium),
+        _AiReflectionMetaLine(
+          mode: reflectionMode,
+          status: reflectionStatus,
+          completedAt: entry.aiReflectionCompletedAt,
+          provider: entry.aiReflectionProvider,
+          model: entry.aiReflectionModel,
+        ),
+        const SizedBox(height: AppConstants.spacingMedium),
+        AiReflectionResultCard(result: result),
+      ]);
+    } else if (reflectionStatus == AiReflectionStatus.deferred &&
+        reflectionMode == null) {
+      children.addAll([
+        const SizedBox(height: AppConstants.spacingMedium),
+        _buildReflectionStatusNotice(
+          context,
+          icon: Icons.schedule_outlined,
+          text: entry.aiReflectionDeferredUntil == null
+              ? 'Für spätere Nachreflexion vorgemerkt.'
+              : 'Für spätere Nachreflexion vorgemerkt. Sinnvoll erneut ab ${_formatTimestamp(entry.aiReflectionDeferredUntil!)}.',
+        ),
+      ]);
+    } else if ((reflectionStatus == AiReflectionStatus.inProgress ||
+            reflectionStatus == AiReflectionStatus.deferred) &&
+        reflectionMode != null) {
+      children.addAll([
+        const SizedBox(height: AppConstants.spacingMedium),
+        _buildReflectionStatusNotice(
+          context,
+          icon: reflectionStatus == AiReflectionStatus.inProgress
+              ? Icons.timelapse_outlined
+              : Icons.schedule_outlined,
+          text: switch (reflectionStatus) {
+            AiReflectionStatus.inProgress => phase ==
+                    AiReflectionPhase.failedComplete
+                ? 'Die Nachreflexion im Modus „${reflectionMode.label}“ wurde begonnen, die letzte Verdichtung ist aber fehlgeschlagen. Du kannst sie fortsetzen.'
+                : 'Eine Nachreflexion im Modus „${reflectionMode.label}“ wurde bereits begonnen und kann fortgesetzt werden.',
+            AiReflectionStatus.deferred =>
+              'Der Modus „${reflectionMode.label}“ ist für eine spätere Nachreflexion vorgemerkt.',
+            _ => '',
+          },
+        ),
+      ]);
+    }
+
+    if (lastErrorMessage != null &&
+        lastErrorMessage.isNotEmpty &&
+        reflectionStatus != AiReflectionStatus.completed) {
+      children.addAll([
+        const SizedBox(height: AppConstants.spacingMedium),
+        _buildReflectionStatusNotice(
+          context,
+          icon: Icons.info_outline,
+          text: lastErrorMessage,
+        ),
+      ]);
+    }
+
+    if (policy.isBlockedByCrisis) {
+      children.addAll([
+        const SizedBox(height: AppConstants.spacingMedium),
+        const Text(
+          'Für akute Kriseneinträge bleibt die KI-Nachreflexion deaktiviert. Hier zählt zuerst Stabilisierung und Sicherheit.',
+        ),
+      ]);
+    } else if (reflectionStatus != AiReflectionStatus.completed) {
+      children.add(const SizedBox(height: AppConstants.spacingMedium));
+      if ((reflectionStatus == AiReflectionStatus.inProgress ||
+              reflectionStatus == AiReflectionStatus.deferred) &&
+          reflectionMode != null) {
+        children.add(
+          AppPrimaryButton(
+            onPressed: () => _openAiReflection(reflectionMode),
+            label: reflectionStatus == AiReflectionStatus.inProgress
+                ? 'Nachreflexion fortsetzen'
+                : 'Jetzt mit ${reflectionMode.label} weiter sortieren',
+          ),
+        );
+      } else {
+        children.addAll(
+          policy.availableModes.map(
+            (mode) => _AiReflectionModeTile(
+              mode: mode,
+              onTap: () => _openAiReflection(mode),
+            ),
+          ),
+        );
+      }
+
+      if (policy.canDefer) {
+        children.addAll([
+          const SizedBox(height: AppConstants.spacingSmall),
+          AppSecondaryButton(
+            onPressed: () => _deferAiReflection(reflectionMode),
+            label: 'Später mit Abstand reflektieren',
+          ),
+        ]);
+      }
+    }
+
+    return _SectionCard(
+      title: 'Mit KI weiter sortieren',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
+    );
   }
 
   Widget _buildAiSection({
@@ -512,6 +671,75 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
     );
   }
 
+  Future<void> _deferAiReflection(AiReflectionMode? mode) async {
+    final now = DateTime.now().toUtc();
+    await ref.read(databaseProvider).markAiReflectionDeferred(
+          entryId: widget.entryId,
+          mode: mode,
+          deferredAt: now,
+          resumeSuggestedAt: now.add(const Duration(hours: 6)),
+        );
+    ref.invalidate(evaluationEntryProvider(widget.entryId));
+    _showMessage('Für spätere Nachreflexion vorgemerkt.');
+  }
+
+  void _openAiReflection(AiReflectionMode mode) {
+    context.push(
+      AppRoutes.entryAiReflection
+          .replaceFirst(':id', '${widget.entryId}')
+          .replaceFirst(':mode', mode.name),
+    );
+  }
+
+  AiReflectionResult? _storedAiReflectionResult(SituationEntryData entry) {
+    final summary = entry.aiReflectionSummary?.trim() ?? '';
+    final likelyCore = entry.aiReflectionLikelyCore?.trim() ?? '';
+    final earlyTurningPoint = entry.aiReflectionEarlyTurningPoint?.trim() ?? '';
+    final alternative = entry.aiReflectionAlternative?.trim() ?? '';
+    final nextStep = entry.aiReflectionNextStep?.trim() ?? '';
+    final mantra = entry.aiReflectionMantra?.trim();
+
+    if (summary.isEmpty ||
+        likelyCore.isEmpty ||
+        earlyTurningPoint.isEmpty ||
+        alternative.isEmpty ||
+        nextStep.isEmpty) {
+      return null;
+    }
+
+    return AiReflectionResult(
+      summary: summary,
+      likelyCore: likelyCore,
+      earlyTurningPoint: earlyTurningPoint,
+      alternative: alternative,
+      nextStep: nextStep,
+      mantra: (mantra == null || mantra.isEmpty) ? null : mantra,
+    );
+  }
+
+  Widget _buildReflectionStatusNotice(
+    BuildContext context, {
+    required IconData icon,
+    required String text,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppConstants.spacingMedium),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: AppConstants.spacingSmall),
+          Expanded(child: Text(text)),
+        ],
+      ),
+    );
+  }
+
   Future<void> _requestAiEvaluation(SituationEntryData entry) async {
     if (entry.isCrisis || entry.systemState == SystemState.crisis.name) {
       _showMessage(
@@ -663,6 +891,15 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
 
     return const [];
   }
+
+  static String _formatTimestamp(DateTime timestamp) {
+    final local = timestamp.toLocal();
+    final day = local.day.toString().padLeft(2, '0');
+    final month = local.month.toString().padLeft(2, '0');
+    final hour = local.hour.toString().padLeft(2, '0');
+    final minute = local.minute.toString().padLeft(2, '0');
+    return '$day.$month.${local.year}, $hour:$minute';
+  }
 }
 
 class _AiMetaLine extends StatelessWidget {
@@ -689,12 +926,52 @@ class _AiMetaLine extends StatelessWidget {
   }
 
   String _formatTimestamp(DateTime timestamp) {
-    final local = timestamp.toLocal();
-    final day = local.day.toString().padLeft(2, '0');
-    final month = local.month.toString().padLeft(2, '0');
-    final hour = local.hour.toString().padLeft(2, '0');
-    final minute = local.minute.toString().padLeft(2, '0');
-    return '$day.$month.${local.year}, $hour:$minute';
+    return _EntryEvaluationScreenState._formatTimestamp(timestamp);
+  }
+}
+
+class _AiReflectionMetaLine extends StatelessWidget {
+  const _AiReflectionMetaLine({
+    required this.mode,
+    required this.status,
+    required this.completedAt,
+    this.provider,
+    this.model,
+  });
+
+  final AiReflectionMode? mode;
+  final AiReflectionStatus status;
+  final DateTime? completedAt;
+  final String? provider;
+  final String? model;
+
+  @override
+  Widget build(BuildContext context) {
+    final parts = <String>[
+      if (mode != null) 'Modus: ${mode!.label}',
+      'Status: ${_statusLabel(status)}',
+      if ((provider ?? '').trim().isNotEmpty) 'Provider: ${provider!.trim()}',
+      if ((model ?? '').trim().isNotEmpty) 'Modell: ${model!.trim()}',
+      if (completedAt != null)
+        _EntryEvaluationScreenState._formatTimestamp(completedAt!),
+    ];
+    return Text(
+      parts.join(' · '),
+      style: Theme.of(context).textTheme.bodySmall,
+    );
+  }
+
+  static String _statusLabel(AiReflectionStatus status) {
+    switch (status) {
+      case AiReflectionStatus.notStarted:
+        return 'Noch nicht gestartet';
+      case AiReflectionStatus.inProgress:
+        return 'In Bearbeitung';
+      case AiReflectionStatus.completed:
+        return 'Abgeschlossen';
+      case AiReflectionStatus.deferred:
+        return 'Für später markiert';
+    }
   }
 }
 
@@ -825,6 +1102,42 @@ class _TipRow extends StatelessWidget {
           const SizedBox(width: AppConstants.spacingSmall),
           Expanded(child: Text(text)),
         ],
+      ),
+    );
+  }
+}
+
+class _AiReflectionModeTile extends StatelessWidget {
+  const _AiReflectionModeTile({
+    required this.mode,
+    required this.onTap,
+  });
+
+  final AiReflectionMode mode;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingSmall),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.spacingMedium,
+          vertical: 4,
+        ),
+        title: Text(
+          mode.label,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(mode.shortDescription),
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
       ),
     );
   }

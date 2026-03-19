@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/constants/actual_behavior_types.dart';
 import '../../core/constants/impulse_types.dart';
 import '../../core/constants/system_reaction_types.dart';
 import '../../domain/services/evaluation_engine.dart';
@@ -99,6 +100,9 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
       final emotionData = state.emotionData!;
       final thoughtData = state.thoughtImpulseData!;
       final reflectionData = state.reflectionData!;
+      final normalizedBehaviorTags = ActualBehaviorTypes.normalizeAll(
+        thoughtData.actualBehaviorTags,
+      );
       final legacyImpulse = _mapSystemReactionToLegacyImpulse(
         thoughtData.systemReaction,
       );
@@ -106,7 +110,9 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
           ? emotionData.additionalEmotions.first
           : null;
       final actualBehaviorSummary = _mergeBehaviorSummary(
-          thoughtData.actualBehaviorTags, thoughtData.actualBehaviorNote);
+        normalizedBehaviorTags,
+        thoughtData.actualBehaviorNote,
+      );
       final needSummary = _buildLegacyNeedSummary(
         reflectionData.touchedThemes,
         reflectionData.neededSupports,
@@ -133,7 +139,7 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
         context: eventData.context,
         factInterpretation: thoughtData.factInterpretation,
         thoughtPatterns: thoughtData.thoughtPatterns,
-        actualBehaviorTags: thoughtData.actualBehaviorTags,
+        actualBehaviorTags: normalizedBehaviorTags,
         tippingPointAwareness: thoughtData.tippingPointAwareness,
         triggerAsLastDrop: reflectionData.triggerAsLastDrop,
         touchedThemes: reflectionData.touchedThemes,
@@ -186,8 +192,8 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
           thoughtPatterns: thoughtData.thoughtPatterns.isNotEmpty
               ? Value(_encodeList(thoughtData.thoughtPatterns))
               : const Value.absent(),
-          actualBehaviorTags: thoughtData.actualBehaviorTags.isNotEmpty
-              ? Value(_encodeList(thoughtData.actualBehaviorTags))
+          actualBehaviorTags: normalizedBehaviorTags.isNotEmpty
+              ? Value(_encodeList(normalizedBehaviorTags))
               : const Value.absent(),
           actualBehavior: actualBehaviorSummary != null
               ? Value(actualBehaviorSummary)
@@ -276,7 +282,7 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
 
     final buffer = StringBuffer();
     if (tags.isNotEmpty) {
-      buffer.write(tags.join(', '));
+      buffer.write(ActualBehaviorTypes.labelsFor(tags).join(', '));
     }
     if (hasNote) {
       if (buffer.isNotEmpty) {

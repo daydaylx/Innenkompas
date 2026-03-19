@@ -1,3 +1,5 @@
+import 'actual_behavior_types.dart';
+
 class NewSituationOptionLists {
   NewSituationOptionLists._();
 
@@ -28,18 +30,8 @@ class NewSituationOptionLists {
     'Gedankenspirale',
   ];
 
-  static const List<String> actualBehaviorOptions = [
-    'laut geworden',
-    'geschrien',
-    'Dinge geworfen',
-    'diskutiert',
-    'Raum verlassen',
-    'zurückgezogen',
-    'geweint',
-    'blockiert',
-    'Hilfe geholt',
-    'abgelenkt',
-  ];
+  static const List<String> actualBehaviorOptions =
+      ActualBehaviorTypes.optionLabels;
 
   static const List<String> touchedThemes = [
     'Ruhe',

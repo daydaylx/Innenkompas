@@ -22,6 +22,8 @@ class AppRoutes {
   static const String intervention = '/intervention';
   static const String postEvaluation = '/post-evaluation';
   static const String entryEvaluation = '/entry-evaluation/:id';
+  static const String entryAiReflection =
+      '/entry-evaluation/:id/ai-reflection/:mode';
   static const String history = '/history';
   static const String entryDetail = '/history/:id';
   static const String patterns = '/patterns';
@@ -62,6 +64,7 @@ class AppRouter {
     required Widget Function(BuildContext, GoRouterState) interventionScreen,
     required Widget Function(BuildContext, GoRouterState) postEvaluationScreen,
     required Widget Function(BuildContext, GoRouterState) entryEvaluationScreen,
+    required Widget Function(BuildContext, GoRouterState) aiReflectionScreen,
     required Widget Function(BuildContext, GoRouterState) entryDetailScreen,
     required bool Function() isOnboardingCompleted,
     bool Function()? isAppLocked,
@@ -188,6 +191,13 @@ class AppRouter {
           pageBuilder: (context, state) => MaterialPage(
             key: state.pageKey,
             child: entryEvaluationScreen(context, state),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.entryAiReflection,
+          pageBuilder: (context, state) => MaterialPage(
+            key: state.pageKey,
+            child: aiReflectionScreen(context, state),
           ),
         ),
 

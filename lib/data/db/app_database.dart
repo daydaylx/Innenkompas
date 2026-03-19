@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -5,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import '../../core/constants/app_constants.dart';
 import '../../domain/models/ai_evaluation.dart';
+import '../../domain/models/ai_reflection.dart';
 import 'tables/situation_entries.dart';
 import 'tables/user_settings.dart';
 import 'tables/crisis_plan.dart';
@@ -194,6 +196,106 @@ class AppDatabase extends _$AppDatabase {
             situationEntries.evaluationStatusKeys,
           );
         }
+        if (from < 6) {
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionMode,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionStatus,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionSummary,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionLikelyCore,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionEarlyTurningPoint,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionAlternative,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionNextStep,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionMantra,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionDeferredUntil,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionCompletedAt,
+          );
+        }
+        if (from < 7) {
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionPhase,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionSessionId,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionInputHash,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionStartedAt,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionProvider,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionModel,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionSchemaVersion,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionStartObservation,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionStartQuestion,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionStartHelperStarters,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionLastErrorCode,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionLastErrorMessage,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionDeferredAt,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiReflectionResumeSuggestedAt,
+          );
+        }
       },
       beforeOpen: (OpeningDetails details) async {
         // Enable foreign keys and other database pragmas
@@ -297,6 +399,235 @@ class AppDatabase extends _$AppDatabase {
         updatedAt: Value(DateTime.now()),
       ),
     );
+  }
+
+  Future<void> markAiReflectionInProgress({
+    required int entryId,
+    required AiReflectionMode mode,
+    required String sessionId,
+    required String inputHash,
+    required DateTime startedAt,
+  }) async {
+    await (update(situationEntries)..where((e) => e.id.equals(entryId))).write(
+      SituationEntriesCompanion(
+        aiReflectionMode: Value(mode.name),
+        aiReflectionStatus: Value(AiReflectionStatus.inProgress.rawValue),
+        aiReflectionPhase: Value(AiReflectionPhase.startPending.rawValue),
+        aiReflectionSessionId: Value(sessionId),
+        aiReflectionInputHash: Value(inputHash),
+        aiReflectionStartedAt: Value(startedAt),
+        aiReflectionProvider: const Value(null),
+        aiReflectionModel: const Value(null),
+        aiReflectionSchemaVersion: const Value(null),
+        aiReflectionStartObservation: const Value(null),
+        aiReflectionStartQuestion: const Value(null),
+        aiReflectionStartHelperStarters: const Value(null),
+        aiReflectionSummary: const Value(null),
+        aiReflectionLikelyCore: const Value(null),
+        aiReflectionEarlyTurningPoint: const Value(null),
+        aiReflectionAlternative: const Value(null),
+        aiReflectionNextStep: const Value(null),
+        aiReflectionMantra: const Value(null),
+        aiReflectionCompletedAt: const Value(null),
+        aiReflectionLastErrorCode: const Value(null),
+        aiReflectionLastErrorMessage: const Value(null),
+        aiReflectionDeferredAt: const Value(null),
+        aiReflectionResumeSuggestedAt: const Value(null),
+        aiReflectionDeferredUntil: const Value(null),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<bool> saveAiReflectionStartContent({
+    required int entryId,
+    required String sessionId,
+    required String inputHash,
+    required AiReflectionMode mode,
+    required AiReflectionStartContent content,
+    required String provider,
+    required String model,
+    required int schemaVersion,
+    required DateTime startedAt,
+  }) async {
+    final rows = await (update(situationEntries)
+          ..where((e) =>
+              e.id.equals(entryId) &
+              e.aiReflectionSessionId.equals(sessionId) &
+              e.aiReflectionInputHash.equals(inputHash)))
+        .write(
+      SituationEntriesCompanion(
+        aiReflectionMode: Value(mode.name),
+        aiReflectionStatus: Value(AiReflectionStatus.inProgress.rawValue),
+        aiReflectionPhase: Value(AiReflectionPhase.readyForReply.rawValue),
+        aiReflectionStartedAt: Value(startedAt),
+        aiReflectionProvider: Value(provider),
+        aiReflectionModel: Value(model),
+        aiReflectionSchemaVersion: Value(schemaVersion),
+        aiReflectionStartObservation: Value(content.observation),
+        aiReflectionStartQuestion: Value(content.question),
+        aiReflectionStartHelperStarters:
+            Value(jsonEncode(content.helperStarters)),
+        aiReflectionLastErrorCode: const Value(null),
+        aiReflectionLastErrorMessage: const Value(null),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+
+    return rows > 0;
+  }
+
+  Future<bool> markAiReflectionCompletePending({
+    required int entryId,
+    required String sessionId,
+    required String inputHash,
+  }) async {
+    final rows = await (update(situationEntries)
+          ..where((e) =>
+              e.id.equals(entryId) &
+              e.aiReflectionSessionId.equals(sessionId) &
+              e.aiReflectionInputHash.equals(inputHash)))
+        .write(
+      SituationEntriesCompanion(
+        aiReflectionStatus: Value(AiReflectionStatus.inProgress.rawValue),
+        aiReflectionPhase: Value(AiReflectionPhase.completePending.rawValue),
+        aiReflectionLastErrorCode: const Value(null),
+        aiReflectionLastErrorMessage: const Value(null),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+
+    return rows > 0;
+  }
+
+  Future<void> markAiReflectionDeferred({
+    required int entryId,
+    required AiReflectionMode? mode,
+    required DateTime deferredAt,
+    DateTime? resumeSuggestedAt,
+  }) async {
+    final current = await getSituationEntryById(entryId);
+    final phase = current?.aiReflectionStartObservation != null
+        ? AiReflectionPhase.readyForReply.rawValue
+        : null;
+    await (update(situationEntries)..where((e) => e.id.equals(entryId))).write(
+      SituationEntriesCompanion(
+        aiReflectionMode: mode == null ? const Value(null) : Value(mode.name),
+        aiReflectionStatus: Value(AiReflectionStatus.deferred.rawValue),
+        aiReflectionPhase: Value(phase),
+        aiReflectionDeferredAt: Value(deferredAt),
+        aiReflectionResumeSuggestedAt: Value(resumeSuggestedAt),
+        aiReflectionDeferredUntil: Value(resumeSuggestedAt ?? deferredAt),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<bool> markAiReflectionFailed({
+    required int entryId,
+    required String sessionId,
+    required String inputHash,
+    required AiReflectionPhase phase,
+    required AiReflectionErrorCode errorCode,
+    required String message,
+    required bool keepInProgress,
+  }) async {
+    final rows = await (update(situationEntries)
+          ..where((e) =>
+              e.id.equals(entryId) &
+              e.aiReflectionSessionId.equals(sessionId) &
+              e.aiReflectionInputHash.equals(inputHash)))
+        .write(
+      SituationEntriesCompanion(
+        aiReflectionStatus: keepInProgress
+            ? Value(AiReflectionStatus.inProgress.rawValue)
+            : const Value(null),
+        aiReflectionPhase: Value(phase.rawValue),
+        aiReflectionLastErrorCode: Value(errorCode.name),
+        aiReflectionLastErrorMessage: Value(message),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+
+    return rows > 0;
+  }
+
+  Future<void> clearAiReflectionInProgress({
+    required int entryId,
+  }) async {
+    final current = await getSituationEntryById(entryId);
+    if (current == null ||
+        AiReflectionStatus.fromRaw(current.aiReflectionStatus) !=
+            AiReflectionStatus.inProgress) {
+      return;
+    }
+
+    await (update(situationEntries)..where((e) => e.id.equals(entryId))).write(
+      SituationEntriesCompanion(
+        aiReflectionMode: const Value(null),
+        aiReflectionStatus: const Value(null),
+        aiReflectionPhase: const Value(null),
+        aiReflectionSessionId: const Value(null),
+        aiReflectionInputHash: const Value(null),
+        aiReflectionStartedAt: const Value(null),
+        aiReflectionProvider: const Value(null),
+        aiReflectionModel: const Value(null),
+        aiReflectionSchemaVersion: const Value(null),
+        aiReflectionDeferredUntil: const Value(null),
+        aiReflectionDeferredAt: const Value(null),
+        aiReflectionResumeSuggestedAt: const Value(null),
+        aiReflectionStartObservation: const Value(null),
+        aiReflectionStartQuestion: const Value(null),
+        aiReflectionStartHelperStarters: const Value(null),
+        aiReflectionLastErrorCode: const Value(null),
+        aiReflectionLastErrorMessage: const Value(null),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<bool> saveAiReflectionCompleted({
+    required int entryId,
+    required AiReflectionMode mode,
+    required String sessionId,
+    required String inputHash,
+    required String provider,
+    required String model,
+    required int schemaVersion,
+    required AiReflectionResult result,
+    required DateTime completedAt,
+  }) async {
+    final rows = await (update(situationEntries)
+          ..where((e) =>
+              e.id.equals(entryId) &
+              e.aiReflectionSessionId.equals(sessionId) &
+              e.aiReflectionInputHash.equals(inputHash)))
+        .write(
+      SituationEntriesCompanion(
+        aiReflectionMode: Value(mode.name),
+        aiReflectionStatus: Value(AiReflectionStatus.completed.rawValue),
+        aiReflectionPhase: Value(AiReflectionPhase.completed.rawValue),
+        aiReflectionProvider: Value(provider),
+        aiReflectionModel: Value(model),
+        aiReflectionSchemaVersion: Value(schemaVersion),
+        aiReflectionSummary: Value(result.summary),
+        aiReflectionLikelyCore: Value(result.likelyCore),
+        aiReflectionEarlyTurningPoint: Value(result.earlyTurningPoint),
+        aiReflectionAlternative: Value(result.alternative),
+        aiReflectionNextStep: Value(result.nextStep),
+        aiReflectionMantra:
+            result.hasMantra ? Value(result.mantra) : const Value(null),
+        aiReflectionLastErrorCode: const Value(null),
+        aiReflectionLastErrorMessage: const Value(null),
+        aiReflectionDeferredAt: const Value(null),
+        aiReflectionResumeSuggestedAt: const Value(null),
+        aiReflectionCompletedAt: Value(completedAt),
+        aiReflectionDeferredUntil: const Value(null),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+
+    return rows > 0;
   }
 
   /// Get all situation entries ordered by timestamp (newest first)
@@ -507,6 +838,32 @@ class AppDatabase extends _$AppDatabase {
         'aiEvaluationConsentGiven': e.aiEvaluationConsentGiven,
         'aiEvaluationText': e.aiEvaluationText,
         'aiEvaluationSchemaVersion': e.aiEvaluationSchemaVersion,
+        'aiReflectionMode': e.aiReflectionMode,
+        'aiReflectionStatus': e.aiReflectionStatus,
+        'aiReflectionSummary': e.aiReflectionSummary,
+        'aiReflectionLikelyCore': e.aiReflectionLikelyCore,
+        'aiReflectionEarlyTurningPoint': e.aiReflectionEarlyTurningPoint,
+        'aiReflectionAlternative': e.aiReflectionAlternative,
+        'aiReflectionNextStep': e.aiReflectionNextStep,
+        'aiReflectionMantra': e.aiReflectionMantra,
+        'aiReflectionDeferredUntil':
+            e.aiReflectionDeferredUntil?.toIso8601String(),
+        'aiReflectionCompletedAt': e.aiReflectionCompletedAt?.toIso8601String(),
+        'aiReflectionPhase': e.aiReflectionPhase,
+        'aiReflectionSessionId': e.aiReflectionSessionId,
+        'aiReflectionInputHash': e.aiReflectionInputHash,
+        'aiReflectionStartedAt': e.aiReflectionStartedAt?.toIso8601String(),
+        'aiReflectionProvider': e.aiReflectionProvider,
+        'aiReflectionModel': e.aiReflectionModel,
+        'aiReflectionSchemaVersion': e.aiReflectionSchemaVersion,
+        'aiReflectionStartObservation': e.aiReflectionStartObservation,
+        'aiReflectionStartQuestion': e.aiReflectionStartQuestion,
+        'aiReflectionStartHelperStarters': e.aiReflectionStartHelperStarters,
+        'aiReflectionLastErrorCode': e.aiReflectionLastErrorCode,
+        'aiReflectionLastErrorMessage': e.aiReflectionLastErrorMessage,
+        'aiReflectionDeferredAt': e.aiReflectionDeferredAt?.toIso8601String(),
+        'aiReflectionResumeSuggestedAt':
+            e.aiReflectionResumeSuggestedAt?.toIso8601String(),
         'interventionType': e.interventionType,
         'interventionId': e.interventionId,
         'interventionCompleted': e.interventionCompleted,
