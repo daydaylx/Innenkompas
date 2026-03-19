@@ -89,6 +89,17 @@ class NewSituationValidators {
     return const ValidationResult.valid();
   }
 
+  /// Validate fact vs interpretation selection.
+  static ValidationResult validateFactInterpretation(dynamic result) {
+    if (result == null) {
+      return const ValidationResult.errors([
+        'Bitte schätze ein, wie sehr dein Gedanke auf Fakten oder Deutung beruht.',
+      ]);
+    }
+
+    return const ValidationResult.valid();
+  }
+
   /// Validate actual behavior (optional)
   static ValidationResult validateActualBehavior(String? value) {
     if (value != null &&
@@ -199,6 +210,11 @@ class NewSituationValidators {
     final impulseResult = validateImpulseSelection(data.firstImpulse);
     if (!impulseResult.isValid) {
       errors.addAll(impulseResult.errorMessages);
+    }
+
+    final factResult = validateFactInterpretation(data.factInterpretation);
+    if (!factResult.isValid) {
+      errors.addAll(factResult.errorMessages);
     }
 
     final behaviorResult = validateActualBehavior(data.actualBehavior);

@@ -26,6 +26,7 @@ class SituationEntries extends Table {
   // Thought and impulse fields (Phase 1)
   TextColumn get automaticThought => text()();
   TextColumn get firstImpulse => text()();
+  TextColumn get factInterpretationResult => text().nullable()();
   TextColumn get actualBehavior =>
       text().nullable()(); // Optional actual behavior
   TextColumn get needOrWoundedPoint => text().nullable()();
@@ -34,6 +35,11 @@ class SituationEntries extends Table {
   // Classification fields (Phase 4)
   TextColumn get systemState => text()();
   BoolColumn get isCrisis => boolean().withDefault(const Constant(false))();
+  TextColumn get evaluationHeadlineKey => text().nullable()();
+  TextColumn get evaluationMeaningKey => text().nullable()();
+  TextColumn get suggestedTipIds => text().nullable()(); // JSON array
+  TextColumn get suggestedNextActionKey => text().nullable()();
+  TextColumn get selectedNextActionKey => text().nullable()();
 
   // Intervention fields (Phase 5)
   TextColumn get interventionType =>

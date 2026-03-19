@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:innenkompass/app/router.dart';
+import 'package:innenkompass/application/providers/evaluation_providers.dart';
 import 'package:innenkompass/core/constants/app_constants.dart';
 import 'package:innenkompass/domain/models/intervention.dart';
 import 'package:innenkompass/application/providers/intervention_providers.dart';
@@ -321,6 +322,12 @@ class _PostEvaluationScreenState extends ConsumerState<PostEvaluationScreen> {
 
       // NewSituationFlow zurücksetzen
       ref.read(newSituationFlowControllerProvider.notifier).reset();
+
+      ref.invalidate(patternSummaryProvider);
+      ref.invalidate(contextCorrelationsProvider);
+      ref.invalidate(trendSlopeProvider);
+      ref.invalidate(burnoutRiskProvider);
+      ref.invalidate(narrativeInsightsProvider);
 
       // Zum HomeScreen navigieren
       if (mounted) {

@@ -390,6 +390,7 @@ class _HistoryFilterSheetState extends State<HistoryFilterSheet> {
     final labels = {
       SystemState.acuteActivation: 'Akute Aktivierung',
       SystemState.reflectiveReady: 'Reflexionsbereit',
+      SystemState.interpretation: 'Interpretationsmodus',
       SystemState.rumination: 'Grübelmodus',
       SystemState.conflict: 'Konflikt',
       SystemState.selfDevaluation: 'Selbstabwertung',

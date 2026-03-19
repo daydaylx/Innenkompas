@@ -106,6 +106,7 @@ const _$ImpulseTypeEnumMap = {
 const _$SystemStateEnumMap = {
   SystemState.acuteActivation: 'acuteActivation',
   SystemState.reflectiveReady: 'reflectiveReady',
+  SystemState.interpretation: 'interpretation',
   SystemState.rumination: 'rumination',
   SystemState.conflict: 'conflict',
   SystemState.selfDevaluation: 'selfDevaluation',

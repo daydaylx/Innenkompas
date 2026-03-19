@@ -10,6 +10,33 @@ import 'package:innenkompass/domain/models/intervention.dart'
     show InterventionEffectiveness;
 import 'package:innenkompass/domain/models/pattern_summary.dart';
 
+/// Burnout-Risiko basierend auf aufeinanderfolgenden Tagen mit hoher Intensität
+enum BurnoutRisk { low, medium, high }
+
+/// Kontext-Emotions-Korrelation: Welche Emotionen überwiegen in einem Kontext
+class ContextCorrelation {
+  const ContextCorrelation({
+    required this.context,
+    required this.emotion,
+    required this.contextPercentage,
+    required this.emotionDominance,
+    required this.occurrenceCount,
+    required this.avgIntensity,
+  });
+
+  final ContextType context;
+  final EmotionType emotion;
+
+  /// Anteil dieser Kontext-Einträge an allen Einträgen (%)
+  final double contextPercentage;
+
+  /// Anteil der dominanten Emotion in diesem Kontext (%)
+  final double emotionDominance;
+
+  final int occurrenceCount;
+  final double avgIntensity;
+}
+
 /// Service zur Analyse von Mustern in Situationseinträgen
 class PatternAnalyzer {
   /// Analysiert alle Einträge und gibt eine Zusammenfassung der Muster zurück
@@ -502,6 +529,233 @@ class PatternAnalyzer {
     }
 
     return filtered;
+  }
+
+  /// E-01: Berechnet die Steigung des Intensitäts-Trends (lineare Regression).
+  /// Positiv = steigende Belastung, negativ = sinkende Belastung.
+  /// Einheit: Intensitätspunkte pro Tag.
+  static double computeTrendSlope(List<TrendDataPoint> trend) {
+    if (trend.length < 2) return 0;
+    final n = trend.length.toDouble();
+    double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    for (int i = 0; i < trend.length; i++) {
+      final x = i.toDouble();
+      final y = trend[i].value;
+      sumX += x;
+      sumY += y;
+      sumXY += x * y;
+      sumX2 += x * x;
+    }
+    final denom = n * sumX2 - sumX * sumX;
+    if (denom == 0) return 0;
+    return (n * sumXY - sumX * sumY) / denom;
+  }
+
+  /// E-03: Burnout-Risiko basierend auf aufeinanderfolgenden Trendpunkten
+  /// mit Durchschnittsintensität ≥ 7.
+  static BurnoutRisk computeBurnoutRisk(List<TrendDataPoint> intensityTrend) {
+    if (intensityTrend.isEmpty) return BurnoutRisk.low;
+
+    final sorted = [...intensityTrend]
+      ..sort((a, b) => a.date.compareTo(b.date));
+
+    int consecutiveDays = 0;
+    for (int i = sorted.length - 1; i >= 0; i--) {
+      if (sorted[i].value >= 7.0) {
+        consecutiveDays++;
+      } else {
+        break;
+      }
+    }
+
+    if (consecutiveDays >= 7) return BurnoutRisk.high;
+    if (consecutiveDays >= 4) return BurnoutRisk.medium;
+    return BurnoutRisk.low;
+  }
+
+  /// E-02: Berechnet Kontext-Emotions-Korrelationen für die Top-3-Kontexte.
+  static List<ContextCorrelation> computeContextCorrelations(
+    List<SituationEntryData> entries,
+  ) {
+    if (entries.isEmpty) return [];
+
+    final totalEntries = entries.length;
+
+    // Gruppiere nach Kontext
+    final byContext = <ContextType, List<SituationEntryData>>{};
+    for (final entry in entries) {
+      final ctx =
+          ContextType.values.where((e) => e.name == entry.context).firstOrNull;
+      if (ctx == null) continue;
+      byContext[ctx] = [...byContext[ctx] ?? [], entry];
+    }
+
+    // Top-3 Kontexte nach Häufigkeit
+    final sortedContexts = byContext.entries.toList()
+      ..sort((a, b) => b.value.length.compareTo(a.value.length));
+
+    final correlations = <ContextCorrelation>[];
+    for (final entry in sortedContexts.take(3)) {
+      final contextEntries = entry.value;
+      if (contextEntries.length < 2) continue;
+
+      // Häufigste Emotion in diesem Kontext
+      final emotionFreq = <EmotionType, int>{};
+      for (final e in contextEntries) {
+        final em = EmotionType.values
+            .where((et) => et.name == e.primaryEmotion)
+            .firstOrNull;
+        if (em != null) emotionFreq[em] = (emotionFreq[em] ?? 0) + 1;
+      }
+      if (emotionFreq.isEmpty) continue;
+
+      final dominantEntry =
+          emotionFreq.entries.reduce((a, b) => a.value > b.value ? a : b);
+
+      final avgIntensity =
+          contextEntries.map((e) => e.intensity).reduce((a, b) => a + b) /
+              contextEntries.length;
+
+      correlations.add(ContextCorrelation(
+        context: entry.key,
+        emotion: dominantEntry.key,
+        contextPercentage: contextEntries.length / totalEntries * 100,
+        emotionDominance: dominantEntry.value / contextEntries.length * 100,
+        occurrenceCount: contextEntries.length,
+        avgIntensity: avgIntensity.toDouble(),
+      ));
+    }
+
+    return correlations;
+  }
+
+  /// Narrative Insight-Sätze für die Musteransicht.
+  static List<String> buildNarrativeInsights(List<SituationEntryData> entries) {
+    if (entries.length < 2) {
+      return const [];
+    }
+
+    final insights = <String>[];
+    final triggers = _findCommonTriggers(entries);
+    final topTrigger = triggers.firstOrNull;
+    if (topTrigger != null && topTrigger.occurrenceCount >= 2) {
+      insights.add(
+        '${topTrigger.context.label} führt bei dir oft zu ${topTrigger.emotion.label.toLowerCase()}.',
+      );
+    }
+
+    final state = _findMostCommonState(entries);
+    if (state != null &&
+        state != SystemState.reflectiveReady &&
+        state != SystemState.crisis) {
+      insights.add(
+        '${state.label} taucht in deinem Verlauf gerade besonders häufig auf.',
+      );
+    }
+
+    final avgTension = _calculateAverageBodyTension(entries);
+    final avgIntensity = _calculateAverageIntensity(entries);
+    if (avgTension >= 7 && avgIntensity >= 6) {
+      insights.add(
+        'Wenn Anspannung und Belastung gleichzeitig hoch sind, hilft dir meist erst Regulation und dann Analyse.',
+      );
+    }
+
+    final actionFrequency = <String, int>{};
+    for (final entry in entries) {
+      final actionKey = entry.selectedNextActionKey;
+      if (actionKey == null || actionKey.isEmpty) continue;
+      actionFrequency[actionKey] = (actionFrequency[actionKey] ?? 0) + 1;
+    }
+    if (actionFrequency.isNotEmpty) {
+      final topAction =
+          actionFrequency.entries.reduce((a, b) => a.value >= b.value ? a : b);
+      if (topAction.value >= 2) {
+        insights.add(
+          'Als nächster Schritt wählst du häufig: ${_nextActionLabel(topAction.key).toLowerCase()}.',
+        );
+      }
+    }
+
+    return insights.take(4).toList(growable: false);
+  }
+
+  /// Fallback-Liste für auswählbare Nächste-Schritt-Optionen.
+  static List<String> nextActionFallbacks({
+    String? suggestedNextActionKey,
+    required String systemStateName,
+  }) {
+    final state = SystemState.values
+        .where((candidate) => candidate.name == systemStateName)
+        .firstOrNull;
+
+    final options = <String>[
+      if (suggestedNextActionKey != null && suggestedNextActionKey.isNotEmpty)
+        suggestedNextActionKey,
+      ...switch (state) {
+        SystemState.acuteActivation => const [
+            'regulate_body_first',
+            'pause_now',
+            'do_not_reply_now',
+          ],
+        SystemState.rumination => const [
+            'limit_thinking_loop',
+            'write_alternative_view',
+            'choose_one_step',
+          ],
+        SystemState.conflict => const [
+            'do_not_reply_now',
+            'write_observation_first',
+            'address_later',
+          ],
+        SystemState.selfDevaluation => const [
+            'collect_counterevidence',
+            'write_alternative_view',
+            'pause_now',
+          ],
+        SystemState.overwhelm => const [
+            'choose_one_step',
+            'reduce_stimuli',
+            'pause_now',
+          ],
+        SystemState.interpretation => const [
+            'check_facts_first',
+            'write_alternative_view',
+            'pause_now',
+          ],
+        SystemState.crisis => const [
+            'seek_support_now',
+            'regulate_body_first',
+            'pause_now',
+          ],
+        _ => const [
+            'choose_one_step',
+            'pause_now',
+            'address_later',
+          ],
+      },
+    ];
+
+    return options.toSet().take(3).toList(growable: false);
+  }
+
+  static String _nextActionLabel(String actionKey) {
+    const labels = {
+      'pause_now': 'Jetzt kurz Abstand schaffen',
+      'regulate_body_first': 'Erst den Körper beruhigen, dann weiterdenken',
+      'do_not_reply_now': 'Nicht im ersten Impuls antworten',
+      'address_later': 'Das Thema später ruhiger ansprechen',
+      'write_observation_first': 'Erst den sachlichen Kern notieren',
+      'check_facts_first': 'Fakten sammeln, bevor du weiter deutest',
+      'write_alternative_view': 'Eine alternative Erklärung aufschreiben',
+      'limit_thinking_loop': 'Die Denkschleife bewusst begrenzen',
+      'choose_one_step': 'Nur einen kleinen nächsten Schritt festlegen',
+      'reduce_stimuli': 'Reize reduzieren, bevor du planst',
+      'collect_counterevidence': 'Gegenbelege sammeln, bevor du dich bewertest',
+      'seek_support_now': 'Jetzt Unterstützung oder sichere Begleitung holen',
+    };
+
+    return labels[actionKey] ?? actionKey;
   }
 
   /// Berechnet Statistiken für eine einzelne Emotion

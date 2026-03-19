@@ -9,20 +9,23 @@ enum SystemState {
   /// Reflexionsbereit - moderate Belastung, noch zugänglich für Reflexion
   reflectiveReady('Reflexionsbereit', '🤔', 2),
 
+  /// Interpretationsmodus - viele Annahmen bei unsicherer Faktenlage
+  interpretation('Interpretationsmodus', '🧭', 3),
+
   /// Grübelmodus - wiederkehrende Gedanken, festgefahren
-  rumination('Grübelmodus', '🔄', 3),
+  rumination('Grübelmodus', '🔄', 4),
 
   /// Konflikt - zwischen eigenem Bedürfnis und äußerer Anforderung
-  conflict('Konflikt', '⚔️', 4),
+  conflict('Konflikt', '⚔️', 5),
 
   /// Selbstabwertung - negatives Selbstbild, innere Kritik
-  selfDevaluation('Selbstabwertung', '📉', 5),
+  selfDevaluation('Selbstabwertung', '📉', 6),
 
   /// Überforderung - zu viele Anforderungen, nicht bewältigbar
-  overwhelm('Überforderung', '🌊', 6),
+  overwhelm('Überforderung', '🌊', 7),
 
   /// Krise - akute Not, Sicherheitsrisiko
-  crisis('Krise', '🆘', 7);
+  crisis('Krise', '🆘', 8);
 
   final String label;
   final String emoji;
@@ -40,6 +43,8 @@ enum SystemState {
         return 'Hohe emotionale Erregung mit starkem Handlungsdruck';
       case SystemState.reflectiveReady:
         return 'Moderate Belastung, noch gut für Reflexion zugänglich';
+      case SystemState.interpretation:
+        return 'Starke Deutung bei noch unsicherer Faktenlage';
       case SystemState.rumination:
         return 'Wiederkehrende Gedanken, festgefahrene Denkmuster';
       case SystemState.conflict:
@@ -69,6 +74,8 @@ enum SystemState {
         return ['Regulation', 'Impulspause', 'Erdung'];
       case SystemState.reflectiveReady:
         return ['Fakt-vs-Deutung', 'Kommunikationshilfe', 'Reflexion'];
+      case SystemState.interpretation:
+        return ['Fakt-vs-Deutung', 'Alternative Erklärung', 'Realitätsprüfung'];
       case SystemState.rumination:
         return ['Grübelstopp', 'Reorientierung', 'Aktivierung'];
       case SystemState.conflict:
@@ -96,6 +103,8 @@ extension SystemStateExtension on SystemState {
         return 0xFFE9B44C; // Orange
       case SystemState.reflectiveReady:
         return 0xFF6B9080; // Green
+      case SystemState.interpretation:
+        return 0xFF7A8C62; // Moss
       case SystemState.rumination:
         return 0xFF7B8FA1; // Gray-blue
       case SystemState.conflict:
@@ -113,6 +122,7 @@ extension SystemStateExtension on SystemState {
   bool get benefitsFromReflection {
     switch (this) {
       case SystemState.reflectiveReady:
+      case SystemState.interpretation:
       case SystemState.rumination:
       case SystemState.conflict:
       case SystemState.selfDevaluation:
@@ -132,6 +142,7 @@ extension SystemStateExtension on SystemState {
       case SystemState.crisis:
         return true;
       case SystemState.reflectiveReady:
+      case SystemState.interpretation:
       case SystemState.rumination:
       case SystemState.conflict:
       case SystemState.selfDevaluation:

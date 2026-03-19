@@ -9,7 +9,7 @@ import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:innenkompass/data/db/app_database.dart';
 
 void main() {
-  test('migrates schema version 1 entries to version 2 without data loss',
+  test('migrates schema version 1 entries to version 3 without data loss',
       () async {
     final tempDir = await Directory.systemTemp.createTemp(
       'innenkompass_migration_test',
@@ -132,6 +132,12 @@ void main() {
 
     expect(columnNames, contains('need_or_wounded_point'));
     expect(columnNames, contains('next_step'));
+    expect(columnNames, contains('fact_interpretation_result'));
+    expect(columnNames, contains('evaluation_headline_key'));
+    expect(columnNames, contains('evaluation_meaning_key'));
+    expect(columnNames, contains('suggested_tip_ids'));
+    expect(columnNames, contains('suggested_next_action_key'));
+    expect(columnNames, contains('selected_next_action_key'));
 
     final upgradedEntry = await database.getSituationEntryById(1);
     expect(upgradedEntry, isNotNull);
@@ -140,6 +146,12 @@ void main() {
     expect(upgradedEntry.primaryEmotion, 'Wut');
     expect(upgradedEntry.needOrWoundedPoint, isNull);
     expect(upgradedEntry.nextStep, isNull);
+    expect(upgradedEntry.factInterpretationResult, isNull);
+    expect(upgradedEntry.evaluationHeadlineKey, isNull);
+    expect(upgradedEntry.evaluationMeaningKey, isNull);
+    expect(upgradedEntry.suggestedTipIds, isNull);
+    expect(upgradedEntry.suggestedNextActionKey, isNull);
+    expect(upgradedEntry.selectedNextActionKey, isNull);
 
     final updated = upgradedEntry.copyWith(
       needOrWoundedPoint: const Value('Ich brauche Abstand.'),
@@ -155,6 +167,6 @@ void main() {
 
     final versionRow =
         await database.customSelect('PRAGMA user_version;').getSingle();
-    expect(versionRow.data['user_version'], 2);
+    expect(versionRow.data['user_version'], 3);
   });
 }

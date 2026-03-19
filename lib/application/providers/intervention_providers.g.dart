@@ -97,7 +97,7 @@ const _$EmotionTypeEnumMap = {
 // **************************************************************************
 
 String _$recommendedInterventionsHash() =>
-    r'fa613c724c52666bf6d9ba236f63e7128951544b';
+    r'ebee65b3235fadd6873fab07503225d68cbded83';
 
 /// Provider für Interventionen basierend auf Klassifikation
 ///
@@ -159,7 +159,7 @@ final patternSummaryProvider =
 // ignore: unused_element
 typedef PatternSummaryRef = AutoDisposeFutureProviderRef<PatternSummary>;
 String _$filteredHistoryEntriesHash() =>
-    r'4a61143795e8beff82bde449a7c63059e164f672';
+    r'2a79107526a0b5b2ffedd4bb4ec577baf5d0f3ab';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -349,7 +349,7 @@ final emotionStatisticsProvider =
 // ignore: unused_element
 typedef EmotionStatisticsRef
     = AutoDisposeFutureProviderRef<Map<EmotionType, Map<String, dynamic>>>;
-String _$last7DaysTrendHash() => r'7e4531c4bacc5f9ae6ee962a43f6110d328df6b6';
+String _$last7DaysTrendHash() => r'83ce5bca65af434235c9be454683d53385b3fc85';
 
 /// Provider für Trend-Daten der letzten 7 Tage
 ///

@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' show Ref;
+import 'package:flutter_riverpod/flutter_riverpod.dart' show FutureProvider, Ref;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:innenkompass/core/constants/emotion_types.dart';
 import 'package:innenkompass/core/constants/intervention_types.dart';
@@ -445,3 +445,23 @@ Future<List<InterventionEffectiveness>> interventionEffectiveness(
   final summary = await PatternAnalyzer.analyzePatterns(entries);
   return summary.mostEffectiveInterventions;
 }
+
+/// E-01: Steigung des Intensitäts-Trends (Punkte pro Tag)
+final trendSlopeProvider = FutureProvider<double>((ref) async {
+  final summary = await ref.watch(patternSummaryProvider.future);
+  return PatternAnalyzer.computeTrendSlope(summary.intensityTrend);
+});
+
+/// E-03: Burnout-Risiko
+final burnoutRiskProvider = FutureProvider<BurnoutRisk>((ref) async {
+  final summary = await ref.watch(patternSummaryProvider.future);
+  return PatternAnalyzer.computeBurnoutRisk(summary.intensityTrend);
+});
+
+/// E-02: Kontext-Emotions-Korrelationen
+final contextCorrelationsProvider =
+    FutureProvider<List<ContextCorrelation>>((ref) async {
+  final db = ref.watch(databaseProvider);
+  final entries = await db.getAllSituationEntries();
+  return PatternAnalyzer.computeContextCorrelations(entries);
+});

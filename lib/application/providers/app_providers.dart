@@ -19,6 +19,8 @@ import '../../features/lock/screens/lock_screen.dart';
 import '../../features/patterns/screens/patterns_screen.dart';
 import '../../features/intervention/screens/intervention_screen.dart';
 import '../../features/intervention/screens/post_evaluation_screen.dart';
+import '../../features/evaluation/screens/entry_evaluation_screen.dart';
+import '../../features/new_situation/screens/quick_checkin_screen.dart';
 import 'bootstrap_provider.dart';
 import 'database_provider.dart';
 import 'lock_provider.dart';
@@ -73,6 +75,17 @@ final routerProvider = Provider<GoRouter>((ref) {
               : null),
     ),
     postEvaluationScreen: (context, state) => const PostEvaluationScreen(),
+    entryEvaluationScreen: (context, state) {
+      final id = int.tryParse(state.pathParameters['id'] ?? '');
+      if (id == null) {
+        return const Scaffold(
+          body: Center(
+            child: Text('Eintrag nicht gefunden'),
+          ),
+        );
+      }
+      return EntryEvaluationScreen(entryId: id);
+    },
     entryDetailScreen: (context, state) {
       final id = int.tryParse(state.pathParameters['id'] ?? '');
       if (id == null) {
@@ -87,6 +100,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     isOnboardingCompleted: isOnboardingCompleted,
     isAppLocked: isAppLocked,
     isAppReady: isAppReady,
+    quickCheckinScreen: (context) => const QuickCheckinScreen(),
   );
 });
 

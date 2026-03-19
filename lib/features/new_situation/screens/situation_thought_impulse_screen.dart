@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/fact_interpretation_results.dart';
 import '../../../core/constants/impulse_types.dart';
 import '../../../core/validators/new_situation_validators.dart';
 import '../../../domain/models/situation_draft.dart';
@@ -30,9 +31,11 @@ class _SituationThoughtImpulseScreenState
   final _behaviorController = TextEditingController();
   String _automaticThought = '';
   ImpulseType? _firstImpulse;
+  FactInterpretationResult? _factInterpretation;
   String _actualBehavior = '';
   String? _thoughtError;
   String? _impulseError;
+  String? _factInterpretationError;
 
   @override
   void initState() {
@@ -42,6 +45,7 @@ class _SituationThoughtImpulseScreenState
     if (existingData != null) {
       _automaticThought = existingData.automaticThought;
       _firstImpulse = existingData.firstImpulse;
+      _factInterpretation = existingData.factInterpretation;
       _actualBehavior = existingData.actualBehavior ?? '';
       _behaviorController.text = _actualBehavior;
     }
@@ -58,7 +62,11 @@ class _SituationThoughtImpulseScreenState
         NewSituationValidators.validateAutomaticThought(_automaticThought);
     final impulseValidation =
         NewSituationValidators.validateImpulseSelection(_firstImpulse);
-    return thoughtValidation.isValid && impulseValidation.isValid;
+    final factValidation =
+        NewSituationValidators.validateFactInterpretation(_factInterpretation);
+    return thoughtValidation.isValid &&
+        impulseValidation.isValid &&
+        factValidation.isValid;
   }
 
   void _handleSave() {
@@ -79,6 +87,14 @@ class _SituationThoughtImpulseScreenState
       return;
     }
 
+    if (_factInterpretation == null) {
+      setState(() {
+        _factInterpretationError =
+            'Bitte schätze ein, wie sehr dein Gedanke auf Fakten oder Deutung beruht.';
+      });
+      return;
+    }
+
     // Validate actual behavior (optional)
     final behaviorValidation =
         NewSituationValidators.validateActualBehavior(_actualBehavior);
@@ -94,6 +110,7 @@ class _SituationThoughtImpulseScreenState
     final thoughtData = SituationThoughtImpulseData(
       automaticThought: _automaticThought.trim(),
       firstImpulse: _firstImpulse!,
+      factInterpretation: _factInterpretation!,
       actualBehavior:
           _actualBehavior.trim().isEmpty ? null : _actualBehavior.trim(),
     );
@@ -248,6 +265,65 @@ class _SituationThoughtImpulseScreenState
                     },
                     errorText: _impulseError,
                   ),
+                ],
+              ),
+            ),
+            AppCard(
+              variant: AppCardVariant.soft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Fakt oder Deutung?',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: AppConstants.spacingSmall),
+                  Text(
+                    'Wie sicher ist dein Gedanke gerade belegt?',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppConstants.spacingMedium),
+                  Wrap(
+                    spacing: AppConstants.spacingSmall,
+                    runSpacing: AppConstants.spacingSmall,
+                    children: FactInterpretationResult.values.map((result) {
+                      final isSelected = _factInterpretation == result;
+                      return ChoiceChip(
+                        selected: isSelected,
+                        label: Text(result.label),
+                        onSelected: (_) {
+                          setState(() {
+                            _factInterpretation = result;
+                            _factInterpretationError = null;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  if (_factInterpretation != null) ...[
+                    const SizedBox(height: AppConstants.spacingSmall),
+                    Text(
+                      _factInterpretation!.description,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                  if (_factInterpretationError != null) ...[
+                    const SizedBox(height: AppConstants.spacingSmall),
+                    Text(
+                      _factInterpretationError!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.error,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

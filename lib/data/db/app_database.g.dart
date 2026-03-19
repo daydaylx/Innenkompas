@@ -84,6 +84,12 @@ class $SituationEntriesTable extends SituationEntries
   late final GeneratedColumn<String> firstImpulse = GeneratedColumn<String>(
       'first_impulse', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _factInterpretationResultMeta =
+      const VerificationMeta('factInterpretationResult');
+  @override
+  late final GeneratedColumn<String> factInterpretationResult =
+      GeneratedColumn<String>('fact_interpretation_result', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _actualBehaviorMeta =
       const VerificationMeta('actualBehavior');
   @override
@@ -118,6 +124,36 @@ class $SituationEntriesTable extends SituationEntries
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("is_crisis" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _evaluationHeadlineKeyMeta =
+      const VerificationMeta('evaluationHeadlineKey');
+  @override
+  late final GeneratedColumn<String> evaluationHeadlineKey =
+      GeneratedColumn<String>('evaluation_headline_key', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _evaluationMeaningKeyMeta =
+      const VerificationMeta('evaluationMeaningKey');
+  @override
+  late final GeneratedColumn<String> evaluationMeaningKey =
+      GeneratedColumn<String>('evaluation_meaning_key', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _suggestedTipIdsMeta =
+      const VerificationMeta('suggestedTipIds');
+  @override
+  late final GeneratedColumn<String> suggestedTipIds = GeneratedColumn<String>(
+      'suggested_tip_ids', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _suggestedNextActionKeyMeta =
+      const VerificationMeta('suggestedNextActionKey');
+  @override
+  late final GeneratedColumn<String> suggestedNextActionKey =
+      GeneratedColumn<String>('suggested_next_action_key', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _selectedNextActionKeyMeta =
+      const VerificationMeta('selectedNextActionKey');
+  @override
+  late final GeneratedColumn<String> selectedNextActionKey =
+      GeneratedColumn<String>('selected_next_action_key', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _interventionTypeMeta =
       const VerificationMeta('interventionType');
   @override
@@ -216,11 +252,17 @@ class $SituationEntriesTable extends SituationEntries
         bodySymptoms,
         automaticThought,
         firstImpulse,
+        factInterpretationResult,
         actualBehavior,
         needOrWoundedPoint,
         nextStep,
         systemState,
         isCrisis,
+        evaluationHeadlineKey,
+        evaluationMeaningKey,
+        suggestedTipIds,
+        suggestedNextActionKey,
+        selectedNextActionKey,
         interventionType,
         interventionId,
         interventionCompleted,
@@ -323,6 +365,13 @@ class $SituationEntriesTable extends SituationEntries
     } else if (isInserting) {
       context.missing(_firstImpulseMeta);
     }
+    if (data.containsKey('fact_interpretation_result')) {
+      context.handle(
+          _factInterpretationResultMeta,
+          factInterpretationResult.isAcceptableOrUnknown(
+              data['fact_interpretation_result']!,
+              _factInterpretationResultMeta));
+    }
     if (data.containsKey('actual_behavior')) {
       context.handle(
           _actualBehaviorMeta,
@@ -350,6 +399,36 @@ class $SituationEntriesTable extends SituationEntries
     if (data.containsKey('is_crisis')) {
       context.handle(_isCrisisMeta,
           isCrisis.isAcceptableOrUnknown(data['is_crisis']!, _isCrisisMeta));
+    }
+    if (data.containsKey('evaluation_headline_key')) {
+      context.handle(
+          _evaluationHeadlineKeyMeta,
+          evaluationHeadlineKey.isAcceptableOrUnknown(
+              data['evaluation_headline_key']!, _evaluationHeadlineKeyMeta));
+    }
+    if (data.containsKey('evaluation_meaning_key')) {
+      context.handle(
+          _evaluationMeaningKeyMeta,
+          evaluationMeaningKey.isAcceptableOrUnknown(
+              data['evaluation_meaning_key']!, _evaluationMeaningKeyMeta));
+    }
+    if (data.containsKey('suggested_tip_ids')) {
+      context.handle(
+          _suggestedTipIdsMeta,
+          suggestedTipIds.isAcceptableOrUnknown(
+              data['suggested_tip_ids']!, _suggestedTipIdsMeta));
+    }
+    if (data.containsKey('suggested_next_action_key')) {
+      context.handle(
+          _suggestedNextActionKeyMeta,
+          suggestedNextActionKey.isAcceptableOrUnknown(
+              data['suggested_next_action_key']!, _suggestedNextActionKeyMeta));
+    }
+    if (data.containsKey('selected_next_action_key')) {
+      context.handle(
+          _selectedNextActionKeyMeta,
+          selectedNextActionKey.isAcceptableOrUnknown(
+              data['selected_next_action_key']!, _selectedNextActionKeyMeta));
     }
     if (data.containsKey('intervention_type')) {
       context.handle(
@@ -450,6 +529,9 @@ class $SituationEntriesTable extends SituationEntries
           DriftSqlType.string, data['${effectivePrefix}automatic_thought'])!,
       firstImpulse: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}first_impulse'])!,
+      factInterpretationResult: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}fact_interpretation_result']),
       actualBehavior: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}actual_behavior']),
       needOrWoundedPoint: attachedDatabase.typeMapping.read(
@@ -460,6 +542,20 @@ class $SituationEntriesTable extends SituationEntries
           .read(DriftSqlType.string, data['${effectivePrefix}system_state'])!,
       isCrisis: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_crisis'])!,
+      evaluationHeadlineKey: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}evaluation_headline_key']),
+      evaluationMeaningKey: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}evaluation_meaning_key']),
+      suggestedTipIds: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}suggested_tip_ids']),
+      suggestedNextActionKey: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}suggested_next_action_key']),
+      selectedNextActionKey: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}selected_next_action_key']),
       interventionType: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}intervention_type']),
       interventionId: attachedDatabase.typeMapping
@@ -508,11 +604,17 @@ class SituationEntryData extends DataClass
   final String? bodySymptoms;
   final String automaticThought;
   final String firstImpulse;
+  final String? factInterpretationResult;
   final String? actualBehavior;
   final String? needOrWoundedPoint;
   final String? nextStep;
   final String systemState;
   final bool isCrisis;
+  final String? evaluationHeadlineKey;
+  final String? evaluationMeaningKey;
+  final String? suggestedTipIds;
+  final String? suggestedNextActionKey;
+  final String? selectedNextActionKey;
   final String? interventionType;
   final String? interventionId;
   final bool interventionCompleted;
@@ -538,11 +640,17 @@ class SituationEntryData extends DataClass
       this.bodySymptoms,
       required this.automaticThought,
       required this.firstImpulse,
+      this.factInterpretationResult,
       this.actualBehavior,
       this.needOrWoundedPoint,
       this.nextStep,
       required this.systemState,
       required this.isCrisis,
+      this.evaluationHeadlineKey,
+      this.evaluationMeaningKey,
+      this.suggestedTipIds,
+      this.suggestedNextActionKey,
+      this.selectedNextActionKey,
       this.interventionType,
       this.interventionId,
       required this.interventionCompleted,
@@ -576,6 +684,10 @@ class SituationEntryData extends DataClass
     }
     map['automatic_thought'] = Variable<String>(automaticThought);
     map['first_impulse'] = Variable<String>(firstImpulse);
+    if (!nullToAbsent || factInterpretationResult != null) {
+      map['fact_interpretation_result'] =
+          Variable<String>(factInterpretationResult);
+    }
     if (!nullToAbsent || actualBehavior != null) {
       map['actual_behavior'] = Variable<String>(actualBehavior);
     }
@@ -587,6 +699,22 @@ class SituationEntryData extends DataClass
     }
     map['system_state'] = Variable<String>(systemState);
     map['is_crisis'] = Variable<bool>(isCrisis);
+    if (!nullToAbsent || evaluationHeadlineKey != null) {
+      map['evaluation_headline_key'] = Variable<String>(evaluationHeadlineKey);
+    }
+    if (!nullToAbsent || evaluationMeaningKey != null) {
+      map['evaluation_meaning_key'] = Variable<String>(evaluationMeaningKey);
+    }
+    if (!nullToAbsent || suggestedTipIds != null) {
+      map['suggested_tip_ids'] = Variable<String>(suggestedTipIds);
+    }
+    if (!nullToAbsent || suggestedNextActionKey != null) {
+      map['suggested_next_action_key'] =
+          Variable<String>(suggestedNextActionKey);
+    }
+    if (!nullToAbsent || selectedNextActionKey != null) {
+      map['selected_next_action_key'] = Variable<String>(selectedNextActionKey);
+    }
     if (!nullToAbsent || interventionType != null) {
       map['intervention_type'] = Variable<String>(interventionType);
     }
@@ -638,6 +766,9 @@ class SituationEntryData extends DataClass
           : Value(bodySymptoms),
       automaticThought: Value(automaticThought),
       firstImpulse: Value(firstImpulse),
+      factInterpretationResult: factInterpretationResult == null && nullToAbsent
+          ? const Value.absent()
+          : Value(factInterpretationResult),
       actualBehavior: actualBehavior == null && nullToAbsent
           ? const Value.absent()
           : Value(actualBehavior),
@@ -649,6 +780,21 @@ class SituationEntryData extends DataClass
           : Value(nextStep),
       systemState: Value(systemState),
       isCrisis: Value(isCrisis),
+      evaluationHeadlineKey: evaluationHeadlineKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(evaluationHeadlineKey),
+      evaluationMeaningKey: evaluationMeaningKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(evaluationMeaningKey),
+      suggestedTipIds: suggestedTipIds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(suggestedTipIds),
+      suggestedNextActionKey: suggestedNextActionKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(suggestedNextActionKey),
+      selectedNextActionKey: selectedNextActionKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(selectedNextActionKey),
       interventionType: interventionType == null && nullToAbsent
           ? const Value.absent()
           : Value(interventionType),
@@ -697,12 +843,23 @@ class SituationEntryData extends DataClass
       bodySymptoms: serializer.fromJson<String?>(json['bodySymptoms']),
       automaticThought: serializer.fromJson<String>(json['automaticThought']),
       firstImpulse: serializer.fromJson<String>(json['firstImpulse']),
+      factInterpretationResult:
+          serializer.fromJson<String?>(json['factInterpretationResult']),
       actualBehavior: serializer.fromJson<String?>(json['actualBehavior']),
       needOrWoundedPoint:
           serializer.fromJson<String?>(json['needOrWoundedPoint']),
       nextStep: serializer.fromJson<String?>(json['nextStep']),
       systemState: serializer.fromJson<String>(json['systemState']),
       isCrisis: serializer.fromJson<bool>(json['isCrisis']),
+      evaluationHeadlineKey:
+          serializer.fromJson<String?>(json['evaluationHeadlineKey']),
+      evaluationMeaningKey:
+          serializer.fromJson<String?>(json['evaluationMeaningKey']),
+      suggestedTipIds: serializer.fromJson<String?>(json['suggestedTipIds']),
+      suggestedNextActionKey:
+          serializer.fromJson<String?>(json['suggestedNextActionKey']),
+      selectedNextActionKey:
+          serializer.fromJson<String?>(json['selectedNextActionKey']),
       interventionType: serializer.fromJson<String?>(json['interventionType']),
       interventionId: serializer.fromJson<String?>(json['interventionId']),
       interventionCompleted:
@@ -735,11 +892,21 @@ class SituationEntryData extends DataClass
       'bodySymptoms': serializer.toJson<String?>(bodySymptoms),
       'automaticThought': serializer.toJson<String>(automaticThought),
       'firstImpulse': serializer.toJson<String>(firstImpulse),
+      'factInterpretationResult':
+          serializer.toJson<String?>(factInterpretationResult),
       'actualBehavior': serializer.toJson<String?>(actualBehavior),
       'needOrWoundedPoint': serializer.toJson<String?>(needOrWoundedPoint),
       'nextStep': serializer.toJson<String?>(nextStep),
       'systemState': serializer.toJson<String>(systemState),
       'isCrisis': serializer.toJson<bool>(isCrisis),
+      'evaluationHeadlineKey':
+          serializer.toJson<String?>(evaluationHeadlineKey),
+      'evaluationMeaningKey': serializer.toJson<String?>(evaluationMeaningKey),
+      'suggestedTipIds': serializer.toJson<String?>(suggestedTipIds),
+      'suggestedNextActionKey':
+          serializer.toJson<String?>(suggestedNextActionKey),
+      'selectedNextActionKey':
+          serializer.toJson<String?>(selectedNextActionKey),
       'interventionType': serializer.toJson<String?>(interventionType),
       'interventionId': serializer.toJson<String?>(interventionId),
       'interventionCompleted': serializer.toJson<bool>(interventionCompleted),
@@ -769,11 +936,17 @@ class SituationEntryData extends DataClass
           Value<String?> bodySymptoms = const Value.absent(),
           String? automaticThought,
           String? firstImpulse,
+          Value<String?> factInterpretationResult = const Value.absent(),
           Value<String?> actualBehavior = const Value.absent(),
           Value<String?> needOrWoundedPoint = const Value.absent(),
           Value<String?> nextStep = const Value.absent(),
           String? systemState,
           bool? isCrisis,
+          Value<String?> evaluationHeadlineKey = const Value.absent(),
+          Value<String?> evaluationMeaningKey = const Value.absent(),
+          Value<String?> suggestedTipIds = const Value.absent(),
+          Value<String?> suggestedNextActionKey = const Value.absent(),
+          Value<String?> selectedNextActionKey = const Value.absent(),
           Value<String?> interventionType = const Value.absent(),
           Value<String?> interventionId = const Value.absent(),
           bool? interventionCompleted,
@@ -803,6 +976,9 @@ class SituationEntryData extends DataClass
             bodySymptoms.present ? bodySymptoms.value : this.bodySymptoms,
         automaticThought: automaticThought ?? this.automaticThought,
         firstImpulse: firstImpulse ?? this.firstImpulse,
+        factInterpretationResult: factInterpretationResult.present
+            ? factInterpretationResult.value
+            : this.factInterpretationResult,
         actualBehavior:
             actualBehavior.present ? actualBehavior.value : this.actualBehavior,
         needOrWoundedPoint: needOrWoundedPoint.present
@@ -811,6 +987,21 @@ class SituationEntryData extends DataClass
         nextStep: nextStep.present ? nextStep.value : this.nextStep,
         systemState: systemState ?? this.systemState,
         isCrisis: isCrisis ?? this.isCrisis,
+        evaluationHeadlineKey: evaluationHeadlineKey.present
+            ? evaluationHeadlineKey.value
+            : this.evaluationHeadlineKey,
+        evaluationMeaningKey: evaluationMeaningKey.present
+            ? evaluationMeaningKey.value
+            : this.evaluationMeaningKey,
+        suggestedTipIds: suggestedTipIds.present
+            ? suggestedTipIds.value
+            : this.suggestedTipIds,
+        suggestedNextActionKey: suggestedNextActionKey.present
+            ? suggestedNextActionKey.value
+            : this.suggestedNextActionKey,
+        selectedNextActionKey: selectedNextActionKey.present
+            ? selectedNextActionKey.value
+            : this.selectedNextActionKey,
         interventionType: interventionType.present
             ? interventionType.value
             : this.interventionType,
@@ -864,6 +1055,9 @@ class SituationEntryData extends DataClass
       firstImpulse: data.firstImpulse.present
           ? data.firstImpulse.value
           : this.firstImpulse,
+      factInterpretationResult: data.factInterpretationResult.present
+          ? data.factInterpretationResult.value
+          : this.factInterpretationResult,
       actualBehavior: data.actualBehavior.present
           ? data.actualBehavior.value
           : this.actualBehavior,
@@ -874,6 +1068,21 @@ class SituationEntryData extends DataClass
       systemState:
           data.systemState.present ? data.systemState.value : this.systemState,
       isCrisis: data.isCrisis.present ? data.isCrisis.value : this.isCrisis,
+      evaluationHeadlineKey: data.evaluationHeadlineKey.present
+          ? data.evaluationHeadlineKey.value
+          : this.evaluationHeadlineKey,
+      evaluationMeaningKey: data.evaluationMeaningKey.present
+          ? data.evaluationMeaningKey.value
+          : this.evaluationMeaningKey,
+      suggestedTipIds: data.suggestedTipIds.present
+          ? data.suggestedTipIds.value
+          : this.suggestedTipIds,
+      suggestedNextActionKey: data.suggestedNextActionKey.present
+          ? data.suggestedNextActionKey.value
+          : this.suggestedNextActionKey,
+      selectedNextActionKey: data.selectedNextActionKey.present
+          ? data.selectedNextActionKey.value
+          : this.selectedNextActionKey,
       interventionType: data.interventionType.present
           ? data.interventionType.value
           : this.interventionType,
@@ -919,11 +1128,17 @@ class SituationEntryData extends DataClass
           ..write('bodySymptoms: $bodySymptoms, ')
           ..write('automaticThought: $automaticThought, ')
           ..write('firstImpulse: $firstImpulse, ')
+          ..write('factInterpretationResult: $factInterpretationResult, ')
           ..write('actualBehavior: $actualBehavior, ')
           ..write('needOrWoundedPoint: $needOrWoundedPoint, ')
           ..write('nextStep: $nextStep, ')
           ..write('systemState: $systemState, ')
           ..write('isCrisis: $isCrisis, ')
+          ..write('evaluationHeadlineKey: $evaluationHeadlineKey, ')
+          ..write('evaluationMeaningKey: $evaluationMeaningKey, ')
+          ..write('suggestedTipIds: $suggestedTipIds, ')
+          ..write('suggestedNextActionKey: $suggestedNextActionKey, ')
+          ..write('selectedNextActionKey: $selectedNextActionKey, ')
           ..write('interventionType: $interventionType, ')
           ..write('interventionId: $interventionId, ')
           ..write('interventionCompleted: $interventionCompleted, ')
@@ -954,11 +1169,17 @@ class SituationEntryData extends DataClass
         bodySymptoms,
         automaticThought,
         firstImpulse,
+        factInterpretationResult,
         actualBehavior,
         needOrWoundedPoint,
         nextStep,
         systemState,
         isCrisis,
+        evaluationHeadlineKey,
+        evaluationMeaningKey,
+        suggestedTipIds,
+        suggestedNextActionKey,
+        selectedNextActionKey,
         interventionType,
         interventionId,
         interventionCompleted,
@@ -988,11 +1209,17 @@ class SituationEntryData extends DataClass
           other.bodySymptoms == this.bodySymptoms &&
           other.automaticThought == this.automaticThought &&
           other.firstImpulse == this.firstImpulse &&
+          other.factInterpretationResult == this.factInterpretationResult &&
           other.actualBehavior == this.actualBehavior &&
           other.needOrWoundedPoint == this.needOrWoundedPoint &&
           other.nextStep == this.nextStep &&
           other.systemState == this.systemState &&
           other.isCrisis == this.isCrisis &&
+          other.evaluationHeadlineKey == this.evaluationHeadlineKey &&
+          other.evaluationMeaningKey == this.evaluationMeaningKey &&
+          other.suggestedTipIds == this.suggestedTipIds &&
+          other.suggestedNextActionKey == this.suggestedNextActionKey &&
+          other.selectedNextActionKey == this.selectedNextActionKey &&
           other.interventionType == this.interventionType &&
           other.interventionId == this.interventionId &&
           other.interventionCompleted == this.interventionCompleted &&
@@ -1020,11 +1247,17 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
   final Value<String?> bodySymptoms;
   final Value<String> automaticThought;
   final Value<String> firstImpulse;
+  final Value<String?> factInterpretationResult;
   final Value<String?> actualBehavior;
   final Value<String?> needOrWoundedPoint;
   final Value<String?> nextStep;
   final Value<String> systemState;
   final Value<bool> isCrisis;
+  final Value<String?> evaluationHeadlineKey;
+  final Value<String?> evaluationMeaningKey;
+  final Value<String?> suggestedTipIds;
+  final Value<String?> suggestedNextActionKey;
+  final Value<String?> selectedNextActionKey;
   final Value<String?> interventionType;
   final Value<String?> interventionId;
   final Value<bool> interventionCompleted;
@@ -1050,11 +1283,17 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     this.bodySymptoms = const Value.absent(),
     this.automaticThought = const Value.absent(),
     this.firstImpulse = const Value.absent(),
+    this.factInterpretationResult = const Value.absent(),
     this.actualBehavior = const Value.absent(),
     this.needOrWoundedPoint = const Value.absent(),
     this.nextStep = const Value.absent(),
     this.systemState = const Value.absent(),
     this.isCrisis = const Value.absent(),
+    this.evaluationHeadlineKey = const Value.absent(),
+    this.evaluationMeaningKey = const Value.absent(),
+    this.suggestedTipIds = const Value.absent(),
+    this.suggestedNextActionKey = const Value.absent(),
+    this.selectedNextActionKey = const Value.absent(),
     this.interventionType = const Value.absent(),
     this.interventionId = const Value.absent(),
     this.interventionCompleted = const Value.absent(),
@@ -1081,11 +1320,17 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     this.bodySymptoms = const Value.absent(),
     required String automaticThought,
     required String firstImpulse,
+    this.factInterpretationResult = const Value.absent(),
     this.actualBehavior = const Value.absent(),
     this.needOrWoundedPoint = const Value.absent(),
     this.nextStep = const Value.absent(),
     required String systemState,
     this.isCrisis = const Value.absent(),
+    this.evaluationHeadlineKey = const Value.absent(),
+    this.evaluationMeaningKey = const Value.absent(),
+    this.suggestedTipIds = const Value.absent(),
+    this.suggestedNextActionKey = const Value.absent(),
+    this.selectedNextActionKey = const Value.absent(),
     this.interventionType = const Value.absent(),
     this.interventionId = const Value.absent(),
     this.interventionCompleted = const Value.absent(),
@@ -1120,11 +1365,17 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     Expression<String>? bodySymptoms,
     Expression<String>? automaticThought,
     Expression<String>? firstImpulse,
+    Expression<String>? factInterpretationResult,
     Expression<String>? actualBehavior,
     Expression<String>? needOrWoundedPoint,
     Expression<String>? nextStep,
     Expression<String>? systemState,
     Expression<bool>? isCrisis,
+    Expression<String>? evaluationHeadlineKey,
+    Expression<String>? evaluationMeaningKey,
+    Expression<String>? suggestedTipIds,
+    Expression<String>? suggestedNextActionKey,
+    Expression<String>? selectedNextActionKey,
     Expression<String>? interventionType,
     Expression<String>? interventionId,
     Expression<bool>? interventionCompleted,
@@ -1152,12 +1403,23 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
       if (bodySymptoms != null) 'body_symptoms': bodySymptoms,
       if (automaticThought != null) 'automatic_thought': automaticThought,
       if (firstImpulse != null) 'first_impulse': firstImpulse,
+      if (factInterpretationResult != null)
+        'fact_interpretation_result': factInterpretationResult,
       if (actualBehavior != null) 'actual_behavior': actualBehavior,
       if (needOrWoundedPoint != null)
         'need_or_wounded_point': needOrWoundedPoint,
       if (nextStep != null) 'next_step': nextStep,
       if (systemState != null) 'system_state': systemState,
       if (isCrisis != null) 'is_crisis': isCrisis,
+      if (evaluationHeadlineKey != null)
+        'evaluation_headline_key': evaluationHeadlineKey,
+      if (evaluationMeaningKey != null)
+        'evaluation_meaning_key': evaluationMeaningKey,
+      if (suggestedTipIds != null) 'suggested_tip_ids': suggestedTipIds,
+      if (suggestedNextActionKey != null)
+        'suggested_next_action_key': suggestedNextActionKey,
+      if (selectedNextActionKey != null)
+        'selected_next_action_key': selectedNextActionKey,
       if (interventionType != null) 'intervention_type': interventionType,
       if (interventionId != null) 'intervention_id': interventionId,
       if (interventionCompleted != null)
@@ -1188,11 +1450,17 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
       Value<String?>? bodySymptoms,
       Value<String>? automaticThought,
       Value<String>? firstImpulse,
+      Value<String?>? factInterpretationResult,
       Value<String?>? actualBehavior,
       Value<String?>? needOrWoundedPoint,
       Value<String?>? nextStep,
       Value<String>? systemState,
       Value<bool>? isCrisis,
+      Value<String?>? evaluationHeadlineKey,
+      Value<String?>? evaluationMeaningKey,
+      Value<String?>? suggestedTipIds,
+      Value<String?>? suggestedNextActionKey,
+      Value<String?>? selectedNextActionKey,
       Value<String?>? interventionType,
       Value<String?>? interventionId,
       Value<bool>? interventionCompleted,
@@ -1218,11 +1486,21 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
       bodySymptoms: bodySymptoms ?? this.bodySymptoms,
       automaticThought: automaticThought ?? this.automaticThought,
       firstImpulse: firstImpulse ?? this.firstImpulse,
+      factInterpretationResult:
+          factInterpretationResult ?? this.factInterpretationResult,
       actualBehavior: actualBehavior ?? this.actualBehavior,
       needOrWoundedPoint: needOrWoundedPoint ?? this.needOrWoundedPoint,
       nextStep: nextStep ?? this.nextStep,
       systemState: systemState ?? this.systemState,
       isCrisis: isCrisis ?? this.isCrisis,
+      evaluationHeadlineKey:
+          evaluationHeadlineKey ?? this.evaluationHeadlineKey,
+      evaluationMeaningKey: evaluationMeaningKey ?? this.evaluationMeaningKey,
+      suggestedTipIds: suggestedTipIds ?? this.suggestedTipIds,
+      suggestedNextActionKey:
+          suggestedNextActionKey ?? this.suggestedNextActionKey,
+      selectedNextActionKey:
+          selectedNextActionKey ?? this.selectedNextActionKey,
       interventionType: interventionType ?? this.interventionType,
       interventionId: interventionId ?? this.interventionId,
       interventionCompleted:
@@ -1280,6 +1558,10 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     if (firstImpulse.present) {
       map['first_impulse'] = Variable<String>(firstImpulse.value);
     }
+    if (factInterpretationResult.present) {
+      map['fact_interpretation_result'] =
+          Variable<String>(factInterpretationResult.value);
+    }
     if (actualBehavior.present) {
       map['actual_behavior'] = Variable<String>(actualBehavior.value);
     }
@@ -1294,6 +1576,25 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     }
     if (isCrisis.present) {
       map['is_crisis'] = Variable<bool>(isCrisis.value);
+    }
+    if (evaluationHeadlineKey.present) {
+      map['evaluation_headline_key'] =
+          Variable<String>(evaluationHeadlineKey.value);
+    }
+    if (evaluationMeaningKey.present) {
+      map['evaluation_meaning_key'] =
+          Variable<String>(evaluationMeaningKey.value);
+    }
+    if (suggestedTipIds.present) {
+      map['suggested_tip_ids'] = Variable<String>(suggestedTipIds.value);
+    }
+    if (suggestedNextActionKey.present) {
+      map['suggested_next_action_key'] =
+          Variable<String>(suggestedNextActionKey.value);
+    }
+    if (selectedNextActionKey.present) {
+      map['selected_next_action_key'] =
+          Variable<String>(selectedNextActionKey.value);
     }
     if (interventionType.present) {
       map['intervention_type'] = Variable<String>(interventionType.value);
@@ -1351,11 +1652,17 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
           ..write('bodySymptoms: $bodySymptoms, ')
           ..write('automaticThought: $automaticThought, ')
           ..write('firstImpulse: $firstImpulse, ')
+          ..write('factInterpretationResult: $factInterpretationResult, ')
           ..write('actualBehavior: $actualBehavior, ')
           ..write('needOrWoundedPoint: $needOrWoundedPoint, ')
           ..write('nextStep: $nextStep, ')
           ..write('systemState: $systemState, ')
           ..write('isCrisis: $isCrisis, ')
+          ..write('evaluationHeadlineKey: $evaluationHeadlineKey, ')
+          ..write('evaluationMeaningKey: $evaluationMeaningKey, ')
+          ..write('suggestedTipIds: $suggestedTipIds, ')
+          ..write('suggestedNextActionKey: $suggestedNextActionKey, ')
+          ..write('selectedNextActionKey: $selectedNextActionKey, ')
           ..write('interventionType: $interventionType, ')
           ..write('interventionId: $interventionId, ')
           ..write('interventionCompleted: $interventionCompleted, ')
@@ -2814,11 +3121,17 @@ typedef $$SituationEntriesTableCreateCompanionBuilder
   Value<String?> bodySymptoms,
   required String automaticThought,
   required String firstImpulse,
+  Value<String?> factInterpretationResult,
   Value<String?> actualBehavior,
   Value<String?> needOrWoundedPoint,
   Value<String?> nextStep,
   required String systemState,
   Value<bool> isCrisis,
+  Value<String?> evaluationHeadlineKey,
+  Value<String?> evaluationMeaningKey,
+  Value<String?> suggestedTipIds,
+  Value<String?> suggestedNextActionKey,
+  Value<String?> selectedNextActionKey,
   Value<String?> interventionType,
   Value<String?> interventionId,
   Value<bool> interventionCompleted,
@@ -2846,11 +3159,17 @@ typedef $$SituationEntriesTableUpdateCompanionBuilder
   Value<String?> bodySymptoms,
   Value<String> automaticThought,
   Value<String> firstImpulse,
+  Value<String?> factInterpretationResult,
   Value<String?> actualBehavior,
   Value<String?> needOrWoundedPoint,
   Value<String?> nextStep,
   Value<String> systemState,
   Value<bool> isCrisis,
+  Value<String?> evaluationHeadlineKey,
+  Value<String?> evaluationMeaningKey,
+  Value<String?> suggestedTipIds,
+  Value<String?> suggestedNextActionKey,
+  Value<String?> selectedNextActionKey,
   Value<String?> interventionType,
   Value<String?> interventionId,
   Value<bool> interventionCompleted,
@@ -2915,6 +3234,10 @@ class $$SituationEntriesTableFilterComposer
   ColumnFilters<String> get firstImpulse => $composableBuilder(
       column: $table.firstImpulse, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get factInterpretationResult => $composableBuilder(
+      column: $table.factInterpretationResult,
+      builder: (column) => ColumnFilters(column));
+
   ColumnFilters<String> get actualBehavior => $composableBuilder(
       column: $table.actualBehavior,
       builder: (column) => ColumnFilters(column));
@@ -2931,6 +3254,26 @@ class $$SituationEntriesTableFilterComposer
 
   ColumnFilters<bool> get isCrisis => $composableBuilder(
       column: $table.isCrisis, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get evaluationHeadlineKey => $composableBuilder(
+      column: $table.evaluationHeadlineKey,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get evaluationMeaningKey => $composableBuilder(
+      column: $table.evaluationMeaningKey,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get suggestedTipIds => $composableBuilder(
+      column: $table.suggestedTipIds,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get suggestedNextActionKey => $composableBuilder(
+      column: $table.suggestedNextActionKey,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get selectedNextActionKey => $composableBuilder(
+      column: $table.selectedNextActionKey,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get interventionType => $composableBuilder(
       column: $table.interventionType,
@@ -3027,6 +3370,10 @@ class $$SituationEntriesTableOrderingComposer
       column: $table.firstImpulse,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get factInterpretationResult => $composableBuilder(
+      column: $table.factInterpretationResult,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get actualBehavior => $composableBuilder(
       column: $table.actualBehavior,
       builder: (column) => ColumnOrderings(column));
@@ -3043,6 +3390,26 @@ class $$SituationEntriesTableOrderingComposer
 
   ColumnOrderings<bool> get isCrisis => $composableBuilder(
       column: $table.isCrisis, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get evaluationHeadlineKey => $composableBuilder(
+      column: $table.evaluationHeadlineKey,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get evaluationMeaningKey => $composableBuilder(
+      column: $table.evaluationMeaningKey,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get suggestedTipIds => $composableBuilder(
+      column: $table.suggestedTipIds,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get suggestedNextActionKey => $composableBuilder(
+      column: $table.suggestedNextActionKey,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get selectedNextActionKey => $composableBuilder(
+      column: $table.selectedNextActionKey,
+      builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get interventionType => $composableBuilder(
       column: $table.interventionType,
@@ -3133,6 +3500,9 @@ class $$SituationEntriesTableAnnotationComposer
   GeneratedColumn<String> get firstImpulse => $composableBuilder(
       column: $table.firstImpulse, builder: (column) => column);
 
+  GeneratedColumn<String> get factInterpretationResult => $composableBuilder(
+      column: $table.factInterpretationResult, builder: (column) => column);
+
   GeneratedColumn<String> get actualBehavior => $composableBuilder(
       column: $table.actualBehavior, builder: (column) => column);
 
@@ -3147,6 +3517,21 @@ class $$SituationEntriesTableAnnotationComposer
 
   GeneratedColumn<bool> get isCrisis =>
       $composableBuilder(column: $table.isCrisis, builder: (column) => column);
+
+  GeneratedColumn<String> get evaluationHeadlineKey => $composableBuilder(
+      column: $table.evaluationHeadlineKey, builder: (column) => column);
+
+  GeneratedColumn<String> get evaluationMeaningKey => $composableBuilder(
+      column: $table.evaluationMeaningKey, builder: (column) => column);
+
+  GeneratedColumn<String> get suggestedTipIds => $composableBuilder(
+      column: $table.suggestedTipIds, builder: (column) => column);
+
+  GeneratedColumn<String> get suggestedNextActionKey => $composableBuilder(
+      column: $table.suggestedNextActionKey, builder: (column) => column);
+
+  GeneratedColumn<String> get selectedNextActionKey => $composableBuilder(
+      column: $table.selectedNextActionKey, builder: (column) => column);
 
   GeneratedColumn<String> get interventionType => $composableBuilder(
       column: $table.interventionType, builder: (column) => column);
@@ -3224,11 +3609,17 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             Value<String?> bodySymptoms = const Value.absent(),
             Value<String> automaticThought = const Value.absent(),
             Value<String> firstImpulse = const Value.absent(),
+            Value<String?> factInterpretationResult = const Value.absent(),
             Value<String?> actualBehavior = const Value.absent(),
             Value<String?> needOrWoundedPoint = const Value.absent(),
             Value<String?> nextStep = const Value.absent(),
             Value<String> systemState = const Value.absent(),
             Value<bool> isCrisis = const Value.absent(),
+            Value<String?> evaluationHeadlineKey = const Value.absent(),
+            Value<String?> evaluationMeaningKey = const Value.absent(),
+            Value<String?> suggestedTipIds = const Value.absent(),
+            Value<String?> suggestedNextActionKey = const Value.absent(),
+            Value<String?> selectedNextActionKey = const Value.absent(),
             Value<String?> interventionType = const Value.absent(),
             Value<String?> interventionId = const Value.absent(),
             Value<bool> interventionCompleted = const Value.absent(),
@@ -3255,11 +3646,17 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             bodySymptoms: bodySymptoms,
             automaticThought: automaticThought,
             firstImpulse: firstImpulse,
+            factInterpretationResult: factInterpretationResult,
             actualBehavior: actualBehavior,
             needOrWoundedPoint: needOrWoundedPoint,
             nextStep: nextStep,
             systemState: systemState,
             isCrisis: isCrisis,
+            evaluationHeadlineKey: evaluationHeadlineKey,
+            evaluationMeaningKey: evaluationMeaningKey,
+            suggestedTipIds: suggestedTipIds,
+            suggestedNextActionKey: suggestedNextActionKey,
+            selectedNextActionKey: selectedNextActionKey,
             interventionType: interventionType,
             interventionId: interventionId,
             interventionCompleted: interventionCompleted,
@@ -3286,11 +3683,17 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             Value<String?> bodySymptoms = const Value.absent(),
             required String automaticThought,
             required String firstImpulse,
+            Value<String?> factInterpretationResult = const Value.absent(),
             Value<String?> actualBehavior = const Value.absent(),
             Value<String?> needOrWoundedPoint = const Value.absent(),
             Value<String?> nextStep = const Value.absent(),
             required String systemState,
             Value<bool> isCrisis = const Value.absent(),
+            Value<String?> evaluationHeadlineKey = const Value.absent(),
+            Value<String?> evaluationMeaningKey = const Value.absent(),
+            Value<String?> suggestedTipIds = const Value.absent(),
+            Value<String?> suggestedNextActionKey = const Value.absent(),
+            Value<String?> selectedNextActionKey = const Value.absent(),
             Value<String?> interventionType = const Value.absent(),
             Value<String?> interventionId = const Value.absent(),
             Value<bool> interventionCompleted = const Value.absent(),
@@ -3317,11 +3720,17 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             bodySymptoms: bodySymptoms,
             automaticThought: automaticThought,
             firstImpulse: firstImpulse,
+            factInterpretationResult: factInterpretationResult,
             actualBehavior: actualBehavior,
             needOrWoundedPoint: needOrWoundedPoint,
             nextStep: nextStep,
             systemState: systemState,
             isCrisis: isCrisis,
+            evaluationHeadlineKey: evaluationHeadlineKey,
+            evaluationMeaningKey: evaluationMeaningKey,
+            suggestedTipIds: suggestedTipIds,
+            suggestedNextActionKey: suggestedNextActionKey,
+            selectedNextActionKey: selectedNextActionKey,
             interventionType: interventionType,
             interventionId: interventionId,
             interventionCompleted: interventionCompleted,

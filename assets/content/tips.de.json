@@ -1,0 +1,26 @@
+{
+  "tips": {
+    "check_facts_not_assumptions": "Prüfe, ob du gerade Annahmen statt Fakten nutzt.",
+    "write_alternative_explanation": "Formuliere eine alternative Erklärung.",
+    "avoid_rechecking": "Vermeide impulsives Nachkontrollieren.",
+    "regulate_body_before_analysis": "Reguliere erst den Körper, bevor du weiter analysierst.",
+    "do_not_react_first_impulse": "Reagiere nicht im ersten Impuls.",
+    "separate_criticism_from_value": "Trenne Kritik von persönlicher Abwertung.",
+    "write_objective_observation": "Schreibe erst auf, was objektiv passiert ist.",
+    "speak_later_in_observations": "Sprich später in Beobachtungen statt Vorwürfen.",
+    "check_if_problem_solvable": "Prüfe, ob das Problem gerade lösbar ist.",
+    "choose_next_step": "Wenn ja: wähle einen nächsten Schritt.",
+    "limit_loop": "Wenn nein: begrenze die Denkschleife bewusst.",
+    "repetition_not_clarity": "Wiederholung ist nicht automatisch Klärung.",
+    "not_everything_at_once": "Nicht alles gleichzeitig lösen.",
+    "reduce_stimuli_then_plan": "Erst Reize reduzieren, dann planen.",
+    "more_analysis_not_solution": "Wenn alles zu viel ist, ist mehr Analyse oft nicht die Lösung.",
+    "separate_error_from_selfworth": "Trenne Fehler von Selbstwert.",
+    "check_counterevidence": "Prüfe Gegenbelege.",
+    "write_more_realistic_alternative": "Formuliere eine realistischere Alternative.",
+    "would_you_talk_same_way": "Würdest du mit einer anderen Person genauso sprechen?",
+    "separate_observation_from_assumption": "Trenne Beobachtung und Unterstellung.",
+    "move_conversation_if_needed": "Wenn nötig: Gespräch verschieben, statt eskalieren.",
+    "get_support_now": "Hole dir jetzt Unterstützung und bleibe nicht allein."
+  }
+}

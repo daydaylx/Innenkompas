@@ -79,6 +79,14 @@ class InterventionSelector {
           InterventionType.selfValueCheck,
         ];
 
+      case SystemState.interpretation:
+        return [
+          InterventionType.factCheck,
+          InterventionType.abc3,
+          InterventionType.regulation,
+          InterventionType.communication,
+        ];
+
       case SystemState.rumination:
         return [
           InterventionType.ruminationStop,
@@ -192,10 +200,18 @@ class InterventionSelector {
           state == SystemState.overwhelm ? 1 : 5,
 
       // Fact check is generally good for reflective states
-      InterventionType.factCheck: state == SystemState.reflectiveReady ? 1 : 3,
+      InterventionType.factCheck:
+          state == SystemState.reflectiveReady ||
+                  state == SystemState.interpretation
+              ? 1
+              : 3,
 
       // Worksheet templates for reflective states
-      InterventionType.abc3: state == SystemState.reflectiveReady ? 2 : 6,
+      InterventionType.abc3:
+          state == SystemState.reflectiveReady ||
+                  state == SystemState.interpretation
+              ? 2
+              : 6,
       InterventionType.rsaAbcde: state == SystemState.selfDevaluation ? 2 : 7,
     };
 

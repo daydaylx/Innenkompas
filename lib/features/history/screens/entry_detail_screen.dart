@@ -1,11 +1,14 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:go_router/go_router.dart';
+import 'package:innenkompass/application/providers/evaluation_providers.dart';
 import 'package:innenkompass/core/constants/app_constants.dart';
 import 'package:innenkompass/core/constants/emotion_types.dart';
+import 'package:innenkompass/core/constants/fact_interpretation_results.dart';
 import 'package:innenkompass/core/constants/context_types.dart';
 import 'package:innenkompass/core/constants/impulse_types.dart';
 import 'package:innenkompass/core/constants/system_states.dart';
@@ -33,6 +36,7 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final entryAsync = ref.watch(entryByIdProvider(widget.entryId));
+    final contentAsync = ref.watch(evaluationContentProvider);
 
     return AppScaffold(
       title: 'Eintragdetails',
@@ -202,6 +206,20 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
                         _getImpulseLabel(entry.firstImpulse),
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
+                      if ((entry.factInterpretationResult ?? '').isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Fakt oder Deutung:',
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _getFactInterpretationLabel(
+                            entry.factInterpretationResult!,
+                          ),
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ],
                       if (entry.actualBehavior != null &&
                           entry.actualBehavior!.isNotEmpty) ...[
                         const SizedBox(height: 12),
@@ -298,6 +316,72 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
                     ],
                   ),
                 ),
+
+                if ((entry.evaluationHeadlineKey ?? '').isNotEmpty ||
+                    (entry.evaluationMeaningKey ?? '').isNotEmpty ||
+                    (entry.suggestedTipIds ?? '').isNotEmpty) ...[
+                  const SizedBox(height: AppConstants.spacingMedium),
+                  _buildCard(
+                    title: 'Auswertung',
+                    icon: Icons.tips_and_updates_outlined,
+                    child: contentAsync.when(
+                      data: (content) {
+                        final tipIds =
+                            _decodeStringList(entry.suggestedTipIds);
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if ((entry.evaluationHeadlineKey ?? '').isNotEmpty)
+                              _buildLabeledValue(
+                                'Was auffällt',
+                                content.headlineFor(
+                                  entry.evaluationHeadlineKey!,
+                                ),
+                              ),
+                            if ((entry.evaluationMeaningKey ?? '').isNotEmpty)
+                              _buildLabeledValue(
+                                'Was das bedeuten könnte',
+                                content.meaningFor(
+                                  entry.evaluationMeaningKey!,
+                                ),
+                              ),
+                            if ((entry.suggestedNextActionKey ?? '').isNotEmpty)
+                              _buildLabeledValue(
+                                'Was jetzt hilfreich sein kann',
+                                content.nextActionFor(
+                                  entry.suggestedNextActionKey!,
+                                ),
+                              ),
+                            if (tipIds.isNotEmpty) ...[
+                              const Text(
+                                'Praktische Tipps:',
+                                style: TextStyle(fontWeight: FontWeight.w500),
+                              ),
+                              const SizedBox(height: 4),
+                              ...tipIds.map(
+                                (tipId) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 6),
+                                  child: Text('• ${content.tipFor(tipId)}'),
+                                ),
+                              ),
+                            ],
+                            if ((entry.selectedNextActionKey ?? '').isNotEmpty)
+                              _buildLabeledValue(
+                                'Gewählter nächster Schritt',
+                                content.nextActionFor(
+                                  entry.selectedNextActionKey!,
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                      loading: () => const CircularProgressIndicator(),
+                      error: (_, __) => const Text(
+                        'Auswertung konnte nicht geladen werden.',
+                      ),
+                    ),
+                  ),
+                ],
 
                 if (entry.interventionType != null) ...[
                   const SizedBox(height: AppConstants.spacingMedium),
@@ -491,6 +575,7 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
       final labels = {
         SystemState.acuteActivation: 'Akute Aktivierung',
         SystemState.reflectiveReady: 'Reflexionsbereit',
+        SystemState.interpretation: 'Interpretationsmodus',
         SystemState.rumination: 'Grübelmodus',
         SystemState.conflict: 'Konflikt',
         SystemState.selfDevaluation: 'Selbstabwertung',
@@ -511,6 +596,7 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
       final colors = {
         SystemState.acuteActivation: AppColors.error,
         SystemState.reflectiveReady: AppColors.success,
+        SystemState.interpretation: AppColors.warning,
         SystemState.rumination: AppColors.warning,
         SystemState.conflict: AppColors.error,
         SystemState.selfDevaluation: Colors.purple,
@@ -536,6 +622,30 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
     return labels[typeStr] ?? typeStr;
   }
 
+  String _getFactInterpretationLabel(String rawValue) {
+    final result = FactInterpretationResult.values
+        .where((candidate) => candidate.name == rawValue)
+        .firstOrNull;
+    return result?.label ?? rawValue;
+  }
+
+  Widget _buildLabeledValue(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$label:',
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 4),
+          Text(value),
+        ],
+      ),
+    );
+  }
+
   List<String> _decodeBodySymptoms(String? rawValue) {
     if (rawValue == null || rawValue.isEmpty) return const [];
 
@@ -549,6 +659,21 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
     }
 
     return rawValue.split(',');
+  }
+
+  List<String> _decodeStringList(String? rawValue) {
+    if (rawValue == null || rawValue.isEmpty) return const [];
+
+    try {
+      final decoded = jsonDecode(rawValue);
+      if (decoded is List) {
+        return decoded.whereType<String>().toList();
+      }
+    } catch (_) {
+      return const [];
+    }
+
+    return const [];
   }
 
   void _showDeleteDialog() {

@@ -4,11 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/router.dart';
 import '../../../app/theme/colors.dart';
+import '../../../application/providers/evaluation_providers.dart';
 import '../../../application/providers/intervention_providers.dart';
 import '../../../application/providers/new_situation_providers.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/validators/new_situation_validators.dart';
-import '../../../domain/models/intervention_library.dart';
 import '../../../domain/models/situation_draft.dart';
 import '../../../shared/widgets/app_scaffold.dart';
 import '../../../shared/widgets/buttons/app_primary_button.dart';
@@ -98,22 +98,15 @@ class _SituationReflectionScreenState
       return;
     }
 
-    final classification = ref.read(classificationResultProvider);
-    if (classification != null && classification.primaryIntervention != null) {
-      final interventions = InterventionLibrary.getByType(
-        classification.primaryIntervention!,
-      );
-      if (interventions.isNotEmpty) {
-        ref
-            .read(interventionFlowStateProvider.notifier)
-            .startIntervention(interventions.first, entryId: savedId);
-        context.push(AppRoutes.intervention);
-        return;
-      }
-    }
+    ref.invalidate(patternSummaryProvider);
+    ref.invalidate(contextCorrelationsProvider);
+    ref.invalidate(trendSlopeProvider);
+    ref.invalidate(burnoutRiskProvider);
+    ref.invalidate(narrativeInsightsProvider);
 
-    ref.read(newSituationFlowControllerProvider.notifier).reset();
-    context.go(AppRoutes.home);
+    context.go(
+      AppRoutes.entryEvaluation.replaceFirst(':id', '$savedId'),
+    );
   }
 
   void _handleBack() {

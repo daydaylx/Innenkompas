@@ -1,12 +1,13 @@
 import '../../core/constants/emotion_types.dart';
 import '../../core/constants/impulse_types.dart';
 import '../../core/constants/context_types.dart';
+import '../../core/constants/fact_interpretation_results.dart';
 import '../../core/constants/system_states.dart';
 
 /// State classifier for determining the user's current mental/emotional state.
 ///
 /// This classifier uses a deterministic rule-based approach to categorize
-/// a situation into one of 7 possible system states based on the captured data.
+/// a situation into one of 8 possible system states based on the captured data.
 ///
 /// Classification priority (highest to lowest):
 /// 1. Acute Activation - High intensity + high tension + action impulse
@@ -14,7 +15,8 @@ import '../../core/constants/system_states.dart';
 /// 3. Overwhelm - Overwhelming contexts with high intensity
 /// 4. Conflict - Conflict contexts + conflict emotions + conflict impulses
 /// 5. Rumination - Rumination impulses + negative emotions
-/// 6. Default: Reflective Ready
+/// 6. Interpretation - Unsichere Faktenlage mit starker Deutung
+/// 7. Default: Reflective Ready
 class StateClassifier {
   StateClassifier._();
 
@@ -29,6 +31,8 @@ class StateClassifier {
     EmotionType? secondaryEmotion,
     required ImpulseType firstImpulse,
     required ContextType context,
+    FactInterpretationResult factInterpretation =
+        FactInterpretationResult.mixed,
   }) {
     // Priority 1: Check for acute activation first
     // High intensity (8+) AND high body tension (7+) AND action-oriented impulse
@@ -67,6 +71,11 @@ class StateClassifier {
       if (_isRuminationEmotion(primaryEmotion, secondaryEmotion)) {
         return SystemState.rumination;
       }
+    }
+
+    // Priority 6: Interpretation mode with weak factual certainty
+    if (factInterpretation == FactInterpretationResult.mostlyInterpretation) {
+      return SystemState.interpretation;
     }
 
     // Default: Reflective Ready

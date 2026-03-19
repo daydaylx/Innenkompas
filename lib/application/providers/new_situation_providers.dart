@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../domain/services/evaluation_engine.dart';
 import '../../core/validators/new_situation_validators.dart';
 import '../../data/db/app_database.dart';
 import '../../domain/models/situation_draft.dart';
@@ -104,6 +107,16 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
         firstImpulse: thoughtData.firstImpulse,
         context: eventData.context,
         automaticThought: thoughtData.automaticThought,
+        factInterpretation: thoughtData.factInterpretation,
+      );
+      final evaluation = EvaluationEngine.evaluate(
+        systemState: classification.systemState,
+        primaryEmotion: emotionData.primaryEmotion,
+        intensity: emotionData.intensity,
+        bodyTension: emotionData.bodyTension,
+        firstImpulse: thoughtData.firstImpulse,
+        context: eventData.context,
+        factInterpretation: thoughtData.factInterpretation,
       );
 
       final systemState = classification.systemState.name;
@@ -130,6 +143,7 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
               : const Value.absent(),
           automaticThought: thoughtData.automaticThought,
           firstImpulse: thoughtData.firstImpulse.name,
+          factInterpretationResult: Value(thoughtData.factInterpretation.name),
           actualBehavior: thoughtData.actualBehavior != null
               ? Value(thoughtData.actualBehavior)
               : const Value.absent(),
@@ -137,6 +151,11 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
           nextStep: Value(reflectionData.nextStep),
           systemState: systemState,
           isCrisis: Value(isCrisis),
+          evaluationHeadlineKey: Value(evaluation.headlineKey),
+          evaluationMeaningKey: Value(evaluation.meaningKey),
+          suggestedTipIds: Value(jsonEncode(evaluation.suggestedTipIds)),
+          suggestedNextActionKey: Value(evaluation.suggestedNextActionKey),
+          selectedNextActionKey: Value(evaluation.suggestedNextActionKey),
           interventionType: interventionType != null
               ? Value(interventionType)
               : const Value.absent(),
@@ -240,6 +259,7 @@ final classificationResultProvider =
     firstImpulse: thoughtData.firstImpulse,
     context: eventData.context,
     automaticThought: thoughtData.automaticThought,
+    factInterpretation: thoughtData.factInterpretation,
   );
 });
 

@@ -20,6 +20,7 @@ class AppRoutes {
   static const String newSituationReflection = '/new-situation/reflection';
   static const String intervention = '/intervention';
   static const String postEvaluation = '/post-evaluation';
+  static const String entryEvaluation = '/entry-evaluation/:id';
   static const String history = '/history';
   static const String entryDetail = '/history/:id';
   static const String patterns = '/patterns';
@@ -27,6 +28,7 @@ class AppRoutes {
   static const String crisisEdit = '/crisis/edit';
   static const String settings = '/settings';
   static const String lock = '/lock';
+  static const String quickCheckin = '/quick-checkin';
 }
 
 /// GoRouter configuration for Innenkompass.
@@ -58,10 +60,12 @@ class AppRouter {
         newSituationReflectionScreen,
     required Widget Function(BuildContext, GoRouterState) interventionScreen,
     required Widget Function(BuildContext, GoRouterState) postEvaluationScreen,
+    required Widget Function(BuildContext, GoRouterState) entryEvaluationScreen,
     required Widget Function(BuildContext, GoRouterState) entryDetailScreen,
     required bool Function() isOnboardingCompleted,
     bool Function()? isAppLocked,
     bool Function()? isAppReady,
+    Widget Function(BuildContext)? quickCheckinScreen,
   }) {
     return GoRouter(
       initialLocation: AppRoutes.root,
@@ -175,6 +179,15 @@ class AppRouter {
           ),
         ),
 
+        // Entry evaluation route
+        GoRoute(
+          path: AppRoutes.entryEvaluation,
+          pageBuilder: (context, state) => MaterialPage(
+            key: state.pageKey,
+            child: entryEvaluationScreen(context, state),
+          ),
+        ),
+
         // History route
         GoRoute(
           path: AppRoutes.history,
@@ -240,6 +253,16 @@ class AppRouter {
             child: settingsScreen(context),
           ),
         ),
+
+        // Quick check-in route (E-04)
+        if (quickCheckinScreen != null)
+          GoRoute(
+            path: AppRoutes.quickCheckin,
+            pageBuilder: (context, state) => MaterialPage(
+              key: state.pageKey,
+              child: quickCheckinScreen(context),
+            ),
+          ),
 
         // Root route - redirects based on onboarding status
         GoRoute(

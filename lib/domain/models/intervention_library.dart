@@ -351,6 +351,7 @@ class InterventionLibrary {
     recommendedForStates: [
       SystemState.rumination,
       SystemState.selfDevaluation,
+      SystemState.interpretation,
       SystemState.reflectiveReady,
     ],
     recommendedForEmotions: [
@@ -542,6 +543,7 @@ class InterventionLibrary {
     estimatedDurationSec: 300,
     recommendedForStates: [
       SystemState.conflict,
+      SystemState.interpretation,
       SystemState.reflectiveReady,
     ],
     recommendedForEmotions: [
@@ -895,6 +897,7 @@ class InterventionLibrary {
     recommendedForStates: [
       SystemState.reflectiveReady,
       SystemState.rumination,
+      SystemState.interpretation,
       SystemState.conflict,
       SystemState.selfDevaluation,
     ],
@@ -1062,6 +1065,7 @@ class InterventionLibrary {
     recommendedForStates: [
       SystemState.reflectiveReady,
       SystemState.rumination,
+      SystemState.interpretation,
       SystemState.selfDevaluation,
       SystemState.conflict,
     ],

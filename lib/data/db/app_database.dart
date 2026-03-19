@@ -39,6 +39,32 @@ class AppDatabase extends _$AppDatabase {
             situationEntries.nextStep,
           );
         }
+        if (from < 3) {
+          await m.addColumn(
+            situationEntries,
+            situationEntries.factInterpretationResult,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.evaluationHeadlineKey,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.evaluationMeaningKey,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.suggestedTipIds,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.suggestedNextActionKey,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.selectedNextActionKey,
+          );
+        }
       },
       beforeOpen: (OpeningDetails details) async {
         // Enable foreign keys and other database pragmas
@@ -70,6 +96,18 @@ class AppDatabase extends _$AppDatabase {
         postNote: Value(userNote),
         interventionCompleted: const Value(true),
         interventionDurationSec: Value(actualDuration),
+      ),
+    );
+  }
+
+  /// Speichert die vom Nutzer gewählte Soforthilfe/Nächster-Schritt-Auswahl.
+  Future<void> updateSelectedNextAction({
+    required int entryId,
+    required String selectedNextActionKey,
+  }) async {
+    await (update(situationEntries)..where((e) => e.id.equals(entryId))).write(
+      SituationEntriesCompanion(
+        selectedNextActionKey: Value(selectedNextActionKey),
       ),
     );
   }
@@ -240,11 +278,17 @@ class AppDatabase extends _$AppDatabase {
         'bodySymptoms': e.bodySymptoms,
         'automaticThought': e.automaticThought,
         'firstImpulse': e.firstImpulse,
+        'factInterpretationResult': e.factInterpretationResult,
         'actualBehavior': e.actualBehavior,
         'needOrWoundedPoint': e.needOrWoundedPoint,
         'nextStep': e.nextStep,
         'systemState': e.systemState,
         'isCrisis': e.isCrisis,
+        'evaluationHeadlineKey': e.evaluationHeadlineKey,
+        'evaluationMeaningKey': e.evaluationMeaningKey,
+        'suggestedTipIds': e.suggestedTipIds,
+        'suggestedNextActionKey': e.suggestedNextActionKey,
+        'selectedNextActionKey': e.selectedNextActionKey,
         'interventionType': e.interventionType,
         'interventionId': e.interventionId,
         'interventionCompleted': e.interventionCompleted,

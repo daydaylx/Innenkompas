@@ -1,4 +1,5 @@
 import '../../core/constants/emotion_types.dart';
+import '../../core/constants/fact_interpretation_results.dart';
 import '../../core/constants/impulse_types.dart';
 import '../../core/constants/context_types.dart';
 import '../../core/constants/system_states.dart';
@@ -31,6 +32,7 @@ class ClassificationService {
   /// - [firstImpulse]: The first/strongest impulse
   /// - [context]: The context in which the situation occurred
   /// - [automaticThought]: The automatic thought that arose
+  /// - [factInterpretation]: Einschätzung, wie stark der Gedanke auf Fakten basiert
   ///
   /// Returns a [CompleteClassificationResult] containing all classification data.
   static CompleteClassificationResult classify({
@@ -41,6 +43,8 @@ class ClassificationService {
     required ImpulseType firstImpulse,
     required ContextType context,
     required String automaticThought,
+    FactInterpretationResult factInterpretation =
+        FactInterpretationResult.mixed,
   }) {
     // Step 1: Classify system state
     final systemState = StateClassifier.classify(
@@ -50,6 +54,7 @@ class ClassificationService {
       secondaryEmotion: secondaryEmotion,
       firstImpulse: firstImpulse,
       context: context,
+      factInterpretation: factInterpretation,
     );
 
     // Step 2: Detect crisis indicators
@@ -119,6 +124,8 @@ class ClassificationService {
     EmotionType? secondaryEmotion,
     required ImpulseType firstImpulse,
     required ContextType context,
+    FactInterpretationResult factInterpretation =
+        FactInterpretationResult.mixed,
   }) {
     return StateClassifier.classify(
       intensity: intensity,
@@ -127,6 +134,7 @@ class ClassificationService {
       secondaryEmotion: secondaryEmotion,
       firstImpulse: firstImpulse,
       context: context,
+      factInterpretation: factInterpretation,
     );
   }
 

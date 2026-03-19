@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:innenkompass/core/constants/emotion_types.dart';
+import 'package:innenkompass/core/constants/fact_interpretation_results.dart';
 import 'package:innenkompass/core/constants/impulse_types.dart';
 import 'package:innenkompass/core/constants/context_types.dart';
 import 'package:innenkompass/core/constants/system_states.dart';
@@ -246,6 +247,20 @@ void main() {
       );
 
       expect(result, SystemState.reflectiveReady);
+    });
+
+    test('classifies interpretation when facts are uncertain and no higher rule matches', () {
+      final result = StateClassifier.classify(
+        intensity: 5,
+        bodyTension: 5,
+        primaryEmotion: EmotionType.fear,
+        secondaryEmotion: null,
+        firstImpulse: ImpulseType.distraction,
+        context: ContextType.other,
+        factInterpretation: FactInterpretationResult.mostlyInterpretation,
+      );
+
+      expect(result, SystemState.interpretation);
     });
 
     test(

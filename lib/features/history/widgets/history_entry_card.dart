@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:innenkompass/core/constants/emotion_types.dart';
 import 'package:innenkompass/core/constants/context_types.dart';

@@ -97,6 +97,10 @@ class HomeScreen extends ConsumerWidget {
               icon: Icons.add_circle_outline,
               onPressed: () => context.push(AppRoutes.newSituationEvent),
             ),
+            const SizedBox(height: AppConstants.spacingMedium),
+            _QuickCheckinButton(
+              onTap: () => context.push(AppRoutes.quickCheckin),
+            ),
             const SizedBox(height: AppConstants.spacingLarge),
             Row(
               children: [
@@ -126,6 +130,82 @@ class HomeScreen extends ConsumerWidget {
               onPressed: () => context.push(AppRoutes.crisis),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Kompakter Quick-Check-in-Button für den Home-Screen.
+class _QuickCheckinButton extends StatelessWidget {
+  const _QuickCheckinButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.spacingLarge,
+            vertical: AppConstants.spacingMedium,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.secondary.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+            border: Border.all(
+              color: AppColors.secondary.withValues(alpha: 0.25),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.secondary.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.checklist_rounded,
+                  size: 20,
+                  color: AppColors.secondary,
+                ),
+              ),
+              const SizedBox(width: AppConstants.spacingMedium),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Kurz einchecken',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      '30 Sekunden · Emotion + Belastung',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: AppColors.textTertiary,
+              ),
+            ],
+          ),
         ),
       ),
     );

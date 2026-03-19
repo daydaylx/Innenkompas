@@ -164,6 +164,7 @@ Unter `docs/konzept/`:
 - `04_gap_analyse_konzeptv2neu.md` – Gap-Analyse zwischen Konzept und Implementierung
 - `05_rechteklärung_lizenzen.md` – Lizenz- und Rechteklärung
 - `07_visuelles_designkonzept_innenkompass.md` – visuelles Designkonzept
+- `08_plan_fuer_auswertung_und_praktische_tipps.md` – Plan für Auswertung und praktische Tipps
 
 ---
 

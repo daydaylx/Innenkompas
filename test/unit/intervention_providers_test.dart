@@ -7,6 +7,7 @@ import 'package:innenkompass/application/providers/intervention_providers.dart';
 import 'package:innenkompass/application/providers/new_situation_providers.dart';
 import 'package:innenkompass/core/constants/context_types.dart';
 import 'package:innenkompass/core/constants/emotion_types.dart';
+import 'package:innenkompass/core/constants/fact_interpretation_results.dart';
 import 'package:innenkompass/core/constants/impulse_types.dart';
 import 'package:innenkompass/core/constants/intervention_types.dart';
 import 'package:innenkompass/core/constants/system_states.dart';
@@ -47,6 +48,7 @@ void main() {
         const SituationThoughtImpulseData(
           automaticThought: 'Ich muss sofort zurückschreiben.',
           firstImpulse: ImpulseType.counter,
+          factInterpretation: FactInterpretationResult.mixed,
         ),
       );
       controller.updateReflectionData(
@@ -121,6 +123,7 @@ void main() {
         const SituationThoughtImpulseData(
           automaticThought: 'Es ist hoffnungslos und ich halte das nicht aus.',
           firstImpulse: ImpulseType.withdraw,
+          factInterpretation: FactInterpretationResult.mostlyFacts,
         ),
       );
       controller.updateReflectionData(

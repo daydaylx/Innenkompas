@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:innenkompass/app/router.dart';
 import 'package:innenkompass/app/theme/colors.dart';
+import 'package:innenkompass/application/providers/evaluation_providers.dart';
 import 'package:innenkompass/application/providers/intervention_providers.dart';
 import 'package:innenkompass/core/constants/app_constants.dart';
 import 'package:innenkompass/core/constants/context_types.dart';
 import 'package:innenkompass/core/constants/emotion_types.dart';
 import 'package:innenkompass/core/constants/system_states.dart';
 import 'package:innenkompass/domain/models/pattern_summary.dart';
+import 'package:innenkompass/domain/services/pattern_analyzer.dart';
 import 'package:innenkompass/features/patterns/widgets/emotion_bar_chart.dart';
 import 'package:innenkompass/features/patterns/widgets/pattern_card.dart';
 import 'package:innenkompass/shared/widgets/app_scaffold.dart';
@@ -22,6 +24,10 @@ class PatternsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final patternAsync = ref.watch(patternSummaryProvider);
+    final burnoutAsync = ref.watch(burnoutRiskProvider);
+    final trendSlopeAsync = ref.watch(trendSlopeProvider);
+    final correlationsAsync = ref.watch(contextCorrelationsProvider);
+    final insightsAsync = ref.watch(narrativeInsightsProvider);
 
     return AppScaffold(
       title: 'Muster',
@@ -41,6 +47,12 @@ class PatternsScreen extends ConsumerWidget {
             return _buildEmptyState(context);
           }
 
+          final burnoutRisk =
+              burnoutAsync.valueOrNull ?? BurnoutRisk.low;
+          final trendSlope = trendSlopeAsync.valueOrNull ?? 0.0;
+          final correlations = correlationsAsync.valueOrNull ?? [];
+          final insights = insightsAsync.valueOrNull ?? [];
+
           return SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(
               AppConstants.spacingMedium,
@@ -52,8 +64,22 @@ class PatternsScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildSummaryPanel(context, pattern),
+                if (burnoutRisk != BurnoutRisk.low) ...[
+                  const SizedBox(height: AppConstants.spacingMedium),
+                  _buildBurnoutBanner(context, burnoutRisk),
+                ],
                 const SizedBox(height: AppConstants.spacingLarge),
                 _buildOverviewCards(context, pattern),
+                if (insights.isNotEmpty) ...[
+                  const SizedBox(height: AppConstants.spacingXLarge),
+                  _buildSectionHeader(
+                    context,
+                    title: 'Erkenntnisse',
+                    subtitle:
+                        'Kurze, regelbasierte Hinweise aus deinem bisherigen Verlauf.',
+                  ),
+                  _buildNarrativeInsights(context, insights),
+                ],
                 const SizedBox(height: AppConstants.spacingXLarge),
                 _buildSectionHeader(
                   context,
@@ -73,6 +99,16 @@ class PatternsScreen extends ConsumerWidget {
                       'Wo Belastung haeufig auftaucht, damit der Verlauf besser einordenbar wird.',
                 ),
                 _buildContextCards(context, pattern),
+                if (correlations.isNotEmpty) ...[
+                  const SizedBox(height: AppConstants.spacingXLarge),
+                  _buildSectionHeader(
+                    context,
+                    title: 'Meine Muster',
+                    subtitle:
+                        'Welche Gefühle in bestimmten Bereichen besonders häufig auftauchen.',
+                  ),
+                  _buildCorrelationCards(context, correlations),
+                ],
                 const SizedBox(height: AppConstants.spacingXLarge),
                 _buildSectionHeader(
                   context,
@@ -92,6 +128,8 @@ class PatternsScreen extends ConsumerWidget {
                   intensityTrend: pattern.intensityTrend,
                   tensionTrend: pattern.tensionTrend,
                 ),
+                const SizedBox(height: AppConstants.spacingSmall),
+                _buildTrendBadge(context, trendSlope),
                 const SizedBox(height: AppConstants.spacingXLarge),
                 _buildSectionHeader(
                   context,
@@ -416,6 +454,231 @@ class PatternsScreen extends ConsumerWidget {
     );
   }
 
+  /// E-03: Burnout-Risiko-Banner
+  Widget _buildBurnoutBanner(BuildContext context, BurnoutRisk risk) {
+    final theme = Theme.of(context);
+    final isHigh = risk == BurnoutRisk.high;
+    final color = isHigh ? AppColors.error : AppColors.warning;
+    final icon = isHigh
+        ? Icons.warning_amber_rounded
+        : Icons.trending_up_rounded;
+    final text = isHigh
+        ? 'Mehrere Tage anhaltend hohe Belastung – Erholung einplanen.'
+        : 'Erhöhte Belastung über mehrere Tage in Folge.';
+    final hint = isHigh
+        ? 'Wenn das anhält, lohnt es sich, Unterstützung zu suchen.'
+        : 'Kleine Pausen und Interventionen können helfen, den Rhythmus zu unterbrechen.';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppConstants.spacingMedium),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        border: Border.all(color: color.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 22),
+          const SizedBox(width: AppConstants.spacingMedium),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  text,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  hint,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// E-01: Trend-Badge unter dem Intensitätsverlauf
+  Widget _buildTrendBadge(BuildContext context, double slope) {
+    final theme = Theme.of(context);
+
+    final bool improving = slope < -0.05;
+    final bool worsening = slope > 0.05;
+
+    final Color color = improving
+        ? AppColors.success
+        : worsening
+            ? AppColors.warning
+            : AppColors.textSecondary;
+    final IconData icon = improving
+        ? Icons.trending_down_rounded
+        : worsening
+            ? Icons.trending_up_rounded
+            : Icons.trending_flat_rounded;
+    final String label = improving
+        ? 'Tendenziell entspannter'
+        : worsening
+            ? 'Steigende Belastungstendenz'
+            : 'Stabil';
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusPill),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// E-02: Kontext-Emotions-Korrelationskarten
+  Widget _buildCorrelationCards(
+    BuildContext context,
+    List<ContextCorrelation> correlations,
+  ) {
+    final theme = Theme.of(context);
+
+    return Column(
+      children: correlations.map((c) {
+        final dominanceInt = c.emotionDominance.round();
+        final ctxPercent = c.contextPercentage.round();
+
+        return Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(bottom: AppConstants.spacingSmall),
+          padding: const EdgeInsets.all(AppConstants.spacingMedium),
+          decoration: BoxDecoration(
+            color: AppColors.surface.withValues(alpha: 0.9),
+            borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+            border: Border.all(color: AppColors.border.withValues(alpha: 0.7)),
+          ),
+          child: Row(
+            children: [
+              Text(
+                c.context.emoji,
+                style: const TextStyle(fontSize: 26),
+              ),
+              const SizedBox(width: AppConstants.spacingMedium),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      c.context.label,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'In $dominanceInt % der Fälle: ${c.emotion.label}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    c.emotion.emoji,
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  Text(
+                    '$ctxPercent % der Einträge',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildNarrativeInsights(
+    BuildContext context,
+    List<String> insights,
+  ) {
+    return Column(
+      children: insights
+          .map(
+            (insight) => Container(
+              width: double.infinity,
+              margin:
+                  const EdgeInsets.only(bottom: AppConstants.spacingSmall),
+              padding: const EdgeInsets.all(AppConstants.spacingMedium),
+              decoration: BoxDecoration(
+                color: AppColors.surface.withValues(alpha: 0.92),
+                borderRadius:
+                    BorderRadius.circular(AppConstants.borderRadius),
+                border: Border.all(
+                  color: AppColors.border.withValues(alpha: 0.7),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(top: 2),
+                    child: Icon(
+                      Icons.insights_outlined,
+                      size: 20,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: AppConstants.spacingSmall),
+                  Expanded(
+                    child: Text(
+                      insight,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textPrimary,
+                            height: 1.5,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+          .toList(),
+    );
+  }
+
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -535,6 +798,8 @@ class PatternsScreen extends ConsumerWidget {
         return 'Akute Aktivierung';
       case SystemState.reflectiveReady:
         return 'Reflexionsbereit';
+      case SystemState.interpretation:
+        return 'Interpretationsmodus';
       case SystemState.rumination:
         return 'Gruebelmodus';
       case SystemState.conflict:
@@ -554,6 +819,8 @@ class PatternsScreen extends ConsumerWidget {
         return AppColors.warning;
       case SystemState.reflectiveReady:
         return AppColors.success;
+      case SystemState.interpretation:
+        return AppColors.warning;
       case SystemState.rumination:
         return AppColors.secondary;
       case SystemState.conflict:
@@ -573,6 +840,8 @@ class PatternsScreen extends ConsumerWidget {
         return Icons.flash_on_rounded;
       case SystemState.reflectiveReady:
         return Icons.self_improvement_rounded;
+      case SystemState.interpretation:
+        return Icons.fact_check_outlined;
       case SystemState.rumination:
         return Icons.loop_rounded;
       case SystemState.conflict:

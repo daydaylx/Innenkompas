@@ -1,4 +1,5 @@
 import '../../core/constants/emotion_types.dart';
+import '../../core/constants/fact_interpretation_results.dart';
 import '../../core/constants/impulse_types.dart';
 import '../../core/constants/context_types.dart';
 
@@ -135,6 +136,7 @@ class SituationThoughtImpulseData {
   const SituationThoughtImpulseData({
     required this.automaticThought,
     required this.firstImpulse,
+    required this.factInterpretation,
     this.actualBehavior,
   });
 
@@ -144,6 +146,9 @@ class SituationThoughtImpulseData {
   /// First impulse type
   final ImpulseType firstImpulse;
 
+  /// Einschätzung, wie stark der Gedanke auf Fakten oder Deutungen beruht.
+  final FactInterpretationResult factInterpretation;
+
   /// Optional actual behavior (max 300 characters)
   final String? actualBehavior;
 
@@ -151,11 +156,13 @@ class SituationThoughtImpulseData {
   SituationThoughtImpulseData copyWith({
     String? automaticThought,
     ImpulseType? firstImpulse,
+    FactInterpretationResult? factInterpretation,
     String? actualBehavior,
   }) {
     return SituationThoughtImpulseData(
       automaticThought: automaticThought ?? this.automaticThought,
       firstImpulse: firstImpulse ?? this.firstImpulse,
+      factInterpretation: factInterpretation ?? this.factInterpretation,
       actualBehavior: actualBehavior ?? this.actualBehavior,
     );
   }
@@ -167,6 +174,7 @@ class SituationThoughtImpulseData {
     return other is SituationThoughtImpulseData &&
         other.automaticThought == automaticThought &&
         other.firstImpulse == firstImpulse &&
+        other.factInterpretation == factInterpretation &&
         other.actualBehavior == actualBehavior;
   }
 
@@ -174,6 +182,7 @@ class SituationThoughtImpulseData {
   int get hashCode {
     return automaticThought.hashCode ^
         firstImpulse.hashCode ^
+        factInterpretation.hashCode ^
         actualBehavior.hashCode;
   }
 }

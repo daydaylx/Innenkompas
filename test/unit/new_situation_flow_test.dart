@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:innenkompass/core/constants/context_types.dart';
 import 'package:innenkompass/core/constants/emotion_types.dart';
+import 'package:innenkompass/core/constants/fact_interpretation_results.dart';
 import 'package:innenkompass/core/constants/impulse_types.dart';
 import 'package:innenkompass/core/validators/new_situation_validators.dart';
 import 'package:innenkompass/domain/models/situation_draft.dart';
@@ -20,6 +21,7 @@ void main() {
     const thoughtData = SituationThoughtImpulseData(
       automaticThought: 'Ich mache gleich alles falsch.',
       firstImpulse: ImpulseType.withdraw,
+      factInterpretation: FactInterpretationResult.mostlyInterpretation,
     );
     const reflectionData = SituationReflectionData(
       needOrWoundedPoint: 'Ich wollte ernst genommen werden.',
