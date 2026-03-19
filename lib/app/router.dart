@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -69,11 +70,13 @@ class AppRouter {
   }) {
     return GoRouter(
       initialLocation: AppRoutes.root,
-      debugLogDiagnostics: true,
+      debugLogDiagnostics: kDebugMode,
       redirect: (context, state) {
         final appReady = isAppReady?.call() ?? true;
         if (!appReady) {
-          return state.matchedLocation == AppRoutes.root ? null : AppRoutes.root;
+          return state.matchedLocation == AppRoutes.root
+              ? null
+              : AppRoutes.root;
         }
 
         final onboardingCompleted = isOnboardingCompleted();

@@ -135,6 +135,17 @@ class OpenRouterAiEvaluationService implements AiEvaluationService {
 
   static Uri _resolveEndpoint(String baseUrl) {
     final base = Uri.parse(baseUrl.trim());
+    final scheme = base.scheme.toLowerCase();
+    if (scheme != 'https') {
+      throw const AiEvaluationException(
+        'Die KI-Auswertung muss über eine HTTPS-URL konfiguriert werden.',
+      );
+    }
+    if (base.host.trim().isEmpty) {
+      throw const AiEvaluationException(
+        'Die KI-Auswertung benötigt eine gültige Endpoint-URL.',
+      );
+    }
     final segments = base.pathSegments
         .where((segment) => segment.isNotEmpty)
         .toList(growable: true);

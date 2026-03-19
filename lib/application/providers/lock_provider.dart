@@ -13,8 +13,8 @@ final localAuthProvider = Provider<LocalAuthentication>((ref) {
 /// Provider for the lock service.
 final lockServiceProvider = Provider<LockService>((ref) {
   return LockService(
-    localAuth: ref.watch(localAuthProvider),
-    secureStorage: ref.watch(secureStorageProvider),
+    localAuth: LocalBiometricAuthenticator(ref.watch(localAuthProvider)),
+    secureStorage: FlutterSecureKeyValueStore(ref.watch(secureStorageProvider)),
   );
 });
 
@@ -41,8 +41,9 @@ class LockState {
     return LockState(
       isEnabled: isEnabled ?? this.isEnabled,
       isLocked: isLocked ?? this.isLocked,
-      lockType:
-          identical(lockType, _lockTypeUnset) ? this.lockType : lockType as String?,
+      lockType: identical(lockType, _lockTypeUnset)
+          ? this.lockType
+          : lockType as String?,
       isLoading: isLoading ?? this.isLoading,
     );
   }

@@ -27,6 +27,7 @@ dependencies:
   path: ^1.9.0
   collection: ^1.19.0
   http: ^1.2.2
+  crypto: ^3.0.6
 
   # Security
   flutter_secure_storage: ^9.0.0

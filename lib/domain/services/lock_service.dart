@@ -1,21 +1,97 @@
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
+
+abstract class BiometricAuthenticator {
+  Future<bool> get canCheckBiometrics;
+
+  Future<bool> isDeviceSupported();
+
+  Future<List<BiometricType>> getAvailableBiometrics();
+
+  Future<bool> authenticate({required String localizedReason});
+}
+
+class LocalBiometricAuthenticator implements BiometricAuthenticator {
+  LocalBiometricAuthenticator(this._localAuth);
+
+  final LocalAuthentication _localAuth;
+
+  @override
+  Future<bool> get canCheckBiometrics => _localAuth.canCheckBiometrics;
+
+  @override
+  Future<bool> isDeviceSupported() => _localAuth.isDeviceSupported();
+
+  @override
+  Future<List<BiometricType>> getAvailableBiometrics() =>
+      _localAuth.getAvailableBiometrics();
+
+  @override
+  Future<bool> authenticate({required String localizedReason}) {
+    return _localAuth.authenticate(
+      localizedReason: localizedReason,
+      options: const AuthenticationOptions(
+        stickyAuth: true,
+        biometricOnly: false,
+      ),
+    );
+  }
+}
+
+abstract class SecureKeyValueStore {
+  Future<void> write({
+    required String key,
+    required String? value,
+  });
+
+  Future<String?> read({required String key});
+
+  Future<void> delete({required String key});
+}
+
+class FlutterSecureKeyValueStore implements SecureKeyValueStore {
+  FlutterSecureKeyValueStore(this._storage);
+
+  final FlutterSecureStorage _storage;
+
+  @override
+  Future<void> write({
+    required String key,
+    required String? value,
+  }) {
+    return _storage.write(key: key, value: value);
+  }
+
+  @override
+  Future<String?> read({required String key}) {
+    return _storage.read(key: key);
+  }
+
+  @override
+  Future<void> delete({required String key}) {
+    return _storage.delete(key: key);
+  }
+}
 
 /// Service for managing app lock via biometrics or PIN.
 class LockService {
   LockService({
-    required LocalAuthentication localAuth,
-    required FlutterSecureStorage secureStorage,
+    required BiometricAuthenticator localAuth,
+    required SecureKeyValueStore secureStorage,
   })  : _localAuth = localAuth,
         _secureStorage = secureStorage;
 
-  final LocalAuthentication _localAuth;
-  final FlutterSecureStorage _secureStorage;
+  final BiometricAuthenticator _localAuth;
+  final SecureKeyValueStore _secureStorage;
 
   static const String _pinKey = 'app_lock_pin';
   static const String _lockEnabledKey = 'app_lock_enabled';
   static const String _lockTypeKey = 'app_lock_type';
+  static const String _hashedPinPrefix = 'sha256:';
 
   /// Check if biometric authentication is available on this device.
   Future<bool> isBiometricAvailable() async {
@@ -40,13 +116,7 @@ class LockService {
   /// Authenticate using biometrics.
   Future<bool> authenticate({String reason = 'Innenkompass entsperren'}) async {
     try {
-      return await _localAuth.authenticate(
-        localizedReason: reason,
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: false,
-        ),
-      );
+      return await _localAuth.authenticate(localizedReason: reason);
     } on PlatformException {
       return false;
     }
@@ -55,7 +125,7 @@ class LockService {
   /// Set a PIN for app lock.
   Future<void> setPin(String pin) async {
     try {
-      await _secureStorage.write(key: _pinKey, value: pin);
+      await _secureStorage.write(key: _pinKey, value: _hashPin(pin));
     } on PlatformException {
       // Ignore storage failures; callers handle unavailable lock setup.
     } on MissingPluginException {
@@ -67,7 +137,22 @@ class LockService {
   Future<bool> verifyPin(String pin) async {
     try {
       final storedPin = await _secureStorage.read(key: _pinKey);
-      return storedPin == pin;
+      if (storedPin == null || storedPin.isEmpty) {
+        return false;
+      }
+
+      final hashedPin = _hashPin(pin);
+      if (storedPin == hashedPin) {
+        return true;
+      }
+
+      final isLegacyPlaintextPin = !_isHashedPin(storedPin) && storedPin == pin;
+      if (!isLegacyPlaintextPin) {
+        return false;
+      }
+
+      await _secureStorage.write(key: _pinKey, value: hashedPin);
+      return true;
     } on PlatformException {
       return false;
     } on MissingPluginException {
@@ -168,5 +253,14 @@ class LockService {
     } on MissingPluginException {
       // Ignore storage failures on unsupported platforms.
     }
+  }
+
+  static String _hashPin(String pin) {
+    final digest = sha256.convert(utf8.encode(pin));
+    return '$_hashedPinPrefix$digest';
+  }
+
+  static bool _isHashedPin(String value) {
+    return value.startsWith(_hashedPinPrefix);
   }
 }

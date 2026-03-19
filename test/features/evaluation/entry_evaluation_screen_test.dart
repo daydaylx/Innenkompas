@@ -113,6 +113,7 @@ Future<void> _pumpScreen(
           const AiEvaluationConfig(
             baseUrl: 'https://example.com/api',
             appToken: null,
+            openRouterApiKey: null,
           ),
         ),
         evaluationContentProvider.overrideWith(

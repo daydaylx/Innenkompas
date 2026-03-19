@@ -5,49 +5,53 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:innenkompass/data/db/app_database.dart';
-import 'package:innenkompass/data/services/open_router_ai_evaluation_service.dart';
+import 'package:innenkompass/data/services/direct_open_router_ai_evaluation_service.dart';
 import 'package:innenkompass/domain/services/ai_evaluation_service.dart';
 
 void main() {
-  group('OpenRouterAiEvaluationService', () {
-    test('posts entry payload to configured endpoint and parses response',
-        () async {
+  group('DirectOpenRouterAiEvaluationService', () {
+    test('posts direct OpenRouter request and parses response', () async {
       final client = MockClient((request) async {
         expect(
           request.url.toString(),
-          'https://example.com/api/ai-evaluations',
+          'https://openrouter.ai/api/v1/chat/completions',
         );
         expect(request.method, 'POST');
+        expect(request.headers['Authorization'], 'Bearer test-openrouter-key');
+        expect(request.headers['X-Title'], 'Innenkompass');
 
         final body = jsonDecode(request.body) as Map<String, dynamic>;
-        expect(body['consent_given'], isTrue);
-        expect(
-          (body['entry'] as Map<String, dynamic>)['situation_description'],
-          'Ein schwieriges Gespräch nach dem Meeting.',
-        );
+        expect(body['model'], 'openai/gpt-4.1-mini');
+        expect(body['response_format'], isA<Map<String, dynamic>>());
+        expect(body['messages'], isA<List<dynamic>>());
 
         return http.Response(
           jsonEncode({
-            'provider': 'openrouter',
-            'model': 'openai/gpt-4.1-mini',
-            'schema_version': 1,
-            'completed_at': '2026-03-19T10:15:00Z',
-            'evaluation': {
-              'was_auffaellt': 'Der Eintrag wirkt stark angespannt.',
-              'einordnung': 'Die Situation klingt nach Alarmmodus.',
-              'praktisch_hilfreich': 'Erst Abstand, dann Fakten sortieren.',
-            },
+            'created': 1_710_842_100,
+            'choices': [
+              {
+                'message': {
+                  'content': jsonEncode({
+                    'was_auffaellt': 'Der Eintrag wirkt stark angespannt.',
+                    'einordnung': 'Die Situation klingt nach Alarmmodus.',
+                    'praktisch_hilfreich':
+                        'Erst Abstand, dann Fakten sortieren.',
+                  }),
+                },
+              },
+            ],
           }),
           200,
           headers: {'content-type': 'application/json'},
         );
       });
 
-      final service = OpenRouterAiEvaluationService(
-        baseUrl: 'https://example.com/api',
+      final service = DirectOpenRouterAiEvaluationService(
+        apiKey: 'test-openrouter-key',
         provider: 'openrouter',
         model: 'openai/gpt-4.1-mini',
         schemaVersion: 1,
+        appTitle: 'Innenkompass',
         client: client,
       );
 
@@ -64,8 +68,8 @@ void main() {
       final client = MockClient((request) async {
         fail('network should not be called for crisis entries');
       });
-      final service = OpenRouterAiEvaluationService(
-        baseUrl: 'https://example.com',
+      final service = DirectOpenRouterAiEvaluationService(
+        apiKey: 'test-openrouter-key',
         provider: 'openrouter',
         model: 'openai/gpt-4.1-mini',
         schemaVersion: 1,
@@ -78,47 +82,11 @@ void main() {
       );
     });
 
-    test('normalizes sub-path base URLs to ai-evaluations endpoint', () async {
-      final client = MockClient((request) async {
-        expect(
-          request.url.toString(),
-          'https://example.com/v1/ai-evaluations',
-        );
-        return http.Response(
-          jsonEncode({
-            'provider': 'openrouter',
-            'model': 'openai/gpt-4.1-mini',
-            'schema_version': 1,
-            'completed_at': '2026-03-19T10:15:00Z',
-            'evaluation': {
-              'was_auffaellt': 'Etwas fällt auf.',
-              'einordnung': 'Etwas wird eingeordnet.',
-              'praktisch_hilfreich': 'Etwas ist praktisch hilfreich.',
-            },
-          }),
-          200,
-          headers: {'content-type': 'application/json'},
-        );
-      });
-
-      final service = OpenRouterAiEvaluationService(
-        baseUrl: 'https://example.com/v1',
-        provider: 'openrouter',
-        model: 'openai/gpt-4.1-mini',
-        schemaVersion: 1,
-        client: client,
-      );
-
-      final result = await service.evaluateEntry(entry: _entry());
-
-      expect(result.content.wasAuffaellt, 'Etwas fällt auf.');
-    });
-
     test('surfaces timeouts as ai evaluation exceptions', () async {
       final completer = Completer<http.Response>();
       final client = MockClient((request) => completer.future);
-      final service = OpenRouterAiEvaluationService(
-        baseUrl: 'https://example.com',
+      final service = DirectOpenRouterAiEvaluationService(
+        apiKey: 'test-openrouter-key',
         provider: 'openrouter',
         model: 'openai/gpt-4.1-mini',
         schemaVersion: 1,
@@ -138,46 +106,22 @@ void main() {
       );
     });
 
-    test('surfaces network failures as ai evaluation exceptions', () async {
-      final client = MockClient((request) async {
-        throw http.ClientException('connection refused');
-      });
-      final service = OpenRouterAiEvaluationService(
-        baseUrl: 'https://example.com',
-        provider: 'openrouter',
-        model: 'openai/gpt-4.1-mini',
-        schemaVersion: 1,
-        client: client,
-      );
-
-      await expectLater(
-        service.evaluateEntry(entry: _entry()),
-        throwsA(
-          isA<AiEvaluationException>().having(
-            (error) => error.message,
-            'message',
-            contains('nicht erreicht'),
-          ),
-        ),
-      );
-    });
-
-    test('rejects successful responses without evaluation payload', () async {
+    test('rejects successful responses without usable content', () async {
       final client = MockClient((request) async {
         return http.Response(
           jsonEncode({
-            'provider': 'openrouter',
-            'model': 'openai/gpt-4.1-mini',
-            'schema_version': 1,
-            'completed_at': '2026-03-19T10:15:00Z',
-            'error': 'Upstream failed',
+            'choices': [
+              {
+                'message': {'content': ''},
+              },
+            ],
           }),
           200,
           headers: {'content-type': 'application/json'},
         );
       });
-      final service = OpenRouterAiEvaluationService(
-        baseUrl: 'https://example.com',
+      final service = DirectOpenRouterAiEvaluationService(
+        apiKey: 'test-openrouter-key',
         provider: 'openrouter',
         model: 'openai/gpt-4.1-mini',
         schemaVersion: 1,
@@ -187,24 +131,6 @@ void main() {
       await expectLater(
         service.evaluateEntry(entry: _entry()),
         throwsA(isA<AiEvaluationException>()),
-      );
-    });
-
-    test('rejects non-https base URLs during configuration', () {
-      expect(
-        () => OpenRouterAiEvaluationService(
-          baseUrl: 'http://example.com',
-          provider: 'openrouter',
-          model: 'openai/gpt-4.1-mini',
-          schemaVersion: 1,
-        ),
-        throwsA(
-          isA<AiEvaluationException>().having(
-            (error) => error.message,
-            'message',
-            contains('HTTPS-URL'),
-          ),
-        ),
       );
     });
   });

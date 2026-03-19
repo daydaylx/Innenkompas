@@ -19,7 +19,7 @@ Die App führt durch eine **4-Phasen-Situations-Erfassung** (Ereignis → Emotio
 - **Kognitiv entlastend** – geführte Schritte, keine Freitext-Flut
 - **Regelbasiert** – automatische Klassifikation statt manueller Kategorisierung
 - **Datenschutz by Design** – App-Sperre, sicherer Speicher, kein Telemetrie
-- **Optionale KI-Auswertung** – nur wenn ein privater Build explizit mit Worker-Endpoint konfiguriert wurde
+- **Optionale KI-Auswertung** – nur wenn ein privater Build explizit mit OpenRouter-Key oder Worker-Pfad konfiguriert wurde
 - **Privates Projekt** – kein Store, kein Tracking, kein kommerzieller Vertrieb
 
 ---
@@ -30,7 +30,7 @@ Die App führt durch eine **4-Phasen-Situations-Erfassung** (Ereignis → Emotio
 - **9 Interventionstypen mit geführten Schritten** – `regulation`, `factCheck`, `impulsePause`, `ruminationStop`, `communication`, `overwhelmStructure`, `selfValueCheck`, `abc3`, `rsaAbcde`
 - **Automatische Klassifikation** – 8 Systemzustände, 10 Emotionstypen, Krisen-Detektion
 - **Post-Interventions-Evaluation** – Intensität, Spannung, Klarheit, Wirksamkeit nach der Intervention
-- **Optionale KI-Auswertung** – kurze zusätzliche Einordnung über einen privaten Cloudflare-Worker/OpenRouter-Pfad, nur bei expliziter Konfiguration und Anforderung
+- **Optionale KI-Auswertung** – kurze zusätzliche Einordnung direkt über OpenRouter oder optional über einen privaten Cloudflare-Worker-Pfad, nur bei expliziter Konfiguration und Anforderung
 - **Musteranalyse & Trends** – Emotionsverteilung, 7-Tage-Trend, Wochentags-Muster, Interventions-Wirksamkeit
 - **Krisenplan** – editierbar: Warnsignale, Coping-Strategien, Kontakte, Ressourcen, Notfallnummern; immer zugänglich
 - **App-Sperre** – Biometrie (Fingerabdruck / Face ID) mit PIN-Fallback
@@ -72,9 +72,10 @@ lib/
 └── shared/           # Wiederverwendbare Widgets
 ```
 
-Optionaler Zusatzpfad für private Builds:
+Optionale Zusatzpfade für private Builds:
 
 ```text
+Flutter App -> DirectOpenRouterAiEvaluationService -> OpenRouter
 Flutter App -> OpenRouterAiEvaluationService -> Cloudflare Worker -> OpenRouter
 ```
 
@@ -177,7 +178,14 @@ adb install -r build/app/outputs/flutter-apk/app-debug.apk
 
 Für optionales Release-Signing (nur bei Verteilung außerhalb des eigenen Geräts): siehe `docs/release/signing-setup.md`.
 
-Optionale KI-Auswertung für private Builds:
+Optionale KI-Auswertung für private Builds direkt mit OpenRouter-Key:
+
+```bash
+flutter run \
+  --dart-define=AI_EVALUATION_OPENROUTER_API_KEY=<openrouter-key>
+```
+
+Alternativ weiter über privaten Worker:
 
 ```bash
 flutter run \

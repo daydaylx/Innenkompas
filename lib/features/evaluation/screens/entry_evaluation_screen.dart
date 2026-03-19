@@ -54,6 +54,7 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
     final entryAsync = ref.watch(evaluationEntryProvider(widget.entryId));
     final contentAsync = ref.watch(evaluationContentProvider);
     final aiConfig = ref.watch(aiEvaluationConfigProvider);
+    final hasAiService = ref.watch(aiEvaluationServiceProvider) != null;
 
     return AppScaffold(
       title: 'Deine Auswertung',
@@ -179,6 +180,7 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
                       context: context,
                       entry: entry,
                       aiConfig: aiConfig,
+                      hasAiService: hasAiService,
                     ),
                     const SizedBox(height: AppConstants.spacingLarge),
                     if (hasIntervention)
@@ -285,6 +287,7 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
     required BuildContext context,
     required SituationEntryData entry,
     required AiEvaluationConfig aiConfig,
+    required bool hasAiService,
   }) {
     final aiStatus = AiEvaluationStatus.fromRaw(entry.aiEvaluationStatus);
     final aiContent = AiEvaluationContent.tryParse(entry.aiEvaluationText);
@@ -308,11 +311,11 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
       );
     }
 
-    if (!aiConfig.isEnabled) {
+    if (!aiConfig.isEnabled || !hasAiService) {
       return const _SectionCard(
         title: 'Freie KI-Einordnung',
         child: Text(
-          'Diese Build-Konfiguration hat noch keinen KI-Endpunkt hinterlegt. '
+          'Diese Build-Konfiguration hat noch keine funktionsfähige KI-Konfiguration hinterlegt. '
           'Die lokale Auswertung funktioniert trotzdem vollständig.',
         ),
       );
@@ -465,7 +468,7 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
             contentPadding: EdgeInsets.zero,
             controlAffinity: ListTileControlAffinity.leading,
             title: const Text(
-              'Ich stimme zu, dass dieser Eintrag inklusive Freitexten an den KI-Endpunkt gesendet und am Eintrag gespeichert wird.',
+              'Ich stimme zu, dass dieser Eintrag inklusive Freitexten an die konfigurierte KI-Verbindung gesendet und am Eintrag gespeichert wird.',
             ),
           ),
           const SizedBox(height: AppConstants.spacingSmall),
@@ -492,7 +495,7 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
     final service = ref.read(aiEvaluationServiceProvider);
     if (service == null) {
       _showMessage(
-        'In dieser Build-Konfiguration ist noch kein KI-Endpunkt hinterlegt.',
+        'In dieser Build-Konfiguration ist noch keine funktionsfähige KI-Konfiguration hinterlegt.',
       );
       return;
     }

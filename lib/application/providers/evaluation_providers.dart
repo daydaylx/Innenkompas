@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:innenkompass/core/config/ai_evaluation_config.dart';
+import 'package:innenkompass/data/services/direct_open_router_ai_evaluation_service.dart';
 import 'package:innenkompass/data/services/open_router_ai_evaluation_service.dart';
 import 'package:innenkompass/data/db/app_database.dart';
 import 'package:innenkompass/domain/models/evaluation.dart';
@@ -30,19 +31,40 @@ final aiEvaluationConfigProvider = Provider<AiEvaluationConfig>((ref) {
 /// configured with an endpoint.
 final aiEvaluationServiceProvider = Provider<AiEvaluationService?>((ref) {
   final config = ref.watch(aiEvaluationConfigProvider);
-  if (!config.isEnabled || config.baseUrl == null) {
+  if (!config.isEnabled) {
     return null;
   }
 
-  final service = OpenRouterAiEvaluationService(
-    baseUrl: config.baseUrl!,
-    appToken: config.appToken,
-    provider: config.provider,
-    model: config.model,
-    schemaVersion: config.schemaVersion,
-  );
-  ref.onDispose(service.dispose);
-  return service;
+  try {
+    if (config.hasDirectOpenRouterAccess && config.openRouterApiKey != null) {
+      final service = DirectOpenRouterAiEvaluationService(
+        apiKey: config.openRouterApiKey!,
+        httpReferer: config.openRouterHttpReferer,
+        appTitle: config.openRouterAppTitle,
+        provider: config.provider,
+        model: config.model,
+        schemaVersion: config.schemaVersion,
+      );
+      ref.onDispose(service.dispose);
+      return service;
+    }
+
+    if (config.baseUrl == null) {
+      return null;
+    }
+
+    final service = OpenRouterAiEvaluationService(
+      baseUrl: config.baseUrl!,
+      appToken: config.appToken,
+      provider: config.provider,
+      model: config.model,
+      schemaVersion: config.schemaVersion,
+    );
+    ref.onDispose(service.dispose);
+    return service;
+  } on AiEvaluationException {
+    return null;
+  }
 });
 
 /// Narrative Verlaufs-Insights für die Musteransicht.
