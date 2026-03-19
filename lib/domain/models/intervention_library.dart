@@ -1,3 +1,4 @@
+import 'package:innenkompass/core/constants/content_license_tags.dart';
 import 'package:innenkompass/core/constants/emotion_types.dart';
 import 'package:innenkompass/core/constants/intervention_types.dart'
     show InterventionType;
@@ -16,6 +17,13 @@ import 'package:innenkompass/domain/models/intervention_step.dart';
 /// 6. Überforderungsstruktur
 /// 7. Selbstabwertungscheck
 class InterventionLibrary {
+  static const ContentLicenseTag _defaultLicenseTag =
+      ContentLicenseTag.originalInspiredNoCopy;
+  static const String _commonLicenseNotes =
+      'Eigene Formulierungen auf Basis etablierter Selbsthilfe- und Therapiekonzepte.';
+  static const String _worksheetLicenseNotes =
+      'Eigene Feldlogik und eigene Formulierungen; kein kopierter Wortlaut aus geschütztem Material.';
+
   // ============================================
   // REGULATION INTERVENTIONEN
   // ============================================
@@ -90,6 +98,8 @@ class InterventionLibrary {
     icon: '🌬️',
     category: 'Regulation',
     difficultyLevel: 1,
+    licenseTag: _defaultLicenseTag,
+    licenseNotes: _commonLicenseNotes,
   );
 
   /// Erdungsübung: 5-4-3-2-1 Technik
@@ -184,6 +194,8 @@ class InterventionLibrary {
     icon: '🧘',
     category: 'Regulation',
     difficultyLevel: 1,
+    licenseTag: _defaultLicenseTag,
+    licenseNotes: _commonLicenseNotes,
   );
 
   /// Impulspause: STOP-Technik
@@ -271,6 +283,8 @@ class InterventionLibrary {
     icon: '🛑',
     category: 'Impulskontrolle',
     difficultyLevel: 2,
+    licenseTag: _defaultLicenseTag,
+    licenseNotes: _commonLicenseNotes,
   );
 
   // ============================================
@@ -364,6 +378,8 @@ class InterventionLibrary {
     icon: '⚖️',
     category: 'Kognitiv',
     difficultyLevel: 3,
+    licenseTag: _defaultLicenseTag,
+    licenseNotes: _commonLicenseNotes,
   );
 
   /// Grübelstopp
@@ -452,6 +468,8 @@ class InterventionLibrary {
     icon: '🛑',
     category: 'Grübelmanagement',
     difficultyLevel: 2,
+    licenseTag: _defaultLicenseTag,
+    licenseNotes: _commonLicenseNotes,
   );
 
   // ============================================
@@ -556,6 +574,8 @@ class InterventionLibrary {
     icon: '💬',
     category: 'Kommunikation',
     difficultyLevel: 3,
+    licenseTag: _defaultLicenseTag,
+    licenseNotes: _commonLicenseNotes,
   );
 
   // ============================================
@@ -646,6 +666,8 @@ class InterventionLibrary {
     icon: '📋',
     category: 'Selbstorganisation',
     difficultyLevel: 2,
+    licenseTag: _defaultLicenseTag,
+    licenseNotes: _commonLicenseNotes,
   );
 
   // ============================================
@@ -739,6 +761,8 @@ class InterventionLibrary {
     icon: '💙',
     category: 'Selbstwert',
     difficultyLevel: 3,
+    licenseTag: _defaultLicenseTag,
+    licenseNotes: _commonLicenseNotes,
   );
 
   // ============================================
@@ -750,7 +774,6 @@ class InterventionLibrary {
   /// Feldlogik: Auslöser (A) → Bewertungen/Gedanken (B) → Konsequenzen (C)
   /// Konsequenzen differenziert in Gefühl, Körper, Verhalten.
   /// Eigene Formulierungen — kein kopierter Wortlaut aus IBT/Kohlhammer.
-  /// license_tag: original-inspired-no-copy
   static const Intervention abc3Protocol = Intervention(
     id: 'abc3_protocol',
     type: InterventionType.abc3,
@@ -912,6 +935,8 @@ class InterventionLibrary {
     icon: '📝',
     category: 'Arbeitsblätter',
     difficultyLevel: 2,
+    licenseTag: _defaultLicenseTag,
+    licenseNotes: _worksheetLicenseNotes,
   );
 
   /// RSA / ABCDE — Rationale Selbstanalyse
@@ -919,7 +944,6 @@ class InterventionLibrary {
   /// Erweitert das ABC-3-Protokoll um Disputation (D) und rationale Alternative (E).
   /// Eigene Formulierungen nach dem REBT-Konzept von Albert Ellis (Allgemeingut).
   /// Kein kopierter Wortlaut aus IBT/Kohlhammer-Arbeitsblättern.
-  /// license_tag: original-inspired-no-copy
   static const Intervention rsaAbcde = Intervention(
     id: 'rsa_abcde_v1',
     type: InterventionType.rsaAbcde,
@@ -1081,6 +1105,8 @@ class InterventionLibrary {
     icon: '🔬',
     category: 'Arbeitsblätter',
     difficultyLevel: 4,
+    licenseTag: _defaultLicenseTag,
+    licenseNotes: _worksheetLicenseNotes,
   );
 
   // ============================================
@@ -1169,6 +1195,8 @@ class InterventionLibrary {
     icon: '🆘',
     category: 'Krisenintervention',
     difficultyLevel: 1,
+    licenseTag: _defaultLicenseTag,
+    licenseNotes: _commonLicenseNotes,
   );
 
   // ============================================

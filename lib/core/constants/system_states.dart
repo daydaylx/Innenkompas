@@ -1,6 +1,6 @@
 /// System states for Innenkompass.
 ///
-/// These are the 7 possible emotional/mental states that the system
+/// These are the 8 possible emotional/mental states that the system
 /// can classify a situation into based on the rule engine.
 enum SystemState {
   /// Akute Aktivierung - Hohe emotionale Erregung, Handlungsdruck

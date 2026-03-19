@@ -9,7 +9,7 @@ import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:innenkompass/data/db/app_database.dart';
 
 void main() {
-  test('migrates schema version 1 entries to version 3 without data loss',
+  test('migrates schema version 1 entries to version 4 without data loss',
       () async {
     final tempDir = await Directory.systemTemp.createTemp(
       'innenkompass_migration_test',
@@ -138,6 +138,14 @@ void main() {
     expect(columnNames, contains('suggested_tip_ids'));
     expect(columnNames, contains('suggested_next_action_key'));
     expect(columnNames, contains('selected_next_action_key'));
+    expect(columnNames, contains('ai_evaluation_status'));
+    expect(columnNames, contains('ai_evaluation_provider'));
+    expect(columnNames, contains('ai_evaluation_model'));
+    expect(columnNames, contains('ai_evaluation_requested_at'));
+    expect(columnNames, contains('ai_evaluation_completed_at'));
+    expect(columnNames, contains('ai_evaluation_consent_given'));
+    expect(columnNames, contains('ai_evaluation_text'));
+    expect(columnNames, contains('ai_evaluation_schema_version'));
 
     final upgradedEntry = await database.getSituationEntryById(1);
     expect(upgradedEntry, isNotNull);
@@ -152,6 +160,14 @@ void main() {
     expect(upgradedEntry.suggestedTipIds, isNull);
     expect(upgradedEntry.suggestedNextActionKey, isNull);
     expect(upgradedEntry.selectedNextActionKey, isNull);
+    expect(upgradedEntry.aiEvaluationStatus, isNull);
+    expect(upgradedEntry.aiEvaluationProvider, isNull);
+    expect(upgradedEntry.aiEvaluationModel, isNull);
+    expect(upgradedEntry.aiEvaluationRequestedAt, isNull);
+    expect(upgradedEntry.aiEvaluationCompletedAt, isNull);
+    expect(upgradedEntry.aiEvaluationConsentGiven, isFalse);
+    expect(upgradedEntry.aiEvaluationText, isNull);
+    expect(upgradedEntry.aiEvaluationSchemaVersion, isNull);
 
     final updated = upgradedEntry.copyWith(
       needOrWoundedPoint: const Value('Ich brauche Abstand.'),
@@ -167,6 +183,6 @@ void main() {
 
     final versionRow =
         await database.customSelect('PRAGMA user_version;').getSingle();
-    expect(versionRow.data['user_version'], 3);
+    expect(versionRow.data['user_version'], 4);
   });
 }

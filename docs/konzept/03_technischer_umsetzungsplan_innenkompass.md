@@ -900,6 +900,8 @@ class TemplateDefinition {
 
 Detaillierte Rechteklärung: → `05_rechteklärung_lizenzen.md`
 
+Aktueller Repo-Stand: Rechte-Metadaten liegen leichtgewichtig direkt auf `Intervention` (`licenseTag`, `licenseNotes`). Eine separate Template-Registry bleibt ein möglicher späterer Ausbauschritt.
+
 ---
 
 ## 21.2 Payload-Strategie: Hybrid-Ansatz

@@ -28,6 +28,8 @@ _$InterventionImpl _$$InterventionImplFromJson(Map<String, dynamic> json) =>
       icon: json['icon'] as String?,
       category: json['category'] as String?,
       difficultyLevel: (json['difficultyLevel'] as num?)?.toInt(),
+      licenseTag: $enumDecode(_$ContentLicenseTagEnumMap, json['licenseTag']),
+      licenseNotes: json['licenseNotes'] as String?,
     );
 
 Map<String, dynamic> _$$InterventionImplToJson(_$InterventionImpl instance) =>
@@ -50,6 +52,8 @@ Map<String, dynamic> _$$InterventionImplToJson(_$InterventionImpl instance) =>
       'icon': instance.icon,
       'category': instance.category,
       'difficultyLevel': instance.difficultyLevel,
+      'licenseTag': _$ContentLicenseTagEnumMap[instance.licenseTag]!,
+      'licenseNotes': instance.licenseNotes,
     };
 
 const _$InterventionTypeEnumMap = {
@@ -86,6 +90,15 @@ const _$EmotionTypeEnumMap = {
   EmotionType.guilt: 'guilt',
   EmotionType.pride: 'pride',
   EmotionType.loneliness: 'loneliness',
+};
+
+const _$ContentLicenseTagEnumMap = {
+  ContentLicenseTag.originalInspiredNoCopy: 'original-inspired-no-copy',
+  ContentLicenseTag.licenseRequired: 'license-required',
+  ContentLicenseTag.licensedKohlhammer: 'licensed-kohlhammer',
+  ContentLicenseTag.licensedHogrefe: 'licensed-hogrefe',
+  ContentLicenseTag.licensedOup: 'licensed-oup',
+  ContentLicenseTag.publicDomain: 'public-domain',
 };
 
 _$InterventionResultImpl _$$InterventionResultImplFromJson(

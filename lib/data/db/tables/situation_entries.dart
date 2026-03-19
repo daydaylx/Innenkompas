@@ -40,6 +40,15 @@ class SituationEntries extends Table {
   TextColumn get suggestedTipIds => text().nullable()(); // JSON array
   TextColumn get suggestedNextActionKey => text().nullable()();
   TextColumn get selectedNextActionKey => text().nullable()();
+  TextColumn get aiEvaluationStatus => text().nullable()();
+  TextColumn get aiEvaluationProvider => text().nullable()();
+  TextColumn get aiEvaluationModel => text().nullable()();
+  DateTimeColumn get aiEvaluationRequestedAt => dateTime().nullable()();
+  DateTimeColumn get aiEvaluationCompletedAt => dateTime().nullable()();
+  BoolColumn get aiEvaluationConsentGiven =>
+      boolean().withDefault(const Constant(false))();
+  TextColumn get aiEvaluationText => text().nullable()();
+  IntColumn get aiEvaluationSchemaVersion => integer().nullable()();
 
   // Intervention fields (Phase 5)
   TextColumn get interventionType =>

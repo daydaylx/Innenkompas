@@ -75,3 +75,5 @@ Die signierte APK liegt unter: `build/app/outputs/flutter-apk/release/app-releas
 - [ ] `android/key.properties` existiert nur lokal (nicht in Git committen!)
 - [ ] Keystore existiert und ist gesichert (bei Verlust keine Updates mehr möglich)
 - [ ] Release-APK baut erfolgreich mit Signierung
+- [ ] `docs/legal/privacy-policy-template.md` und `docs/legal/support-template.md` für den konkreten Privat-Build geprüft
+- [ ] Bei aktivierter KI-Auswertung ist die externe Datenübertragung im Datenschutzhinweis klar beschrieben

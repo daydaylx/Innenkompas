@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:innenkompass/core/constants/content_license_tags.dart';
 import 'package:innenkompass/core/constants/emotion_types.dart';
 import 'package:innenkompass/core/constants/system_states.dart';
 import 'package:innenkompass/core/constants/intervention_types.dart';
@@ -52,6 +53,12 @@ class Intervention with _$Intervention {
 
     /// Optional: Schwierigkeitsgrad (1-5)
     int? difficultyLevel,
+
+    /// Rechtestatus des statischen Inhalts
+    required ContentLicenseTag licenseTag,
+
+    /// Kurzer Hinweis zur inhaltlichen Herkunft / Abgrenzung
+    String? licenseNotes,
   }) = _Intervention;
 
   factory Intervention.fromJson(Map<String, dynamic> json) =>

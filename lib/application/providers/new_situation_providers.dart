@@ -155,7 +155,7 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
           evaluationMeaningKey: Value(evaluation.meaningKey),
           suggestedTipIds: Value(jsonEncode(evaluation.suggestedTipIds)),
           suggestedNextActionKey: Value(evaluation.suggestedNextActionKey),
-          selectedNextActionKey: Value(evaluation.suggestedNextActionKey),
+          // selectedNextActionKey bleibt absent – Nutzer wählt auf dem Evaluation-Screen
           interventionType: interventionType != null
               ? Value(interventionType)
               : const Value.absent(),
@@ -183,8 +183,7 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
 
   /// Encode body symptoms list as JSON string
   String _encodeBodySymptoms(List<String> symptoms) {
-    // Simple JSON encoding for MVP
-    return '[${symptoms.map((s) => '"$s"').join(',')}]';
+    return jsonEncode(symptoms);
   }
 }
 

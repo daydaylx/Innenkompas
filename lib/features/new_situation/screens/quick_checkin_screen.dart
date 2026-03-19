@@ -257,11 +257,18 @@ class _QuickCheckinScreenState extends ConsumerState<QuickCheckinScreen> {
 
       if (mounted) {
         setState(() => _isSaving = false);
-        _showFollowUpDialog(emotion);
+        if (_intensity >= 9) {
+          context.go(AppRoutes.crisis);
+        } else {
+          _showFollowUpDialog(emotion);
+        }
       }
     } catch (_) {
       if (mounted) {
         setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Speichern fehlgeschlagen. Bitte erneut versuchen.')),
+        );
       }
     }
   }

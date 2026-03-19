@@ -18,6 +18,8 @@ Bei reiner Eigennutzung entfällt die Angabe eines Verantwortlichen. Bei Weiterg
 
 Innenkompass ist eine lokal-first Mobile App zur Selbstreflexion und Selbstregulation. Sie speichert Situationseinträge, Krisenplan-Inhalte und App-Einstellungen primär auf dem Gerät des Nutzers.
 
+In bestimmten privaten Builds kann zusätzlich eine optionale KI-Auswertung aktiviert sein. Dann werden für eine vom Nutzer bewusst angeforderte Auswertung ausgewählte Eintragsdaten an einen konfigurierten Edge-Worker und den dahinterliegenden KI-Anbieter übertragen.
+
 ---
 
 ## Verarbeitete Daten
@@ -27,21 +29,34 @@ Innenkompass ist eine lokal-first Mobile App zur Selbstreflexion und Selbstregul
 - App-Einstellungen wie Sprache, Lock-Präferenz, Notification-Einstellungen
 - Optional: Lokale Lock-Zugangsdaten (PIN, biometrische Daten) – gespeichert via platform-eigenem Secure Storage
 - Optional: Export-Dateien, die nur bei expliziter Nutzeraktion erstellt werden
+- Optional: Ausgewählte Eintragsdaten für eine explizit angeforderte KI-Auswertung in entsprechend konfigurierten Privat-Builds
 
 ---
 
 ## Speichermodell
 
-- **Lokale Speicherung:** Alle Daten werden ausschließlich lokal auf dem Gerät gespeichert
-- **Keine Cloud:** Es gibt keine Cloud-Anbindung, kein Account-Zwang, kein Server-Backend
+- **Primär lokal:** Die reguläre Nutzung speichert Daten lokal auf dem Gerät
+- **Keine Cloud-Synchronisierung:** Es gibt keinen Account-Zwang und keine automatische Synchronisierung auf einen Cloud-Speicher
 - **Kein Tracking:** Die App enthält keine Analytics- oder Telemetrie-Komponenten
-- **Keine Datenweitergabe:** Es findet keine Übermittlung an Dritte statt (sofern nicht vom Nutzer explizit via Export gewünscht)
+- **Keine automatische Datenweitergabe:** Übermittlungen an Dritte erfolgen nur bei explizitem Export oder bei bewusst angeforderter optionaler KI-Auswertung
 
 ---
 
 ## Benachrichtigungen
 
 Wenn der Nutzer Erinnerungen aktiviert, plant die App lokale Benachrichtigungen auf dem Gerät. Der Inhalt kann im diskreten Modus konfiguriert werden, um sensible Texte auf dem Sperrbildschirm zu vermeiden.
+
+---
+
+## Optionale KI-Auswertung
+
+In speziell dafür konfigurierten Privat-Builds kann der Nutzer eine zusätzliche KI-Auswertung einzelner Einträge anfordern.
+
+- Die Funktion ist optional und nicht Bestandteil jeder App-Version
+- Die Übertragung erfolgt nur auf explizite Nutzeraktion
+- Es werden nur die für die Auswertung nötigen Eintragsdaten gesendet
+- Die Auswertung dient der ergänzenden Einordnung und ersetzt keine professionelle Hilfe
+- Für solche Builds sollte der konkrete Worker-/Anbieterpfad dokumentiert werden
 
 ---
 
@@ -106,6 +121,6 @@ Dieser Datenschutzhinweis kann bei Bedarf angepasst werden. Der aktuelle Stand i
 Bei reiner **privater Eigennutzung** sind viele formale Datenschutz-Anforderungen reduziert. Dieses Dokument dient als Vorlage und sollte bei:
 - **Weitergabe an Dritte** (auch kostenlos)
 - **Kommerzieller Nutzung**
-- **Store-Veröffentlichung**
+- **Aktivierter optionaler KI-Auswertung**
 
 rechtlich geprüft und angepasst werden.

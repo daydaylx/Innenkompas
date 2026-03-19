@@ -31,5 +31,6 @@
 
 ## Optional (nur bei Verteilung)
 - Release-Signing mit eigenem Keystore ergänzen
-- `docs/legal/privacy-policy-template.md` für Empfänger verfügbar machen
+- `docs/legal/privacy-policy-template.md` für Empfänger verfügbar machen und an den konkreten Privat-Build anpassen
 - `docs/legal/support-template.md` mit Kontaktmöglichkeit füllen
+- Wenn die optionale KI-Auswertung aktiviert ist: externe Datenübertragung im Datenschutzhinweis und im Weitergabekontext klar benennen

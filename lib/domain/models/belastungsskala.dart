@@ -1,3 +1,5 @@
+import 'package:innenkompass/core/constants/content_license_tags.dart';
+
 /// Eigenentwickelte Selbsteinschätzungs-Kurzskala (SelbsteinschaetzungsSkala)
 ///
 /// Erhebt 5 Bereiche der Belastung in der letzten Woche, je 0–4.
@@ -5,11 +7,14 @@
 ///
 /// WICHTIG: Dies ist eine vollständige Eigenentwicklung in eigenen Worten.
 /// Kein Wortlaut aus ODSIS (Oxford University Press) oder UP/Hogrefe-Material.
-/// license_tag: public-domain
 ///
 /// Zweck: Pragmatisches Selbstbeobachtungs-Werkzeug für Verlaufsmonitoring.
 /// Kein Diagnoseinstrument — kein Grenzwert-Cutoff im MVP.
 class SelbsteinschaetzungsSkala {
+  static const ContentLicenseTag licenseTag = ContentLicenseTag.publicDomain;
+  static const String licenseNotes =
+      'Vollständige Eigenentwicklung für privates Verlaufsmonitoring; kein ODSIS-Wortlaut.';
+
   /// Item 1: Häufigkeit
   /// Frage: „Wie oft haben Sie sich in der letzten Woche
   /// gedrückt, niedergeschlagen oder leer gefühlt?"

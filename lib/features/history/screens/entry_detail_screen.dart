@@ -13,6 +13,7 @@ import 'package:innenkompass/core/constants/context_types.dart';
 import 'package:innenkompass/core/constants/impulse_types.dart';
 import 'package:innenkompass/core/constants/system_states.dart';
 import 'package:innenkompass/data/db/app_database.dart';
+import 'package:innenkompass/domain/models/ai_evaluation.dart';
 import 'package:innenkompass/application/providers/database_provider.dart';
 import 'package:innenkompass/shared/widgets/app_scaffold.dart';
 import 'package:innenkompass/app/theme/colors.dart';
@@ -206,7 +207,8 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
                         _getImpulseLabel(entry.firstImpulse),
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                      if ((entry.factInterpretationResult ?? '').isNotEmpty) ...[
+                      if ((entry.factInterpretationResult ?? '')
+                          .isNotEmpty) ...[
                         const SizedBox(height: 12),
                         const Text(
                           'Fakt oder Deutung:',
@@ -326,8 +328,7 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
                     icon: Icons.tips_and_updates_outlined,
                     child: contentAsync.when(
                       data: (content) {
-                        final tipIds =
-                            _decodeStringList(entry.suggestedTipIds);
+                        final tipIds = _decodeStringList(entry.suggestedTipIds);
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -380,6 +381,16 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
                         'Auswertung konnte nicht geladen werden.',
                       ),
                     ),
+                  ),
+                ],
+
+                if ((entry.aiEvaluationStatus ?? '').isNotEmpty ||
+                    (entry.aiEvaluationText ?? '').isNotEmpty) ...[
+                  const SizedBox(height: AppConstants.spacingMedium),
+                  _buildCard(
+                    title: 'Freie KI-Einordnung',
+                    icon: Icons.auto_awesome_outlined,
+                    child: _buildAiEvaluationSection(entry),
                   ),
                 ],
 
@@ -483,6 +494,73 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
     );
   }
 
+  Widget _buildAiEvaluationSection(SituationEntryData entry) {
+    final status = AiEvaluationStatus.fromRaw(entry.aiEvaluationStatus);
+    final content = AiEvaluationContent.tryParse(entry.aiEvaluationText);
+    final isStalePending = status?.isPendingStale(
+          requestedAt: entry.aiEvaluationRequestedAt,
+        ) ??
+        false;
+
+    if (status == AiEvaluationStatus.pending && !isStalePending) {
+      return const Text(
+        'Die freie KI-Einordnung wurde angefragt und wird noch verarbeitet.',
+      );
+    }
+
+    if (isStalePending) {
+      return const Text(
+        'Die freie KI-Einordnung wurde angefragt, aber nicht abgeschlossen. '
+        'Du kannst den Eintrag erneut öffnen und die Anfrage neu starten.',
+      );
+    }
+
+    if (status == AiEvaluationStatus.failed) {
+      return const Text(
+        'Die freie KI-Einordnung konnte für diesen Eintrag nicht gespeichert werden.',
+      );
+    }
+
+    if (status == AiEvaluationStatus.success && content != null) {
+      final metaParts = <String>[
+        if ((entry.aiEvaluationProvider ?? '').isNotEmpty)
+          'Provider: ${entry.aiEvaluationProvider}',
+        if ((entry.aiEvaluationModel ?? '').isNotEmpty)
+          'Modell: ${entry.aiEvaluationModel}',
+        if (entry.aiEvaluationCompletedAt != null)
+          _formatAiTimestamp(entry.aiEvaluationCompletedAt!),
+      ];
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (metaParts.isNotEmpty) ...[
+            Text(
+              metaParts.join(' · '),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: AppConstants.spacingMedium),
+          ],
+          _buildLabeledValue('Was auffällt', content.wasAuffaellt),
+          _buildLabeledValue('Einordnung', content.einordnung),
+          _buildLabeledValue(
+            'Praktisch hilfreich',
+            content.praktischHilfreich,
+          ),
+          if (content.hasVorsichtshinweis)
+            _buildLabeledValue(
+              'Vorsichtshinweis',
+              content.vorsichtshinweis!,
+            ),
+        ],
+      );
+    }
+
+    return const Text(
+      'Für diesen Eintrag liegt noch keine gespeicherte KI-Einordnung vor.',
+    );
+  }
+
   Widget _buildSectionHeader(IconData icon, String text) {
     return Row(
       children: [
@@ -536,6 +614,10 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
 
   String _formatDateTime(DateTime dt) {
     return '${dt.day}.${dt.month}.${dt.year} - ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _formatAiTimestamp(DateTime dt) {
+    return 'Erstellt am ${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}.${dt.year} um ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 
   String _getContextLabel(String contextName) {

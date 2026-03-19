@@ -10,15 +10,16 @@ Version: 1.0.0+1 · Plattform: Android · Sprache: Deutsch
 
 ## Was ist Innenkompass?
 
-Innenkompass ist eine mobile App für den privaten Gebrauch, die Menschen dabei unterstützt, schwierige Situationen strukturiert zu erfassen, emotionale Reaktionen zu verstehen und gezielt zu regulieren – vollständig offline und ohne Cloud-Anbindung.
+Innenkompass ist eine mobile App für den privaten Gebrauch, die Menschen dabei unterstützt, schwierige Situationen strukturiert zu erfassen, emotionale Reaktionen zu verstehen und gezielt zu regulieren. Die Datenverarbeitung ist lokal-first; eine freie KI-Auswertung ist nur in speziell konfigurierten Privat-Builds optional zuschaltbar.
 
 Die App führt durch eine **4-Phasen-Situations-Erfassung** (Ereignis → Emotion → Gedanke/Impuls → Reflexion), wählt automatisch passende Interventionen aus und analysiert langfristige Muster im Erleben. Ein integrierter Krisenplan ist jederzeit erreichbar.
 
 **Kernprinzipien:**
-- **Lokal-first** – alle Daten bleiben auf dem Gerät, kein Cloud-Tracking
+- **Lokal-first** – Daten bleiben standardmäßig auf dem Gerät, keine Cloud-Synchronisierung, kein Tracking
 - **Kognitiv entlastend** – geführte Schritte, keine Freitext-Flut
 - **Regelbasiert** – automatische Klassifikation statt manueller Kategorisierung
 - **Datenschutz by Design** – App-Sperre, sicherer Speicher, kein Telemetrie
+- **Optionale KI-Auswertung** – nur wenn ein privater Build explizit mit Worker-Endpoint konfiguriert wurde
 - **Privates Projekt** – kein Store, kein Tracking, kein kommerzieller Vertrieb
 
 ---
@@ -27,8 +28,9 @@ Die App führt durch eine **4-Phasen-Situations-Erfassung** (Ereignis → Emotio
 
 - **Situations-Erfassung in 4 Phasen** – strukturierter Durchlauf: Ereignis → Emotion & Intensität → Gedanke/Impuls → Reflexion
 - **9 Interventionstypen mit geführten Schritten** – `regulation`, `factCheck`, `impulsePause`, `ruminationStop`, `communication`, `overwhelmStructure`, `selfValueCheck`, `abc3`, `rsaAbcde`
-- **Automatische Klassifikation** – 7 Systemzustände, 10 Emotionstypen, Krisen-Detektion
+- **Automatische Klassifikation** – 8 Systemzustände, 10 Emotionstypen, Krisen-Detektion
 - **Post-Interventions-Evaluation** – Intensität, Spannung, Klarheit, Wirksamkeit nach der Intervention
+- **Optionale KI-Auswertung** – kurze zusätzliche Einordnung über einen privaten Cloudflare-Worker/OpenRouter-Pfad, nur bei expliziter Konfiguration und Anforderung
 - **Musteranalyse & Trends** – Emotionsverteilung, 7-Tage-Trend, Wochentags-Muster, Interventions-Wirksamkeit
 - **Krisenplan** – editierbar: Warnsignale, Coping-Strategien, Kontakte, Ressourcen, Notfallnummern; immer zugänglich
 - **App-Sperre** – Biometrie (Fingerabdruck / Face ID) mit PIN-Fallback
@@ -46,6 +48,7 @@ Die App führt durch eine **4-Phasen-Situations-Erfassung** (Ereignis → Emotio
 | go_router | 13.0.0 | Deklaratives Routing |
 | drift | 2.14.1 | SQLite ORM |
 | sqlite3 | 2.4.0 | Lokale Datenbank |
+| http | 1.2.2 | Optionaler HTTP-Client für KI-Auswertung |
 | freezed | 2.4.6 | Immutable Models (Code-Gen) |
 | local_auth | 2.1.6 | Biometrie-Authentifizierung |
 | flutter_secure_storage | 9.0.0 | Sicherer Schlüsselspeicher |
@@ -65,28 +68,34 @@ lib/
 ├── core/             # Konstanten, Enums, Validatoren
 ├── data/             # Drift DB, DAOs, Repositories
 ├── domain/           # Business-Modelle, Services, Rule-Engines
-├── features/         # Feature-Module (11 Screens)
+├── features/         # Feature-Module
 └── shared/           # Wiederverwendbare Widgets
+```
+
+Optionaler Zusatzpfad für private Builds:
+
+```text
+Flutter App -> OpenRouterAiEvaluationService -> Cloudflare Worker -> OpenRouter
 ```
 
 **Schichten:**
 
 - **`domain/`** – Kernlogik: Models, Services (`PatternAnalyzer`, `ClassificationService`, `CrisisDetector`, `InterventionSelector`)
-- **`data/`** – SQLite-Persistenz via Drift: 3 Tabellen, DAOs, Repositories
+- **`data/`** – SQLite-Persistenz via Drift: Tabellen, DAOs, Repositories
 - **`application/`** – Riverpod State Management: bootstrap, settings, lock, intervention flow, new-situation draft, notifications
-- **`features/`** – UI-Layer: 11 Feature-Module (splash, onboarding, home, new\_situation, intervention, post\_evaluation, history, patterns, crisis, settings, lock)
+- **`features/`** – UI-Layer: Feature-Module für Erfassung, Intervention, Verlauf, Muster, Krise, Einstellungen und optionale KI-Auswertung
 
 ---
 
-## Datenbankschema (Schema-Version 2)
+## Datenbankschema (Schema-Version 4)
 
 | Tabelle | Inhalt |
 |---|---|
-| **SituationEntries** | Kern-Log: 40+ Spalten – Ereignis, Emotion & Intensität, Körpersymptome, Gedanken/Impulse, gewählte Intervention, Post-Evaluations-Werte, Metadaten |
+| **SituationEntries** | Kern-Log: Ereignis, Emotion & Intensität, Körpersymptome, Gedanken/Impulse, gewählte Intervention, Post-Evaluations-Werte, Metadaten und optionale KI-Auswertungsfelder |
 | **UserSettings** | App-Einstellungen: Notifications, Sprache, Lock-Typ, Theme |
 | **CrisisPlan** | Persönlicher Krisenplan: Warnsignale, Coping-Strategien, Kontakte, Ressourcen |
 
-Migrationen sind versioniert implementiert (Schema-Version 1 → 2).
+Migrationen sind versioniert implementiert (Schema-Version 1 → 4).
 
 ---
 
@@ -116,8 +125,8 @@ Migrationen sind versioniert implementiert (Schema-Version 1 → 2).
 
 ## Systemzustände & Emotionstypen
 
-**7 Systemzustände** (automatisch klassifiziert):
-`acuteActivation` · `reflectiveReady` · `rumination` · `conflict` · `selfDevaluation` · `overwhelm` · `crisis`
+**8 Systemzustände** (automatisch klassifiziert):
+`acuteActivation` · `reflectiveReady` · `interpretation` · `rumination` · `conflict` · `selfDevaluation` · `overwhelm` · `crisis`
 
 **10 Emotionstypen** (7 negativ, 3 positiv) – regelbasiert aus Intensität, Körpersymptomen und Gedankeninhalten abgeleitet.
 
@@ -134,6 +143,7 @@ emotion/
 │   ├── konzept/          Konzept- & Planungsdokumente
 │   ├── legal/            Datenschutzhinweise & Support-Infos (private Nutzung)
 │   └── release/          APK-Build-Anleitung, Signing-Setup (optional)
+├── workers/              Optionaler Cloudflare-Worker für freie KI-Auswertung
 ├── pubspec.yaml
 └── README.md
 ```
@@ -167,6 +177,16 @@ adb install -r build/app/outputs/flutter-apk/app-debug.apk
 
 Für optionales Release-Signing (nur bei Verteilung außerhalb des eigenen Geräts): siehe `docs/release/signing-setup.md`.
 
+Optionale KI-Auswertung für private Builds:
+
+```bash
+flutter run \
+  --dart-define=AI_EVALUATION_BASE_URL=https://<dein-worker-host> \
+  --dart-define=AI_EVALUATION_APP_TOKEN=<shared-token>
+```
+
+Details zur optionalen Worker-Konfiguration: `workers/ai-evaluation/README.md`
+
 ---
 
 ## Konzeptdokumente
@@ -183,10 +203,11 @@ Unter `docs/konzept/`:
 
 ## Lizenz & Rechtliches
 
-Dieses Projekt ist für die **private Nutzung** konzipiert. Für die reine Eigennutzung gelten reduzierte Anforderungen im Vergleich zu einer Store-Veröffentlichung.
+Dieses Projekt ist für die **private Nutzung** konzipiert. Für die reine Eigennutzung gelten reduzierte Anforderungen im Vergleich zu einer öffentlichen oder breiteren externen Verbreitung.
 
 - **Datenschutzhinweis:** `docs/legal/privacy-policy-template.md`
 - **Support-Information:** `docs/legal/support-template.md`
 - **Lizenzklärung:** `docs/konzept/05_rechteklärung_lizenzen.md`
+- **Optionale KI-Auswertung:** `workers/ai-evaluation/README.md`
 
-> **Wichtig:** Bei geplanter Weitergabe an Dritte (auch kostenlos) sollten die rechtlichen Hinweise geprüft und ggf. angepasst werden.
+> **Wichtig:** Bei privater Weitergabe an einzelne Dritte sollten die rechtlichen Hinweise geprüft und für den konkreten Build angepasst werden. Das gilt besonders, wenn die optionale KI-Auswertung aktiviert ist.

@@ -50,7 +50,7 @@ Die folgenden Bereiche sind zwischen Konzept und Implementierung vollständig ü
 
 ## Abschnitt 2: Teilweise umgesetzt — Anpassungsbedarf
 
-### 2.1 State-Klassifikation: 7 Zustände vs. 4 Zustände
+### 2.1 State-Klassifikation: 8 Zustände vs. 4 Zustände
 
 **konzeptv2neu.md-Position:**
 Vereinfacht auf 4 Zustände als „Heuristik-Beispiel":
@@ -60,17 +60,17 @@ Vereinfacht auf 4 Zustände als „Heuristik-Beispiel":
 - `crisis`
 
 **Aktuelle Implementierung:**
-7 Zustände:
+8 Zustände:
 - `acuteActivation`, `reflectiveReady`, `rumination`, `crisis` (aus Konzept)
-- zusätzlich: `conflict`, `selfDevaluation`, `overwhelm`
+- zusätzlich: `interpretation`, `conflict`, `selfDevaluation`, `overwhelm`
 
 **Datei:** `state_classifier.dart`, `system_states.dart`
 
-**Bewertung:** Die 7-Zustands-Logik ist detaillierter und klinisch sinnvoller. Das Konzeptdokument nennt 4 Zustände explizit als vereinfachtes Heuristik-Beispiel — kein Widerspruch zur Vollimplementierung.
+**Bewertung:** Die 8-Zustands-Logik ist detaillierter und klinisch sinnvoller. Das Konzeptdokument nennt 4 Zustände explizit als vereinfachtes Heuristik-Beispiel — kein Widerspruch zur Vollimplementierung.
 
-**Empfehlung:** 7-State-Logik beibehalten. Dokumentation um Erklärung ergänzen, warum die Vollversion 7 Zustände nutzt.
+**Empfehlung:** 8-State-Logik beibehalten. Dokumentation um Erklärung ergänzen, warum die Vollversion 8 Zustände nutzt.
 
-**Aktion:** Kommentar in `state_classifier.dart` ergänzen. Status: offen.
+**Aktion:** In `state_classifier.dart` dokumentiert. Status: erledigt.
 
 ---
 
@@ -85,17 +85,16 @@ Eine `WorksheetTemplate`-Entität mit:
 **Aktuelle Implementierung:**
 - `Intervention` + `InterventionStep` (typisiert, Dart-Klassen mit Freezed)
 - `InterventionLibrary` als statische Sammlung
-- Kein `license_tag`-Feld
+- `licenseTag` + `licenseNotes` direkt auf `Intervention`
 - Keine JSON-Payload-Flexibilität
 
 **Gap:**
-- Kein `license_tag` auf Templates
 - Keine formale `TemplateDefinition`-Abstraktion
 - Fehlende JSON-Payload-Schicht für `SituationEntry`
 
 **Konsequenz:** Zukünftige neue Templates würden neue DB-Migrationen erfordern, wenn Felder strikt typisiert bleiben.
 
-**Aktion (Prio 2):** Template-Registry-Konzept in `03_technischer_umsetzungsplan` ergänzen. Dart-Modell-Erweiterung für `license_tag` in Issue festhalten.
+**Aktion (Prio 2):** Leichtgewichtige Rechte-Metadaten sind umgesetzt. Template-Registry-Konzept bleibt ein separater Zukunftsschritt.
 
 ---
 
@@ -130,11 +129,11 @@ Eine `WorksheetTemplate`-Entität mit:
 
 ---
 
-## Abschnitt 3: Noch nicht implementiert — neue Features
+## Abschnitt 3: Neue Features / Statusabgleich
 
 ### 3.1 ABC-3 Kurzprotokoll-Template
 
-**Status:** Fehlend als explizites Template mit definierten Feldnamen
+**Status:** Leichtgewichtig implementiert als `Intervention`-Template
 
 **Anforderung (konzeptv2neu.md):**
 - `situation.description` (Text, Pflicht)
@@ -144,7 +143,7 @@ Eine `WorksheetTemplate`-Entität mit:
 - `consequence.behavior` (Enum + Text)
 - Nachbewertung (Intensität + Klarheit 0–10)
 
-**Aktion (Prio 3):** Als `abc3Protocol`-Intervention in `intervention_library.dart` umsetzen.
+**Aktion (Prio 3):** Bestehende `abc3Protocol`-Implementierung dokumentieren. Separate Template-Registry nur bei späterem Ausbau einführen.
 
 **Implementierungshinweis:** Verwendet vorhandene `InterventionStepType`-Werte (`reflection`, `selection`, `rating`). Neuer `InterventionType.abc3` erforderlich.
 
@@ -152,7 +151,7 @@ Eine `WorksheetTemplate`-Entität mit:
 
 ### 3.2 RSA/ABCDE-Template (mehrstufig)
 
-**Status:** Fehlend
+**Status:** Leichtgewichtig implementiert
 
 **Anforderung (konzeptv2neu.md):**
 - D1 „Wahr?": `rsa.d.truth_check` (Enum + Begründung)
@@ -165,13 +164,13 @@ Eine `WorksheetTemplate`-Entität mit:
 
 **Flow:** Mehrstufiger Disputation-Screen: 1 Gedanke → D1 → D2 → Perspektive → E → Re-Rating
 
-**Aktion (Prio 3):** Als `rsaAbcde`-Intervention in `intervention_library.dart` umsetzen. Neuer `InterventionType.rsaAbcde` erforderlich.
+**Aktion (Prio 3):** Bestehende `rsaAbcde`-Implementierung beibehalten. Separate Template-Registry nur bei späterem Ausbau einführen.
 
 ---
 
 ### 3.3 Belastungsskala — eigenentwickelte Kurzskala
 
-**Status:** Fehlend
+**Status:** Implementiert
 
 **Hintergrund:**
 Die ODSIS-Skala (Overall Depression Severity and Impairment Scale) ist urheberrechtlich geschützt (Oxford University Press). Für das MVP muss eine eigenentwickelte Kurzskala in eigenen Worten erstellt werden.
@@ -183,13 +182,13 @@ Die ODSIS-Skala (Overall Depression Severity and Impairment Scale) ist urheberre
 - Wiederholbar (Verlaufsbeobachtung)
 - Kein Diagnose-Label — nur Summenwert + Verlauf
 
-**Aktion (Prio 3):** `SelbsteinschätzungsSkala`-Modell erstellen in `belastungsskala.dart`. Eigene Itemformulierungen, kein Wortlaut aus ODSIS/OUP-Material.
+**Aktion (Prio 3):** Bestehende `SelbsteinschätzungsSkala` beibehalten und die Rechte-Metadaten weiter dokumentieren.
 
 ---
 
 ### 3.4 License-Tag-System
 
-**Status:** Fehlend
+**Status:** Leichtgewichtig implementiert
 
 **Anforderung (konzeptv2neu.md):**
 Jedes Template braucht einen `license_tag`, z.B.:
@@ -200,7 +199,7 @@ Jedes Template braucht einen `license_tag`, z.B.:
 
 **Zweck:** Template-Registry kann später zwischen MVP-Templates (eigenentwickelt) und lizenzierten Templates unterscheiden.
 
-**Aktion (Prio 2):** Konzept in `03_technischer_umsetzungsplan` als Kapitel ergänzen. `license_tag`-Feld als Metadata-Eintrag im `Intervention`-Modell vorbereiten.
+**Aktion (Prio 2):** `licenseTag`/`licenseNotes` im bestehenden `Intervention`-Modell beibehalten. Separate Template-Registry nur bei künftigem Ausbau einführen.
 
 ---
 

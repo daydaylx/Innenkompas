@@ -47,7 +47,7 @@ class PatternAnalyzer {
       return PatternSummary.empty();
     }
 
-    final sortedEntries = entries
+    final sortedEntries = List.of(entries)
       ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
     return PatternSummary(
@@ -343,7 +343,7 @@ class PatternAnalyzer {
     };
 
     for (final entry in entries) {
-      final weekday = entry.timestamp.weekday % 7; // 0=Montag, 6=Sonntag
+      final weekday = entry.timestamp.weekday - 1; // 0=Montag, 6=Sonntag
       weekdayDist[weekday]++;
       weekdayIntensity[weekday].add(entry.intensity.toDouble());
 

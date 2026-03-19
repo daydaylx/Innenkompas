@@ -64,6 +64,12 @@ mixin _$Intervention {
   /// Optional: Schwierigkeitsgrad (1-5)
   int? get difficultyLevel => throw _privateConstructorUsedError;
 
+  /// Rechtestatus des statischen Inhalts
+  ContentLicenseTag get licenseTag => throw _privateConstructorUsedError;
+
+  /// Kurzer Hinweis zur inhaltlichen Herkunft / Abgrenzung
+  String? get licenseNotes => throw _privateConstructorUsedError;
+
   /// Serializes this Intervention to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -94,7 +100,9 @@ abstract class $InterventionCopyWith<$Res> {
       int? maxIntensity,
       String? icon,
       String? category,
-      int? difficultyLevel});
+      int? difficultyLevel,
+      ContentLicenseTag licenseTag,
+      String? licenseNotes});
 }
 
 /// @nodoc
@@ -126,6 +134,8 @@ class _$InterventionCopyWithImpl<$Res, $Val extends Intervention>
     Object? icon = freezed,
     Object? category = freezed,
     Object? difficultyLevel = freezed,
+    Object? licenseTag = null,
+    Object? licenseNotes = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -184,6 +194,14 @@ class _$InterventionCopyWithImpl<$Res, $Val extends Intervention>
           ? _value.difficultyLevel
           : difficultyLevel // ignore: cast_nullable_to_non_nullable
               as int?,
+      licenseTag: null == licenseTag
+          ? _value.licenseTag
+          : licenseTag // ignore: cast_nullable_to_non_nullable
+              as ContentLicenseTag,
+      licenseNotes: freezed == licenseNotes
+          ? _value.licenseNotes
+          : licenseNotes // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -210,7 +228,9 @@ abstract class _$$InterventionImplCopyWith<$Res>
       int? maxIntensity,
       String? icon,
       String? category,
-      int? difficultyLevel});
+      int? difficultyLevel,
+      ContentLicenseTag licenseTag,
+      String? licenseNotes});
 }
 
 /// @nodoc
@@ -240,6 +260,8 @@ class __$$InterventionImplCopyWithImpl<$Res>
     Object? icon = freezed,
     Object? category = freezed,
     Object? difficultyLevel = freezed,
+    Object? licenseTag = null,
+    Object? licenseNotes = freezed,
   }) {
     return _then(_$InterventionImpl(
       id: null == id
@@ -298,6 +320,14 @@ class __$$InterventionImplCopyWithImpl<$Res>
           ? _value.difficultyLevel
           : difficultyLevel // ignore: cast_nullable_to_non_nullable
               as int?,
+      licenseTag: null == licenseTag
+          ? _value.licenseTag
+          : licenseTag // ignore: cast_nullable_to_non_nullable
+              as ContentLicenseTag,
+      licenseNotes: freezed == licenseNotes
+          ? _value.licenseNotes
+          : licenseNotes // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -319,7 +349,9 @@ class _$InterventionImpl implements _Intervention {
       this.maxIntensity,
       this.icon,
       this.category,
-      this.difficultyLevel})
+      this.difficultyLevel,
+      required this.licenseTag,
+      this.licenseNotes})
       : _steps = steps,
         _recommendedForStates = recommendedForStates,
         _recommendedForEmotions = recommendedForEmotions;
@@ -406,9 +438,17 @@ class _$InterventionImpl implements _Intervention {
   @override
   final int? difficultyLevel;
 
+  /// Rechtestatus des statischen Inhalts
+  @override
+  final ContentLicenseTag licenseTag;
+
+  /// Kurzer Hinweis zur inhaltlichen Herkunft / Abgrenzung
+  @override
+  final String? licenseNotes;
+
   @override
   String toString() {
-    return 'Intervention(id: $id, type: $type, title: $title, summary: $summary, description: $description, steps: $steps, estimatedDurationSec: $estimatedDurationSec, recommendedForStates: $recommendedForStates, recommendedForEmotions: $recommendedForEmotions, minIntensity: $minIntensity, maxIntensity: $maxIntensity, icon: $icon, category: $category, difficultyLevel: $difficultyLevel)';
+    return 'Intervention(id: $id, type: $type, title: $title, summary: $summary, description: $description, steps: $steps, estimatedDurationSec: $estimatedDurationSec, recommendedForStates: $recommendedForStates, recommendedForEmotions: $recommendedForEmotions, minIntensity: $minIntensity, maxIntensity: $maxIntensity, icon: $icon, category: $category, difficultyLevel: $difficultyLevel, licenseTag: $licenseTag, licenseNotes: $licenseNotes)';
   }
 
   @override
@@ -437,7 +477,11 @@ class _$InterventionImpl implements _Intervention {
             (identical(other.category, category) ||
                 other.category == category) &&
             (identical(other.difficultyLevel, difficultyLevel) ||
-                other.difficultyLevel == difficultyLevel));
+                other.difficultyLevel == difficultyLevel) &&
+            (identical(other.licenseTag, licenseTag) ||
+                other.licenseTag == licenseTag) &&
+            (identical(other.licenseNotes, licenseNotes) ||
+                other.licenseNotes == licenseNotes));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -457,7 +501,9 @@ class _$InterventionImpl implements _Intervention {
       maxIntensity,
       icon,
       category,
-      difficultyLevel);
+      difficultyLevel,
+      licenseTag,
+      licenseNotes);
 
   /// Create a copy of Intervention
   /// with the given fields replaced by the non-null parameter values.
@@ -490,7 +536,9 @@ abstract class _Intervention implements Intervention {
       final int? maxIntensity,
       final String? icon,
       final String? category,
-      final int? difficultyLevel}) = _$InterventionImpl;
+      final int? difficultyLevel,
+      required final ContentLicenseTag licenseTag,
+      final String? licenseNotes}) = _$InterventionImpl;
 
   factory _Intervention.fromJson(Map<String, dynamic> json) =
       _$InterventionImpl.fromJson;
@@ -550,6 +598,14 @@ abstract class _Intervention implements Intervention {
   /// Optional: Schwierigkeitsgrad (1-5)
   @override
   int? get difficultyLevel;
+
+  /// Rechtestatus des statischen Inhalts
+  @override
+  ContentLicenseTag get licenseTag;
+
+  /// Kurzer Hinweis zur inhaltlichen Herkunft / Abgrenzung
+  @override
+  String? get licenseNotes;
 
   /// Create a copy of Intervention
   /// with the given fields replaced by the non-null parameter values.

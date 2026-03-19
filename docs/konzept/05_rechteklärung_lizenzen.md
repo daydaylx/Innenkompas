@@ -12,7 +12,7 @@ audience:
   - "Entwicklung"
   - "Rechtliches Review"
 purpose: "Übersicht der Urheberrechts- und Lizenzlage für alle verwendeten oder geplanten Therapiematerialien. Entscheidungsgrundlage für MVP-Templates."
-disclaimer: "Kein Rechtsgutachten. Dient der internen Planung. Für private Nutzung sind viele Anforderungen reduziert. Vor Store-Veröffentlichung juristisches Review empfohlen."
+disclaimer: "Kein Rechtsgutachten. Dient der internen Planung. Für private Nutzung sind viele Anforderungen reduziert. Vor öffentlicher oder breiter externer Verbreitung juristisches Review empfohlen."
 ---
 
 # Rechteklärung und Lizenzmatrix — Innenkompass
@@ -22,7 +22,7 @@ disclaimer: "Kein Rechtsgutachten. Dient der internen Planung. Für private Nutz
 > **Für private Nutzung:** Bei reinem Eigengebrauch ohne Weitergabe an Dritte sind viele lizenzrechtliche Anforderungen reduziert. Konzepte und Ideen sind nicht urheberrechtlich geschützt – nur deren konkrete Ausgestaltung (Wortlaut, Layout, 1:1-Kopien). Dieses Dokument wird relevant bei:
 > - Weitergabe der App an Dritte (auch kostenlos)
 > - Kommerzieller Nutzung
-> - Store-Veröffentlichung
+> - Öffentlicher oder breiter externer Verbreitung
 
 ---
 
@@ -106,14 +106,15 @@ Jedes Template in der App bekommt einen `license_tag`, der den Rechtestatus doku
 
 ### 2.2 Technische Umsetzung
 
-Der `license_tag` wird als Metadata-Feld im `Intervention`-Modell abgelegt:
+Im aktuellen Repo wird der `license_tag` leichtgewichtig als eigenes Feld `licenseTag` im `Intervention`-Modell geführt. Ergänzend kann `licenseNotes` den Herkunftshinweis aufnehmen:
 
 ```dart
-// Im Intervention-Modell (metadata oder eigenes Feld):
-metadata: {
-  'license_tag': 'original-inspired-no-copy',
-  'license_notes': 'Feldlogik nach CBT/REBT-Konzept; eigene Formulierungen',
-}
+Intervention(
+  // ...
+  licenseTag: ContentLicenseTag.originalInspiredNoCopy,
+  licenseNotes:
+      'Feldlogik nach CBT/REBT-Konzept; eigene Formulierungen',
+)
 ```
 
 Im späteren Template-Registry-Konzept wird `license_tag` ein Pflichtfeld auf `WorksheetTemplate`.
@@ -204,12 +205,12 @@ Im späteren Template-Registry-Konzept wird `license_tag` ein Pflichtfeld auf `W
 
 Solange die App keine medizinische Zweckbestimmung hat, ist sie kein Medizinprodukt (MDR) und muss nicht als DiGA (Digitale Gesundheitsanwendung) zugelassen werden.
 
-**Für private Nutzung:** Bei reinem Eigengebrauch ohne Store-Veröffentlichung sind regulatorische Anforderungen deutlich reduziert. Die folgenden Hinweise werden relevant bei geplanter Weitergabe oder Store-Veröffentlichung.
+**Für private Nutzung:** Bei reinem Eigengebrauch ohne öffentliche Verbreitung sind regulatorische Anforderungen deutlich reduziert. Die folgenden Hinweise werden relevant bei geplanter Weitergabe oder anderer externer Verbreitung.
 
 **Safe-Harbor-Positionierung:**
 > „Digitale Arbeitsblatt-Bibliothek für Selbstreflexion und kognitive Umstrukturierung — kein Therapieersatz, kein Notfall-Dienst"
 
-**Verbotene Claims im Marketing** (relevant bei Store-Veröffentlichung):
+**Verbotene Claims im Marketing** (relevant bei externer oder öffentlicher Verbreitung):
 - „Behandelt Burnout"
 - „Therapiert Depression"
 - „Medizinisch validiert"
@@ -231,7 +232,7 @@ Emotionale Zustände und Belastungswerte gelten als Gesundheitsdaten nach DSGVO 
 - Kein automatischer Export
 - App-Lock optional anbieten
 
-**Bei Weitergabe/Store-Veröffentlichung:** DSGVO voll anwendbar → ausdrückliche Einwilligung bei Erststart erforderlich.
+**Bei externer Weitergabe:** DSGVO voll anwendbar → ausdrückliche Einwilligung bei Erststart erforderlich.
 
 ### 5.3 DiGA-Pfad (optional, später)
 
@@ -257,7 +258,7 @@ Falls DiGA angestrebt wird:
 | DSGVO Art. 9 Verstoss | Niedrig (local-first, private Nutzung) | Sehr hoch | Local-first Architektur; Haushaltsausnahme nutzbar |
 | DiGA-Pflicht bei Marktzugang | Niedrig im MVP | Hoch | Keine Heilsversprechen; Wellness-Positionierung |
 
-**Hinweis zur privaten Nutzung:** Bei reinem Eigengebrauch ohne Weitergabe sind die Risiken deutlich reduziert. Die Tabelle wird relevant bei geplanter Weitergabe oder Store-Veröffentlichung.
+**Hinweis zur privaten Nutzung:** Bei reinem Eigengebrauch ohne Weitergabe sind die Risiken deutlich reduziert. Die Tabelle wird relevant bei geplanter externer Weitergabe oder einem späteren öffentlichen Vertriebspfad.
 
 ---
 
@@ -266,11 +267,11 @@ Falls DiGA angestrebt wird:
 | # | Aufgabe | Priorität | Status |
 |---|---|---|---|
 | 7.1 | Rechte-Matrix: vollständige Liste aller geplanten Templates + Quelle + Rechtestatus | Prio 1 | ✓ In diesem Dokument |
-| 7.2 | Kontaktaufnahme Hogrefe (Rights & Permissions) | Prio 3 | offen (nur bei Store-Veröffentlichung) |
-| 7.3 | Kontaktaufnahme Kohlhammer (Licensing) | Prio 3 | offen (nur bei Store-Veröffentlichung) |
-| 7.4 | ODSIS-Lizenz klären (OUP + Hogrefe) — für spätere Version | Prio 3 | offen (nur bei Store-Veröffentlichung) |
+| 7.2 | Kontaktaufnahme Hogrefe (Rights & Permissions) | Prio 3 | offen (nur bei späterer externer oder öffentlicher Weitergabe) |
+| 7.3 | Kontaktaufnahme Kohlhammer (Licensing) | Prio 3 | offen (nur bei späterer externer oder öffentlicher Weitergabe) |
+| 7.4 | ODSIS-Lizenz klären (OUP + Hogrefe) — für spätere Version | Prio 3 | offen (nur bei späterer externer oder öffentlicher Weitergabe) |
 | 7.5 | MVP ohne lizenzpflichtige Skalen finalisieren | Prio 1 | ✓ SelbsteinschätzungsSkala implementiert |
-| 7.6 | Juristisches Review vor Store-Veröffentlichung | Pflicht (bei Store) | offen |
+| 7.6 | Juristisches Review vor öffentlicher/externer Verbreitung | Pflicht (falls geplant) | offen |
 | 7.7 | DSGVO-Einwilligungstext für Erststart formulieren | Prio 2 | offen |
 
-**Hinweis:** Die Aufgaben 7.2–7.4 und 7.6 sind nur bei geplanter Store-Veröffentlichung oder Weitergabe an Dritte relevant. Für reine private Nutzung können diese Schritte entfallen.
+**Hinweis:** Die Aufgaben 7.2–7.4 und 7.6 sind nur bei geplanter externer Weitergabe relevant. Für reine private Nutzung können diese Schritte entfallen.

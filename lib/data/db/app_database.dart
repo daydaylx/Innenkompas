@@ -4,6 +4,7 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import '../../core/constants/app_constants.dart';
+import '../../domain/models/ai_evaluation.dart';
 import 'tables/situation_entries.dart';
 import 'tables/user_settings.dart';
 import 'tables/crisis_plan.dart';
@@ -65,6 +66,40 @@ class AppDatabase extends _$AppDatabase {
             situationEntries.selectedNextActionKey,
           );
         }
+        if (from < 4) {
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiEvaluationStatus,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiEvaluationProvider,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiEvaluationModel,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiEvaluationRequestedAt,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiEvaluationCompletedAt,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiEvaluationConsentGiven,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiEvaluationText,
+          );
+          await m.addColumn(
+            situationEntries,
+            situationEntries.aiEvaluationSchemaVersion,
+          );
+        }
       },
       beforeOpen: (OpeningDetails details) async {
         // Enable foreign keys and other database pragmas
@@ -108,6 +143,64 @@ class AppDatabase extends _$AppDatabase {
     await (update(situationEntries)..where((e) => e.id.equals(entryId))).write(
       SituationEntriesCompanion(
         selectedNextActionKey: Value(selectedNextActionKey),
+      ),
+    );
+  }
+
+  /// Marks a saved entry as opted-in and currently waiting for AI output.
+  Future<void> markAiEvaluationPending({
+    required int entryId,
+    required bool consentGiven,
+    required DateTime requestedAt,
+  }) async {
+    await (update(situationEntries)..where((e) => e.id.equals(entryId))).write(
+      SituationEntriesCompanion(
+        aiEvaluationStatus: Value(AiEvaluationStatus.pending.name),
+        aiEvaluationConsentGiven: Value(consentGiven),
+        aiEvaluationRequestedAt: Value(requestedAt),
+        aiEvaluationCompletedAt: const Value(null),
+        aiEvaluationText: const Value(null),
+        aiEvaluationSchemaVersion: const Value(null),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Persists a successful AI evaluation response.
+  Future<void> saveAiEvaluationSuccess({
+    required int entryId,
+    required String provider,
+    required String model,
+    required int schemaVersion,
+    required AiEvaluationContent content,
+    required DateTime completedAt,
+  }) async {
+    await (update(situationEntries)..where((e) => e.id.equals(entryId))).write(
+      SituationEntriesCompanion(
+        aiEvaluationStatus: Value(AiEvaluationStatus.success.name),
+        aiEvaluationProvider: Value(provider),
+        aiEvaluationModel: Value(model),
+        aiEvaluationCompletedAt: Value(completedAt),
+        aiEvaluationConsentGiven: const Value(true),
+        aiEvaluationText: Value(content.toJsonString()),
+        aiEvaluationSchemaVersion: Value(schemaVersion),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Persists a failed AI evaluation attempt without removing user consent.
+  Future<void> markAiEvaluationFailed({
+    required int entryId,
+    required DateTime completedAt,
+  }) async {
+    await (update(situationEntries)..where((e) => e.id.equals(entryId))).write(
+      SituationEntriesCompanion(
+        aiEvaluationStatus: Value(AiEvaluationStatus.failed.name),
+        aiEvaluationCompletedAt: Value(completedAt),
+        aiEvaluationConsentGiven: const Value(true),
+        aiEvaluationText: const Value(null),
+        updatedAt: Value(DateTime.now()),
       ),
     );
   }
@@ -289,6 +382,16 @@ class AppDatabase extends _$AppDatabase {
         'suggestedTipIds': e.suggestedTipIds,
         'suggestedNextActionKey': e.suggestedNextActionKey,
         'selectedNextActionKey': e.selectedNextActionKey,
+        'aiEvaluationStatus': e.aiEvaluationStatus,
+        'aiEvaluationProvider': e.aiEvaluationProvider,
+        'aiEvaluationModel': e.aiEvaluationModel,
+        'aiEvaluationRequestedAt':
+            e.aiEvaluationRequestedAt?.toIso8601String(),
+        'aiEvaluationCompletedAt':
+            e.aiEvaluationCompletedAt?.toIso8601String(),
+        'aiEvaluationConsentGiven': e.aiEvaluationConsentGiven,
+        'aiEvaluationText': e.aiEvaluationText,
+        'aiEvaluationSchemaVersion': e.aiEvaluationSchemaVersion,
         'interventionType': e.interventionType,
         'interventionId': e.interventionId,
         'interventionCompleted': e.interventionCompleted,

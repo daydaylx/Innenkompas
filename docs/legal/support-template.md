@@ -23,6 +23,7 @@ Der Support (falls angeboten) umfasst:
 - Hilfe bei Problemen mit der App-Sperre (Lock, Biometrie, PIN)
 - Hilfe bei Benachrichtigungs-Problemen
 - Hilfe bei Export und lokaler Datenlöschung
+- Hilfe bei optionaler KI-Auswertung (nur falls der konkrete Privat-Build diese Funktion enthält)
 - Allgemeine Bug-Reports und Fehlerbeschreibungen
 - Klärung, dass Krisenplan-Inhalte vom Nutzer selbst verwaltete lokale Daten sind
 
@@ -64,10 +65,14 @@ A: Einstellungen → Alle Daten löschen → Bestätigen. Danach sind alle Eintr
 
 ### Q: Wo sind meine Daten gespeichert?
 
-A: Alle Daten sind lokal auf deinem Gerät gespeichert. Es gibt keine Cloud-Anbindung.
+A: Standardmäßig sind die Daten lokal auf deinem Gerät gespeichert. Wenn in deinem privaten Build die optionale KI-Auswertung aktiviert ist und du sie bewusst anforderst, werden die dafür nötigen Eintragsdaten einmalig an den konfigurierten KI-Dienst übertragen.
+
+### Q: Wann werden Daten nach außen übertragen?
+
+A: Nur wenn du Daten aktiv exportierst oder wenn ein speziell konfigurierter Privat-Build die optionale KI-Auswertung enthält und du diese Auswertung selbst startest.
 
 ---
 
 ## Hinweis für Entwickler
 
-Bei reiner **privater Eigennutzung** ist kein formaler Support erforderlich. Dieses Dokument dient als Vorlage und sollte bei **Weitergabe an Dritte** mit echten Kontaktinformationen gefüllt werden.
+Bei reiner **privater Eigennutzung** ist kein formaler Support erforderlich. Dieses Dokument dient als Vorlage und sollte bei **Weitergabe an Dritte** mit echten Kontaktinformationen gefüllt und an die im jeweiligen Privat-Build aktivierten Funktionen angepasst werden.

@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:innenkompass/core/config/ai_evaluation_config.dart';
+import 'package:innenkompass/data/services/open_router_ai_evaluation_service.dart';
 import 'package:innenkompass/data/db/app_database.dart';
 import 'package:innenkompass/domain/models/evaluation.dart';
+import 'package:innenkompass/domain/services/ai_evaluation_service.dart';
 import 'package:innenkompass/domain/services/pattern_analyzer.dart';
 
 import 'database_provider.dart';
@@ -16,6 +19,30 @@ final evaluationEntryProvider =
     FutureProvider.family<SituationEntryData?, int>((ref, entryId) async {
   final db = ref.watch(databaseProvider);
   return db.getSituationEntryById(entryId);
+});
+
+/// Compile-time feature configuration for the optional AI evaluation flow.
+final aiEvaluationConfigProvider = Provider<AiEvaluationConfig>((ref) {
+  return AiEvaluationConfig.fromEnvironment();
+});
+
+/// HTTP-backed AI evaluation service. Returns null when the build is not
+/// configured with an endpoint.
+final aiEvaluationServiceProvider = Provider<AiEvaluationService?>((ref) {
+  final config = ref.watch(aiEvaluationConfigProvider);
+  if (!config.isEnabled || config.baseUrl == null) {
+    return null;
+  }
+
+  final service = OpenRouterAiEvaluationService(
+    baseUrl: config.baseUrl!,
+    appToken: config.appToken,
+    provider: config.provider,
+    model: config.model,
+    schemaVersion: config.schemaVersion,
+  );
+  ref.onDispose(service.dispose);
+  return service;
 });
 
 /// Narrative Verlaufs-Insights für die Musteransicht.

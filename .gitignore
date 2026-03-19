@@ -57,3 +57,6 @@ sqlite_mcp_server.db
 
 # Lokale Entwicklungsreferenz (eigenständiges Flutter-Projekt, kein Bestandteil dieses Repos)
 innenkompass/
+
+# Lokale LLM-/Audit-Logs
+logs/

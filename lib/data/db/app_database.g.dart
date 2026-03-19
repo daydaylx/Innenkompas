@@ -154,6 +154,59 @@ class $SituationEntriesTable extends SituationEntries
   late final GeneratedColumn<String> selectedNextActionKey =
       GeneratedColumn<String>('selected_next_action_key', aliasedName, true,
           type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiEvaluationStatusMeta =
+      const VerificationMeta('aiEvaluationStatus');
+  @override
+  late final GeneratedColumn<String> aiEvaluationStatus =
+      GeneratedColumn<String>('ai_evaluation_status', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiEvaluationProviderMeta =
+      const VerificationMeta('aiEvaluationProvider');
+  @override
+  late final GeneratedColumn<String> aiEvaluationProvider =
+      GeneratedColumn<String>('ai_evaluation_provider', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiEvaluationModelMeta =
+      const VerificationMeta('aiEvaluationModel');
+  @override
+  late final GeneratedColumn<String> aiEvaluationModel =
+      GeneratedColumn<String>('ai_evaluation_model', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiEvaluationRequestedAtMeta =
+      const VerificationMeta('aiEvaluationRequestedAt');
+  @override
+  late final GeneratedColumn<DateTime> aiEvaluationRequestedAt =
+      GeneratedColumn<DateTime>('ai_evaluation_requested_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _aiEvaluationCompletedAtMeta =
+      const VerificationMeta('aiEvaluationCompletedAt');
+  @override
+  late final GeneratedColumn<DateTime> aiEvaluationCompletedAt =
+      GeneratedColumn<DateTime>('ai_evaluation_completed_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _aiEvaluationConsentGivenMeta =
+      const VerificationMeta('aiEvaluationConsentGiven');
+  @override
+  late final GeneratedColumn<bool> aiEvaluationConsentGiven =
+      GeneratedColumn<bool>(
+          'ai_evaluation_consent_given', aliasedName, false,
+          type: DriftSqlType.bool,
+          requiredDuringInsert: false,
+          defaultConstraints: GeneratedColumn.constraintIsAlways(
+              'CHECK ("ai_evaluation_consent_given" IN (0, 1))'),
+          defaultValue: const Constant(false));
+  static const VerificationMeta _aiEvaluationTextMeta =
+      const VerificationMeta('aiEvaluationText');
+  @override
+  late final GeneratedColumn<String> aiEvaluationText = GeneratedColumn<String>(
+      'ai_evaluation_text', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aiEvaluationSchemaVersionMeta =
+      const VerificationMeta('aiEvaluationSchemaVersion');
+  @override
+  late final GeneratedColumn<int> aiEvaluationSchemaVersion =
+      GeneratedColumn<int>('ai_evaluation_schema_version', aliasedName, true,
+          type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _interventionTypeMeta =
       const VerificationMeta('interventionType');
   @override
@@ -263,6 +316,14 @@ class $SituationEntriesTable extends SituationEntries
         suggestedTipIds,
         suggestedNextActionKey,
         selectedNextActionKey,
+        aiEvaluationStatus,
+        aiEvaluationProvider,
+        aiEvaluationModel,
+        aiEvaluationRequestedAt,
+        aiEvaluationCompletedAt,
+        aiEvaluationConsentGiven,
+        aiEvaluationText,
+        aiEvaluationSchemaVersion,
         interventionType,
         interventionId,
         interventionCompleted,
@@ -430,6 +491,58 @@ class $SituationEntriesTable extends SituationEntries
           selectedNextActionKey.isAcceptableOrUnknown(
               data['selected_next_action_key']!, _selectedNextActionKeyMeta));
     }
+    if (data.containsKey('ai_evaluation_status')) {
+      context.handle(
+          _aiEvaluationStatusMeta,
+          aiEvaluationStatus.isAcceptableOrUnknown(
+              data['ai_evaluation_status']!, _aiEvaluationStatusMeta));
+    }
+    if (data.containsKey('ai_evaluation_provider')) {
+      context.handle(
+          _aiEvaluationProviderMeta,
+          aiEvaluationProvider.isAcceptableOrUnknown(
+              data['ai_evaluation_provider']!, _aiEvaluationProviderMeta));
+    }
+    if (data.containsKey('ai_evaluation_model')) {
+      context.handle(
+          _aiEvaluationModelMeta,
+          aiEvaluationModel.isAcceptableOrUnknown(
+              data['ai_evaluation_model']!, _aiEvaluationModelMeta));
+    }
+    if (data.containsKey('ai_evaluation_requested_at')) {
+      context.handle(
+          _aiEvaluationRequestedAtMeta,
+          aiEvaluationRequestedAt.isAcceptableOrUnknown(
+              data['ai_evaluation_requested_at']!,
+              _aiEvaluationRequestedAtMeta));
+    }
+    if (data.containsKey('ai_evaluation_completed_at')) {
+      context.handle(
+          _aiEvaluationCompletedAtMeta,
+          aiEvaluationCompletedAt.isAcceptableOrUnknown(
+              data['ai_evaluation_completed_at']!,
+              _aiEvaluationCompletedAtMeta));
+    }
+    if (data.containsKey('ai_evaluation_consent_given')) {
+      context.handle(
+          _aiEvaluationConsentGivenMeta,
+          aiEvaluationConsentGiven.isAcceptableOrUnknown(
+              data['ai_evaluation_consent_given']!,
+              _aiEvaluationConsentGivenMeta));
+    }
+    if (data.containsKey('ai_evaluation_text')) {
+      context.handle(
+          _aiEvaluationTextMeta,
+          aiEvaluationText.isAcceptableOrUnknown(
+              data['ai_evaluation_text']!, _aiEvaluationTextMeta));
+    }
+    if (data.containsKey('ai_evaluation_schema_version')) {
+      context.handle(
+          _aiEvaluationSchemaVersionMeta,
+          aiEvaluationSchemaVersion.isAcceptableOrUnknown(
+              data['ai_evaluation_schema_version']!,
+              _aiEvaluationSchemaVersionMeta));
+    }
     if (data.containsKey('intervention_type')) {
       context.handle(
           _interventionTypeMeta,
@@ -556,6 +669,27 @@ class $SituationEntriesTable extends SituationEntries
       selectedNextActionKey: attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}selected_next_action_key']),
+      aiEvaluationStatus: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}ai_evaluation_status']),
+      aiEvaluationProvider: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}ai_evaluation_provider']),
+      aiEvaluationModel: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}ai_evaluation_model']),
+      aiEvaluationRequestedAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime,
+          data['${effectivePrefix}ai_evaluation_requested_at']),
+      aiEvaluationCompletedAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime,
+          data['${effectivePrefix}ai_evaluation_completed_at']),
+      aiEvaluationConsentGiven: attachedDatabase.typeMapping.read(
+          DriftSqlType.bool,
+          data['${effectivePrefix}ai_evaluation_consent_given'])!,
+      aiEvaluationText: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}ai_evaluation_text']),
+      aiEvaluationSchemaVersion: attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}ai_evaluation_schema_version']),
       interventionType: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}intervention_type']),
       interventionId: attachedDatabase.typeMapping
@@ -615,6 +749,14 @@ class SituationEntryData extends DataClass
   final String? suggestedTipIds;
   final String? suggestedNextActionKey;
   final String? selectedNextActionKey;
+  final String? aiEvaluationStatus;
+  final String? aiEvaluationProvider;
+  final String? aiEvaluationModel;
+  final DateTime? aiEvaluationRequestedAt;
+  final DateTime? aiEvaluationCompletedAt;
+  final bool aiEvaluationConsentGiven;
+  final String? aiEvaluationText;
+  final int? aiEvaluationSchemaVersion;
   final String? interventionType;
   final String? interventionId;
   final bool interventionCompleted;
@@ -651,6 +793,14 @@ class SituationEntryData extends DataClass
       this.suggestedTipIds,
       this.suggestedNextActionKey,
       this.selectedNextActionKey,
+      this.aiEvaluationStatus,
+      this.aiEvaluationProvider,
+      this.aiEvaluationModel,
+      this.aiEvaluationRequestedAt,
+      this.aiEvaluationCompletedAt,
+      required this.aiEvaluationConsentGiven,
+      this.aiEvaluationText,
+      this.aiEvaluationSchemaVersion,
       this.interventionType,
       this.interventionId,
       required this.interventionCompleted,
@@ -714,6 +864,32 @@ class SituationEntryData extends DataClass
     }
     if (!nullToAbsent || selectedNextActionKey != null) {
       map['selected_next_action_key'] = Variable<String>(selectedNextActionKey);
+    }
+    if (!nullToAbsent || aiEvaluationStatus != null) {
+      map['ai_evaluation_status'] = Variable<String>(aiEvaluationStatus);
+    }
+    if (!nullToAbsent || aiEvaluationProvider != null) {
+      map['ai_evaluation_provider'] = Variable<String>(aiEvaluationProvider);
+    }
+    if (!nullToAbsent || aiEvaluationModel != null) {
+      map['ai_evaluation_model'] = Variable<String>(aiEvaluationModel);
+    }
+    if (!nullToAbsent || aiEvaluationRequestedAt != null) {
+      map['ai_evaluation_requested_at'] =
+          Variable<DateTime>(aiEvaluationRequestedAt);
+    }
+    if (!nullToAbsent || aiEvaluationCompletedAt != null) {
+      map['ai_evaluation_completed_at'] =
+          Variable<DateTime>(aiEvaluationCompletedAt);
+    }
+    map['ai_evaluation_consent_given'] =
+        Variable<bool>(aiEvaluationConsentGiven);
+    if (!nullToAbsent || aiEvaluationText != null) {
+      map['ai_evaluation_text'] = Variable<String>(aiEvaluationText);
+    }
+    if (!nullToAbsent || aiEvaluationSchemaVersion != null) {
+      map['ai_evaluation_schema_version'] =
+          Variable<int>(aiEvaluationSchemaVersion);
     }
     if (!nullToAbsent || interventionType != null) {
       map['intervention_type'] = Variable<String>(interventionType);
@@ -795,6 +971,29 @@ class SituationEntryData extends DataClass
       selectedNextActionKey: selectedNextActionKey == null && nullToAbsent
           ? const Value.absent()
           : Value(selectedNextActionKey),
+      aiEvaluationStatus: aiEvaluationStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiEvaluationStatus),
+      aiEvaluationProvider: aiEvaluationProvider == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiEvaluationProvider),
+      aiEvaluationModel: aiEvaluationModel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiEvaluationModel),
+      aiEvaluationRequestedAt: aiEvaluationRequestedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiEvaluationRequestedAt),
+      aiEvaluationCompletedAt: aiEvaluationCompletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiEvaluationCompletedAt),
+      aiEvaluationConsentGiven: Value(aiEvaluationConsentGiven),
+      aiEvaluationText: aiEvaluationText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aiEvaluationText),
+      aiEvaluationSchemaVersion:
+          aiEvaluationSchemaVersion == null && nullToAbsent
+              ? const Value.absent()
+              : Value(aiEvaluationSchemaVersion),
       interventionType: interventionType == null && nullToAbsent
           ? const Value.absent()
           : Value(interventionType),
@@ -860,6 +1059,21 @@ class SituationEntryData extends DataClass
           serializer.fromJson<String?>(json['suggestedNextActionKey']),
       selectedNextActionKey:
           serializer.fromJson<String?>(json['selectedNextActionKey']),
+      aiEvaluationStatus:
+          serializer.fromJson<String?>(json['aiEvaluationStatus']),
+      aiEvaluationProvider:
+          serializer.fromJson<String?>(json['aiEvaluationProvider']),
+      aiEvaluationModel:
+          serializer.fromJson<String?>(json['aiEvaluationModel']),
+      aiEvaluationRequestedAt:
+          serializer.fromJson<DateTime?>(json['aiEvaluationRequestedAt']),
+      aiEvaluationCompletedAt:
+          serializer.fromJson<DateTime?>(json['aiEvaluationCompletedAt']),
+      aiEvaluationConsentGiven:
+          serializer.fromJson<bool>(json['aiEvaluationConsentGiven']),
+      aiEvaluationText: serializer.fromJson<String?>(json['aiEvaluationText']),
+      aiEvaluationSchemaVersion:
+          serializer.fromJson<int?>(json['aiEvaluationSchemaVersion']),
       interventionType: serializer.fromJson<String?>(json['interventionType']),
       interventionId: serializer.fromJson<String?>(json['interventionId']),
       interventionCompleted:
@@ -907,6 +1121,18 @@ class SituationEntryData extends DataClass
           serializer.toJson<String?>(suggestedNextActionKey),
       'selectedNextActionKey':
           serializer.toJson<String?>(selectedNextActionKey),
+      'aiEvaluationStatus': serializer.toJson<String?>(aiEvaluationStatus),
+      'aiEvaluationProvider': serializer.toJson<String?>(aiEvaluationProvider),
+      'aiEvaluationModel': serializer.toJson<String?>(aiEvaluationModel),
+      'aiEvaluationRequestedAt':
+          serializer.toJson<DateTime?>(aiEvaluationRequestedAt),
+      'aiEvaluationCompletedAt':
+          serializer.toJson<DateTime?>(aiEvaluationCompletedAt),
+      'aiEvaluationConsentGiven':
+          serializer.toJson<bool>(aiEvaluationConsentGiven),
+      'aiEvaluationText': serializer.toJson<String?>(aiEvaluationText),
+      'aiEvaluationSchemaVersion':
+          serializer.toJson<int?>(aiEvaluationSchemaVersion),
       'interventionType': serializer.toJson<String?>(interventionType),
       'interventionId': serializer.toJson<String?>(interventionId),
       'interventionCompleted': serializer.toJson<bool>(interventionCompleted),
@@ -947,6 +1173,14 @@ class SituationEntryData extends DataClass
           Value<String?> suggestedTipIds = const Value.absent(),
           Value<String?> suggestedNextActionKey = const Value.absent(),
           Value<String?> selectedNextActionKey = const Value.absent(),
+          Value<String?> aiEvaluationStatus = const Value.absent(),
+          Value<String?> aiEvaluationProvider = const Value.absent(),
+          Value<String?> aiEvaluationModel = const Value.absent(),
+          Value<DateTime?> aiEvaluationRequestedAt = const Value.absent(),
+          Value<DateTime?> aiEvaluationCompletedAt = const Value.absent(),
+          bool? aiEvaluationConsentGiven,
+          Value<String?> aiEvaluationText = const Value.absent(),
+          Value<int?> aiEvaluationSchemaVersion = const Value.absent(),
           Value<String?> interventionType = const Value.absent(),
           Value<String?> interventionId = const Value.absent(),
           bool? interventionCompleted,
@@ -1002,6 +1236,29 @@ class SituationEntryData extends DataClass
         selectedNextActionKey: selectedNextActionKey.present
             ? selectedNextActionKey.value
             : this.selectedNextActionKey,
+        aiEvaluationStatus: aiEvaluationStatus.present
+            ? aiEvaluationStatus.value
+            : this.aiEvaluationStatus,
+        aiEvaluationProvider: aiEvaluationProvider.present
+            ? aiEvaluationProvider.value
+            : this.aiEvaluationProvider,
+        aiEvaluationModel: aiEvaluationModel.present
+            ? aiEvaluationModel.value
+            : this.aiEvaluationModel,
+        aiEvaluationRequestedAt: aiEvaluationRequestedAt.present
+            ? aiEvaluationRequestedAt.value
+            : this.aiEvaluationRequestedAt,
+        aiEvaluationCompletedAt: aiEvaluationCompletedAt.present
+            ? aiEvaluationCompletedAt.value
+            : this.aiEvaluationCompletedAt,
+        aiEvaluationConsentGiven:
+            aiEvaluationConsentGiven ?? this.aiEvaluationConsentGiven,
+        aiEvaluationText: aiEvaluationText.present
+            ? aiEvaluationText.value
+            : this.aiEvaluationText,
+        aiEvaluationSchemaVersion: aiEvaluationSchemaVersion.present
+            ? aiEvaluationSchemaVersion.value
+            : this.aiEvaluationSchemaVersion,
         interventionType: interventionType.present
             ? interventionType.value
             : this.interventionType,
@@ -1083,6 +1340,30 @@ class SituationEntryData extends DataClass
       selectedNextActionKey: data.selectedNextActionKey.present
           ? data.selectedNextActionKey.value
           : this.selectedNextActionKey,
+      aiEvaluationStatus: data.aiEvaluationStatus.present
+          ? data.aiEvaluationStatus.value
+          : this.aiEvaluationStatus,
+      aiEvaluationProvider: data.aiEvaluationProvider.present
+          ? data.aiEvaluationProvider.value
+          : this.aiEvaluationProvider,
+      aiEvaluationModel: data.aiEvaluationModel.present
+          ? data.aiEvaluationModel.value
+          : this.aiEvaluationModel,
+      aiEvaluationRequestedAt: data.aiEvaluationRequestedAt.present
+          ? data.aiEvaluationRequestedAt.value
+          : this.aiEvaluationRequestedAt,
+      aiEvaluationCompletedAt: data.aiEvaluationCompletedAt.present
+          ? data.aiEvaluationCompletedAt.value
+          : this.aiEvaluationCompletedAt,
+      aiEvaluationConsentGiven: data.aiEvaluationConsentGiven.present
+          ? data.aiEvaluationConsentGiven.value
+          : this.aiEvaluationConsentGiven,
+      aiEvaluationText: data.aiEvaluationText.present
+          ? data.aiEvaluationText.value
+          : this.aiEvaluationText,
+      aiEvaluationSchemaVersion: data.aiEvaluationSchemaVersion.present
+          ? data.aiEvaluationSchemaVersion.value
+          : this.aiEvaluationSchemaVersion,
       interventionType: data.interventionType.present
           ? data.interventionType.value
           : this.interventionType,
@@ -1139,6 +1420,14 @@ class SituationEntryData extends DataClass
           ..write('suggestedTipIds: $suggestedTipIds, ')
           ..write('suggestedNextActionKey: $suggestedNextActionKey, ')
           ..write('selectedNextActionKey: $selectedNextActionKey, ')
+          ..write('aiEvaluationStatus: $aiEvaluationStatus, ')
+          ..write('aiEvaluationProvider: $aiEvaluationProvider, ')
+          ..write('aiEvaluationModel: $aiEvaluationModel, ')
+          ..write('aiEvaluationRequestedAt: $aiEvaluationRequestedAt, ')
+          ..write('aiEvaluationCompletedAt: $aiEvaluationCompletedAt, ')
+          ..write('aiEvaluationConsentGiven: $aiEvaluationConsentGiven, ')
+          ..write('aiEvaluationText: $aiEvaluationText, ')
+          ..write('aiEvaluationSchemaVersion: $aiEvaluationSchemaVersion, ')
           ..write('interventionType: $interventionType, ')
           ..write('interventionId: $interventionId, ')
           ..write('interventionCompleted: $interventionCompleted, ')
@@ -1180,6 +1469,14 @@ class SituationEntryData extends DataClass
         suggestedTipIds,
         suggestedNextActionKey,
         selectedNextActionKey,
+        aiEvaluationStatus,
+        aiEvaluationProvider,
+        aiEvaluationModel,
+        aiEvaluationRequestedAt,
+        aiEvaluationCompletedAt,
+        aiEvaluationConsentGiven,
+        aiEvaluationText,
+        aiEvaluationSchemaVersion,
         interventionType,
         interventionId,
         interventionCompleted,
@@ -1220,6 +1517,14 @@ class SituationEntryData extends DataClass
           other.suggestedTipIds == this.suggestedTipIds &&
           other.suggestedNextActionKey == this.suggestedNextActionKey &&
           other.selectedNextActionKey == this.selectedNextActionKey &&
+          other.aiEvaluationStatus == this.aiEvaluationStatus &&
+          other.aiEvaluationProvider == this.aiEvaluationProvider &&
+          other.aiEvaluationModel == this.aiEvaluationModel &&
+          other.aiEvaluationRequestedAt == this.aiEvaluationRequestedAt &&
+          other.aiEvaluationCompletedAt == this.aiEvaluationCompletedAt &&
+          other.aiEvaluationConsentGiven == this.aiEvaluationConsentGiven &&
+          other.aiEvaluationText == this.aiEvaluationText &&
+          other.aiEvaluationSchemaVersion == this.aiEvaluationSchemaVersion &&
           other.interventionType == this.interventionType &&
           other.interventionId == this.interventionId &&
           other.interventionCompleted == this.interventionCompleted &&
@@ -1258,6 +1563,14 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
   final Value<String?> suggestedTipIds;
   final Value<String?> suggestedNextActionKey;
   final Value<String?> selectedNextActionKey;
+  final Value<String?> aiEvaluationStatus;
+  final Value<String?> aiEvaluationProvider;
+  final Value<String?> aiEvaluationModel;
+  final Value<DateTime?> aiEvaluationRequestedAt;
+  final Value<DateTime?> aiEvaluationCompletedAt;
+  final Value<bool> aiEvaluationConsentGiven;
+  final Value<String?> aiEvaluationText;
+  final Value<int?> aiEvaluationSchemaVersion;
   final Value<String?> interventionType;
   final Value<String?> interventionId;
   final Value<bool> interventionCompleted;
@@ -1294,6 +1607,14 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     this.suggestedTipIds = const Value.absent(),
     this.suggestedNextActionKey = const Value.absent(),
     this.selectedNextActionKey = const Value.absent(),
+    this.aiEvaluationStatus = const Value.absent(),
+    this.aiEvaluationProvider = const Value.absent(),
+    this.aiEvaluationModel = const Value.absent(),
+    this.aiEvaluationRequestedAt = const Value.absent(),
+    this.aiEvaluationCompletedAt = const Value.absent(),
+    this.aiEvaluationConsentGiven = const Value.absent(),
+    this.aiEvaluationText = const Value.absent(),
+    this.aiEvaluationSchemaVersion = const Value.absent(),
     this.interventionType = const Value.absent(),
     this.interventionId = const Value.absent(),
     this.interventionCompleted = const Value.absent(),
@@ -1331,6 +1652,14 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     this.suggestedTipIds = const Value.absent(),
     this.suggestedNextActionKey = const Value.absent(),
     this.selectedNextActionKey = const Value.absent(),
+    this.aiEvaluationStatus = const Value.absent(),
+    this.aiEvaluationProvider = const Value.absent(),
+    this.aiEvaluationModel = const Value.absent(),
+    this.aiEvaluationRequestedAt = const Value.absent(),
+    this.aiEvaluationCompletedAt = const Value.absent(),
+    this.aiEvaluationConsentGiven = const Value.absent(),
+    this.aiEvaluationText = const Value.absent(),
+    this.aiEvaluationSchemaVersion = const Value.absent(),
     this.interventionType = const Value.absent(),
     this.interventionId = const Value.absent(),
     this.interventionCompleted = const Value.absent(),
@@ -1376,6 +1705,14 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
     Expression<String>? suggestedTipIds,
     Expression<String>? suggestedNextActionKey,
     Expression<String>? selectedNextActionKey,
+    Expression<String>? aiEvaluationStatus,
+    Expression<String>? aiEvaluationProvider,
+    Expression<String>? aiEvaluationModel,
+    Expression<DateTime>? aiEvaluationRequestedAt,
+    Expression<DateTime>? aiEvaluationCompletedAt,
+    Expression<bool>? aiEvaluationConsentGiven,
+    Expression<String>? aiEvaluationText,
+    Expression<int>? aiEvaluationSchemaVersion,
     Expression<String>? interventionType,
     Expression<String>? interventionId,
     Expression<bool>? interventionCompleted,
@@ -1420,6 +1757,20 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
         'suggested_next_action_key': suggestedNextActionKey,
       if (selectedNextActionKey != null)
         'selected_next_action_key': selectedNextActionKey,
+      if (aiEvaluationStatus != null)
+        'ai_evaluation_status': aiEvaluationStatus,
+      if (aiEvaluationProvider != null)
+        'ai_evaluation_provider': aiEvaluationProvider,
+      if (aiEvaluationModel != null) 'ai_evaluation_model': aiEvaluationModel,
+      if (aiEvaluationRequestedAt != null)
+        'ai_evaluation_requested_at': aiEvaluationRequestedAt,
+      if (aiEvaluationCompletedAt != null)
+        'ai_evaluation_completed_at': aiEvaluationCompletedAt,
+      if (aiEvaluationConsentGiven != null)
+        'ai_evaluation_consent_given': aiEvaluationConsentGiven,
+      if (aiEvaluationText != null) 'ai_evaluation_text': aiEvaluationText,
+      if (aiEvaluationSchemaVersion != null)
+        'ai_evaluation_schema_version': aiEvaluationSchemaVersion,
       if (interventionType != null) 'intervention_type': interventionType,
       if (interventionId != null) 'intervention_id': interventionId,
       if (interventionCompleted != null)
@@ -1461,6 +1812,14 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
       Value<String?>? suggestedTipIds,
       Value<String?>? suggestedNextActionKey,
       Value<String?>? selectedNextActionKey,
+      Value<String?>? aiEvaluationStatus,
+      Value<String?>? aiEvaluationProvider,
+      Value<String?>? aiEvaluationModel,
+      Value<DateTime?>? aiEvaluationRequestedAt,
+      Value<DateTime?>? aiEvaluationCompletedAt,
+      Value<bool>? aiEvaluationConsentGiven,
+      Value<String?>? aiEvaluationText,
+      Value<int?>? aiEvaluationSchemaVersion,
       Value<String?>? interventionType,
       Value<String?>? interventionId,
       Value<bool>? interventionCompleted,
@@ -1501,6 +1860,18 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
           suggestedNextActionKey ?? this.suggestedNextActionKey,
       selectedNextActionKey:
           selectedNextActionKey ?? this.selectedNextActionKey,
+      aiEvaluationStatus: aiEvaluationStatus ?? this.aiEvaluationStatus,
+      aiEvaluationProvider: aiEvaluationProvider ?? this.aiEvaluationProvider,
+      aiEvaluationModel: aiEvaluationModel ?? this.aiEvaluationModel,
+      aiEvaluationRequestedAt:
+          aiEvaluationRequestedAt ?? this.aiEvaluationRequestedAt,
+      aiEvaluationCompletedAt:
+          aiEvaluationCompletedAt ?? this.aiEvaluationCompletedAt,
+      aiEvaluationConsentGiven:
+          aiEvaluationConsentGiven ?? this.aiEvaluationConsentGiven,
+      aiEvaluationText: aiEvaluationText ?? this.aiEvaluationText,
+      aiEvaluationSchemaVersion:
+          aiEvaluationSchemaVersion ?? this.aiEvaluationSchemaVersion,
       interventionType: interventionType ?? this.interventionType,
       interventionId: interventionId ?? this.interventionId,
       interventionCompleted:
@@ -1596,6 +1967,35 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
       map['selected_next_action_key'] =
           Variable<String>(selectedNextActionKey.value);
     }
+    if (aiEvaluationStatus.present) {
+      map['ai_evaluation_status'] = Variable<String>(aiEvaluationStatus.value);
+    }
+    if (aiEvaluationProvider.present) {
+      map['ai_evaluation_provider'] =
+          Variable<String>(aiEvaluationProvider.value);
+    }
+    if (aiEvaluationModel.present) {
+      map['ai_evaluation_model'] = Variable<String>(aiEvaluationModel.value);
+    }
+    if (aiEvaluationRequestedAt.present) {
+      map['ai_evaluation_requested_at'] =
+          Variable<DateTime>(aiEvaluationRequestedAt.value);
+    }
+    if (aiEvaluationCompletedAt.present) {
+      map['ai_evaluation_completed_at'] =
+          Variable<DateTime>(aiEvaluationCompletedAt.value);
+    }
+    if (aiEvaluationConsentGiven.present) {
+      map['ai_evaluation_consent_given'] =
+          Variable<bool>(aiEvaluationConsentGiven.value);
+    }
+    if (aiEvaluationText.present) {
+      map['ai_evaluation_text'] = Variable<String>(aiEvaluationText.value);
+    }
+    if (aiEvaluationSchemaVersion.present) {
+      map['ai_evaluation_schema_version'] =
+          Variable<int>(aiEvaluationSchemaVersion.value);
+    }
     if (interventionType.present) {
       map['intervention_type'] = Variable<String>(interventionType.value);
     }
@@ -1663,6 +2063,14 @@ class SituationEntriesCompanion extends UpdateCompanion<SituationEntryData> {
           ..write('suggestedTipIds: $suggestedTipIds, ')
           ..write('suggestedNextActionKey: $suggestedNextActionKey, ')
           ..write('selectedNextActionKey: $selectedNextActionKey, ')
+          ..write('aiEvaluationStatus: $aiEvaluationStatus, ')
+          ..write('aiEvaluationProvider: $aiEvaluationProvider, ')
+          ..write('aiEvaluationModel: $aiEvaluationModel, ')
+          ..write('aiEvaluationRequestedAt: $aiEvaluationRequestedAt, ')
+          ..write('aiEvaluationCompletedAt: $aiEvaluationCompletedAt, ')
+          ..write('aiEvaluationConsentGiven: $aiEvaluationConsentGiven, ')
+          ..write('aiEvaluationText: $aiEvaluationText, ')
+          ..write('aiEvaluationSchemaVersion: $aiEvaluationSchemaVersion, ')
           ..write('interventionType: $interventionType, ')
           ..write('interventionId: $interventionId, ')
           ..write('interventionCompleted: $interventionCompleted, ')
@@ -3132,6 +3540,14 @@ typedef $$SituationEntriesTableCreateCompanionBuilder
   Value<String?> suggestedTipIds,
   Value<String?> suggestedNextActionKey,
   Value<String?> selectedNextActionKey,
+  Value<String?> aiEvaluationStatus,
+  Value<String?> aiEvaluationProvider,
+  Value<String?> aiEvaluationModel,
+  Value<DateTime?> aiEvaluationRequestedAt,
+  Value<DateTime?> aiEvaluationCompletedAt,
+  Value<bool> aiEvaluationConsentGiven,
+  Value<String?> aiEvaluationText,
+  Value<int?> aiEvaluationSchemaVersion,
   Value<String?> interventionType,
   Value<String?> interventionId,
   Value<bool> interventionCompleted,
@@ -3170,6 +3586,14 @@ typedef $$SituationEntriesTableUpdateCompanionBuilder
   Value<String?> suggestedTipIds,
   Value<String?> suggestedNextActionKey,
   Value<String?> selectedNextActionKey,
+  Value<String?> aiEvaluationStatus,
+  Value<String?> aiEvaluationProvider,
+  Value<String?> aiEvaluationModel,
+  Value<DateTime?> aiEvaluationRequestedAt,
+  Value<DateTime?> aiEvaluationCompletedAt,
+  Value<bool> aiEvaluationConsentGiven,
+  Value<String?> aiEvaluationText,
+  Value<int?> aiEvaluationSchemaVersion,
   Value<String?> interventionType,
   Value<String?> interventionId,
   Value<bool> interventionCompleted,
@@ -3273,6 +3697,38 @@ class $$SituationEntriesTableFilterComposer
 
   ColumnFilters<String> get selectedNextActionKey => $composableBuilder(
       column: $table.selectedNextActionKey,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiEvaluationStatus => $composableBuilder(
+      column: $table.aiEvaluationStatus,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiEvaluationProvider => $composableBuilder(
+      column: $table.aiEvaluationProvider,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiEvaluationModel => $composableBuilder(
+      column: $table.aiEvaluationModel,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get aiEvaluationRequestedAt => $composableBuilder(
+      column: $table.aiEvaluationRequestedAt,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get aiEvaluationCompletedAt => $composableBuilder(
+      column: $table.aiEvaluationCompletedAt,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get aiEvaluationConsentGiven => $composableBuilder(
+      column: $table.aiEvaluationConsentGiven,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aiEvaluationText => $composableBuilder(
+      column: $table.aiEvaluationText,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get aiEvaluationSchemaVersion => $composableBuilder(
+      column: $table.aiEvaluationSchemaVersion,
       builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get interventionType => $composableBuilder(
@@ -3411,6 +3867,38 @@ class $$SituationEntriesTableOrderingComposer
       column: $table.selectedNextActionKey,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get aiEvaluationStatus => $composableBuilder(
+      column: $table.aiEvaluationStatus,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiEvaluationProvider => $composableBuilder(
+      column: $table.aiEvaluationProvider,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiEvaluationModel => $composableBuilder(
+      column: $table.aiEvaluationModel,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get aiEvaluationRequestedAt => $composableBuilder(
+      column: $table.aiEvaluationRequestedAt,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get aiEvaluationCompletedAt => $composableBuilder(
+      column: $table.aiEvaluationCompletedAt,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get aiEvaluationConsentGiven => $composableBuilder(
+      column: $table.aiEvaluationConsentGiven,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aiEvaluationText => $composableBuilder(
+      column: $table.aiEvaluationText,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get aiEvaluationSchemaVersion => $composableBuilder(
+      column: $table.aiEvaluationSchemaVersion,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get interventionType => $composableBuilder(
       column: $table.interventionType,
       builder: (column) => ColumnOrderings(column));
@@ -3533,6 +4021,30 @@ class $$SituationEntriesTableAnnotationComposer
   GeneratedColumn<String> get selectedNextActionKey => $composableBuilder(
       column: $table.selectedNextActionKey, builder: (column) => column);
 
+  GeneratedColumn<String> get aiEvaluationStatus => $composableBuilder(
+      column: $table.aiEvaluationStatus, builder: (column) => column);
+
+  GeneratedColumn<String> get aiEvaluationProvider => $composableBuilder(
+      column: $table.aiEvaluationProvider, builder: (column) => column);
+
+  GeneratedColumn<String> get aiEvaluationModel => $composableBuilder(
+      column: $table.aiEvaluationModel, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get aiEvaluationRequestedAt => $composableBuilder(
+      column: $table.aiEvaluationRequestedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get aiEvaluationCompletedAt => $composableBuilder(
+      column: $table.aiEvaluationCompletedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get aiEvaluationConsentGiven => $composableBuilder(
+      column: $table.aiEvaluationConsentGiven, builder: (column) => column);
+
+  GeneratedColumn<String> get aiEvaluationText => $composableBuilder(
+      column: $table.aiEvaluationText, builder: (column) => column);
+
+  GeneratedColumn<int> get aiEvaluationSchemaVersion => $composableBuilder(
+      column: $table.aiEvaluationSchemaVersion, builder: (column) => column);
+
   GeneratedColumn<String> get interventionType => $composableBuilder(
       column: $table.interventionType, builder: (column) => column);
 
@@ -3620,6 +4132,14 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             Value<String?> suggestedTipIds = const Value.absent(),
             Value<String?> suggestedNextActionKey = const Value.absent(),
             Value<String?> selectedNextActionKey = const Value.absent(),
+            Value<String?> aiEvaluationStatus = const Value.absent(),
+            Value<String?> aiEvaluationProvider = const Value.absent(),
+            Value<String?> aiEvaluationModel = const Value.absent(),
+            Value<DateTime?> aiEvaluationRequestedAt = const Value.absent(),
+            Value<DateTime?> aiEvaluationCompletedAt = const Value.absent(),
+            Value<bool> aiEvaluationConsentGiven = const Value.absent(),
+            Value<String?> aiEvaluationText = const Value.absent(),
+            Value<int?> aiEvaluationSchemaVersion = const Value.absent(),
             Value<String?> interventionType = const Value.absent(),
             Value<String?> interventionId = const Value.absent(),
             Value<bool> interventionCompleted = const Value.absent(),
@@ -3657,6 +4177,14 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             suggestedTipIds: suggestedTipIds,
             suggestedNextActionKey: suggestedNextActionKey,
             selectedNextActionKey: selectedNextActionKey,
+            aiEvaluationStatus: aiEvaluationStatus,
+            aiEvaluationProvider: aiEvaluationProvider,
+            aiEvaluationModel: aiEvaluationModel,
+            aiEvaluationRequestedAt: aiEvaluationRequestedAt,
+            aiEvaluationCompletedAt: aiEvaluationCompletedAt,
+            aiEvaluationConsentGiven: aiEvaluationConsentGiven,
+            aiEvaluationText: aiEvaluationText,
+            aiEvaluationSchemaVersion: aiEvaluationSchemaVersion,
             interventionType: interventionType,
             interventionId: interventionId,
             interventionCompleted: interventionCompleted,
@@ -3694,6 +4222,14 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             Value<String?> suggestedTipIds = const Value.absent(),
             Value<String?> suggestedNextActionKey = const Value.absent(),
             Value<String?> selectedNextActionKey = const Value.absent(),
+            Value<String?> aiEvaluationStatus = const Value.absent(),
+            Value<String?> aiEvaluationProvider = const Value.absent(),
+            Value<String?> aiEvaluationModel = const Value.absent(),
+            Value<DateTime?> aiEvaluationRequestedAt = const Value.absent(),
+            Value<DateTime?> aiEvaluationCompletedAt = const Value.absent(),
+            Value<bool> aiEvaluationConsentGiven = const Value.absent(),
+            Value<String?> aiEvaluationText = const Value.absent(),
+            Value<int?> aiEvaluationSchemaVersion = const Value.absent(),
             Value<String?> interventionType = const Value.absent(),
             Value<String?> interventionId = const Value.absent(),
             Value<bool> interventionCompleted = const Value.absent(),
@@ -3731,6 +4267,14 @@ class $$SituationEntriesTableTableManager extends RootTableManager<
             suggestedTipIds: suggestedTipIds,
             suggestedNextActionKey: suggestedNextActionKey,
             selectedNextActionKey: selectedNextActionKey,
+            aiEvaluationStatus: aiEvaluationStatus,
+            aiEvaluationProvider: aiEvaluationProvider,
+            aiEvaluationModel: aiEvaluationModel,
+            aiEvaluationRequestedAt: aiEvaluationRequestedAt,
+            aiEvaluationCompletedAt: aiEvaluationCompletedAt,
+            aiEvaluationConsentGiven: aiEvaluationConsentGiven,
+            aiEvaluationText: aiEvaluationText,
+            aiEvaluationSchemaVersion: aiEvaluationSchemaVersion,
             interventionType: interventionType,
             interventionId: interventionId,
             interventionCompleted: interventionCompleted,
