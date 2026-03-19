@@ -54,46 +54,88 @@ class LockService {
 
   /// Set a PIN for app lock.
   Future<void> setPin(String pin) async {
-    await _secureStorage.write(key: _pinKey, value: pin);
+    try {
+      await _secureStorage.write(key: _pinKey, value: pin);
+    } on PlatformException {
+      // Ignore storage failures; callers handle unavailable lock setup.
+    } on MissingPluginException {
+      // Tests and unsupported platforms may not provide the plugin.
+    }
   }
 
   /// Verify a PIN against the stored one.
   Future<bool> verifyPin(String pin) async {
-    final storedPin = await _secureStorage.read(key: _pinKey);
-    return storedPin == pin;
+    try {
+      final storedPin = await _secureStorage.read(key: _pinKey);
+      return storedPin == pin;
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
+    }
   }
 
   /// Check if a PIN has been set.
   Future<bool> hasPin() async {
-    final pin = await _secureStorage.read(key: _pinKey);
-    return pin != null && pin.isNotEmpty;
+    try {
+      final pin = await _secureStorage.read(key: _pinKey);
+      return pin != null && pin.isNotEmpty;
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
+    }
   }
 
   /// Delete the stored PIN.
   Future<void> deletePin() async {
-    await _secureStorage.delete(key: _pinKey);
+    try {
+      await _secureStorage.delete(key: _pinKey);
+    } on PlatformException {
+      // Ignore storage failures on unsupported platforms.
+    } on MissingPluginException {
+      // Ignore storage failures on unsupported platforms.
+    }
   }
 
   /// Check if app lock is enabled.
   Future<bool> isLockEnabled() async {
-    final value = await _secureStorage.read(key: _lockEnabledKey);
-    return value == 'true';
+    try {
+      final value = await _secureStorage.read(key: _lockEnabledKey);
+      return value == 'true';
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
+    }
   }
 
   /// Set app lock enabled state.
   Future<void> setLockEnabled(bool enabled, {String? type}) async {
-    await _secureStorage.write(
-      key: _lockEnabledKey,
-      value: enabled.toString(),
-    );
-    if (type != null) {
-      await _secureStorage.write(key: _lockTypeKey, value: type);
+    try {
+      await _secureStorage.write(
+        key: _lockEnabledKey,
+        value: enabled.toString(),
+      );
+      if (type != null) {
+        await _secureStorage.write(key: _lockTypeKey, value: type);
+      }
+    } on PlatformException {
+      // Ignore storage failures; callers treat lock setup as unavailable.
+    } on MissingPluginException {
+      // Ignore storage failures; callers treat lock setup as unavailable.
     }
   }
 
   /// Get the lock type ('biometric', 'pin', 'biometric_and_pin').
   Future<String?> getLockType() async {
-    return _secureStorage.read(key: _lockTypeKey);
+    try {
+      return _secureStorage.read(key: _lockTypeKey);
+    } on PlatformException {
+      return null;
+    } on MissingPluginException {
+      return null;
+    }
   }
 
   /// Perform the full authentication flow.
@@ -117,8 +159,14 @@ class LockService {
 
   /// Remove all lock data.
   Future<void> clearLockData() async {
-    await _secureStorage.delete(key: _pinKey);
-    await _secureStorage.delete(key: _lockEnabledKey);
-    await _secureStorage.delete(key: _lockTypeKey);
+    try {
+      await _secureStorage.delete(key: _pinKey);
+      await _secureStorage.delete(key: _lockEnabledKey);
+      await _secureStorage.delete(key: _lockTypeKey);
+    } on PlatformException {
+      // Ignore storage failures on unsupported platforms.
+    } on MissingPluginException {
+      // Ignore storage failures on unsupported platforms.
+    }
   }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../../data/db/app_database.dart';
 import '../../domain/services/notification_service.dart';
+import 'settings_provider.dart';
 
 /// Provider for FlutterLocalNotificationsPlugin instance.
 final localNotificationsPluginProvider =
@@ -26,77 +28,130 @@ class NotificationSettings {
   final bool discrete;
   final List<TimeOfDay> times;
 
-  NotificationSettings copyWith({
-    bool? enabled,
-    bool? discrete,
-    List<TimeOfDay>? times,
-  }) {
+  factory NotificationSettings.fromUserSettings(UserSettingsData? settings) {
+    final times = NotificationSchedule.fromJsonString(settings?.notificationTimes)
+        .map((schedule) => schedule.time)
+        .toList(growable: false);
+
     return NotificationSettings(
-      enabled: enabled ?? this.enabled,
-      discrete: discrete ?? this.discrete,
-      times: times ?? this.times,
+      enabled: settings?.notificationsEnabled ?? false,
+      discrete: settings?.discreteNotifications ?? true,
+      times: times,
     );
   }
 }
 
-/// Notifier for notification settings state.
-class NotificationSettingsNotifier extends StateNotifier<NotificationSettings> {
-  NotificationSettingsNotifier(this._service)
-      : super(const NotificationSettings()) {
-    _loadSettings();
-  }
+final notificationSettingsProvider = Provider<NotificationSettings>((ref) {
+  final settings = ref.watch(settingsNotifierProvider);
+  return NotificationSettings.fromUserSettings(settings);
+});
 
-  final NotificationService _service;
+final notificationSettingsControllerProvider =
+    Provider<NotificationSettingsController>((ref) {
+  return NotificationSettingsController(ref);
+});
 
-  Future<void> _loadSettings() async {
-    // Settings are loaded from DB through settingsNotifierProvider
-  }
+class NotificationSettingsController {
+  NotificationSettingsController(this._ref);
 
-  /// Toggle notifications on/off.
-  Future<void> toggleEnabled(bool enabled) async {
+  final Ref _ref;
+
+  NotificationService get _service => _ref.read(notificationServiceProvider);
+
+  Future<bool> toggleEnabled(bool enabled) async {
     if (enabled) {
       final granted = await _service.requestPermissions();
-      if (!granted) return;
-    } else {
-      await _service.cancelAll();
+      if (!granted) {
+        return false;
+      }
     }
-    state = state.copyWith(enabled: enabled);
+
+    await _ref
+        .read(settingsNotifierProvider.notifier)
+        .updateNotificationSettings(notificationsEnabled: enabled);
+    await _syncFromCurrentSettings();
+    return true;
   }
 
-  /// Update notification times.
   Future<void> updateTimes(List<TimeOfDay> times) async {
-    state = state.copyWith(times: times);
-    if (state.enabled) {
-      await scheduleReminders();
-    }
+    final normalizedTimes = _normalizeTimes(times);
+    await _ref.read(settingsNotifierProvider.notifier).updateNotificationSettings(
+          notificationTimes: normalizedTimes.isEmpty
+              ? null
+              : NotificationSchedule.toJsonString(
+                  _schedulesFromTimes(normalizedTimes),
+                ),
+          clearNotificationTimes: normalizedTimes.isEmpty,
+        );
+    await _syncFromCurrentSettings();
   }
 
-  /// Toggle discrete mode.
   Future<void> toggleDiscrete(bool discrete) async {
-    state = state.copyWith(discrete: discrete);
+    await _ref
+        .read(settingsNotifierProvider.notifier)
+        .updateNotificationSettings(discreteNotifications: discrete);
+    await _syncFromCurrentSettings();
   }
 
-  /// Schedule reminders based on current settings.
-  Future<void> scheduleReminders() async {
-    if (!state.enabled || state.times.isEmpty) {
-      await _service.cancelAll();
+  Future<void> _syncFromCurrentSettings() async {
+    final settings = _ref.read(settingsNotifierProvider);
+    if (settings == null) {
       return;
     }
 
-    final schedules = state.times.asMap().entries.map((entry) {
-      return NotificationSchedule(
-        id: entry.key,
-        time: entry.value,
-      );
-    }).toList();
+    await syncNotificationSchedules(
+      service: _service,
+      settings: settings,
+    );
+  }
 
-    await _service.scheduleMultiple(schedules);
+  List<NotificationSchedule> _schedulesFromTimes(List<TimeOfDay> times) {
+    return times.asMap().entries
+        .map(
+          (entry) => NotificationSchedule(
+            id: entry.key,
+            time: entry.value,
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  List<TimeOfDay> _normalizeTimes(List<TimeOfDay> times) {
+    final uniqueTimes = <String, TimeOfDay>{};
+    for (final time in times) {
+      final key =
+          '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+      uniqueTimes[key] = time;
+    }
+
+    final normalized = uniqueTimes.values.toList()
+      ..sort((a, b) {
+        final left = (a.hour * 60) + a.minute;
+        final right = (b.hour * 60) + b.minute;
+        return left.compareTo(right);
+      });
+
+    return normalized.take(3).toList(growable: false);
   }
 }
 
-/// Provider for notification settings state.
-final notificationSettingsProvider =
-    StateNotifierProvider<NotificationSettingsNotifier, NotificationSettings>(
-        (ref) {
-  return NotificationSettingsNotifier(ref.watch(notificationServiceProvider));
-});
+Future<void> syncNotificationSchedules({
+  required NotificationService service,
+  required UserSettingsData settings,
+}) async {
+  if (!settings.notificationsEnabled) {
+    await service.cancelAll();
+    return;
+  }
+
+  final schedules = NotificationSchedule.fromJsonString(settings.notificationTimes);
+  if (schedules.isEmpty) {
+    await service.cancelAll();
+    return;
+  }
+
+  await service.scheduleMultiple(
+    schedules,
+    discrete: settings.discreteNotifications,
+  );
+}

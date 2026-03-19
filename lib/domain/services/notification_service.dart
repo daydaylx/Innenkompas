@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/services.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -11,6 +12,7 @@ class NotificationService {
   NotificationService(this._plugin);
 
   final FlutterLocalNotificationsPlugin _plugin;
+  bool _isInitialized = false;
 
   static const String _channelId = 'innenkompass_reminders';
   static const String _channelName = 'Erinnerungen';
@@ -19,43 +21,62 @@ class NotificationService {
 
   /// Initialize the notification service.
   Future<void> initialize() async {
-    tz_data.initializeTimeZones();
+    if (_isInitialized) {
+      return;
+    }
 
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
-    );
-    const settings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
+    try {
+      tz_data.initializeTimeZones();
 
-    await _plugin.initialize(settings);
+      const androidSettings =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
+      const iosSettings = DarwinInitializationSettings(
+        requestAlertPermission: false,
+        requestBadgePermission: false,
+        requestSoundPermission: false,
+      );
+      const settings = InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+      );
+
+      await _plugin.initialize(settings);
+      _isInitialized = true;
+    } on PlatformException {
+      // Unsupported platforms keep notifications disabled gracefully.
+    } on MissingPluginException {
+      // Tests may not wire native notification plugins.
+    }
   }
 
   /// Request notification permissions from the user.
   Future<bool> requestPermissions() async {
-    final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    await initialize();
 
-    if (androidPlugin != null) {
-      final granted = await androidPlugin.requestNotificationsPermission();
-      return granted ?? false;
-    }
+    try {
+      final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
 
-    final iosPlugin = _plugin.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
+      if (androidPlugin != null) {
+        final granted = await androidPlugin.requestNotificationsPermission();
+        return granted ?? false;
+      }
 
-    if (iosPlugin != null) {
-      final granted = await iosPlugin.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-      return granted ?? false;
+      final iosPlugin = _plugin.resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
+
+      if (iosPlugin != null) {
+        final granted = await iosPlugin.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+        return granted ?? false;
+      }
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
     }
 
     return false;
@@ -68,6 +89,8 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
+    await initialize();
+
     final androidDetails = AndroidNotificationDetails(
       _channelId,
       _channelName,
@@ -88,23 +111,32 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    await _plugin.zonedSchedule(
-      id,
-      title,
-      body,
-      _nextInstanceOfTime(time),
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
+    try {
+      await _plugin.zonedSchedule(
+        id,
+        title,
+        body,
+        _nextInstanceOfTime(time),
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    } on PlatformException {
+      // Ignore scheduling failures on unsupported platforms.
+    } on MissingPluginException {
+      // Ignore scheduling failures in tests.
+    }
   }
 
   /// Schedule multiple notifications at the given times.
-  Future<void> scheduleMultiple(List<NotificationSchedule> schedules) async {
+  Future<void> scheduleMultiple(
+    List<NotificationSchedule> schedules, {
+    required bool discrete,
+  }) async {
     await cancelAll();
 
     for (final schedule in schedules) {
-      final message = _getDiscreteMessage(schedule.id);
+      final message = _getMessage(schedule.id, discrete: discrete);
       await scheduleDaily(
         id: schedule.id,
         time: schedule.time,
@@ -116,31 +148,59 @@ class NotificationService {
 
   /// Cancel all scheduled notifications.
   Future<void> cancelAll() async {
-    await _plugin.cancelAll();
+    await initialize();
+    try {
+      await _plugin.cancelAll();
+    } on PlatformException {
+      // Ignore cancellation failures on unsupported platforms.
+    } on MissingPluginException {
+      // Ignore cancellation failures in tests.
+    }
   }
 
   /// Cancel a specific notification.
   Future<void> cancel(int id) async {
-    await _plugin.cancel(id);
+    await initialize();
+    try {
+      await _plugin.cancel(id);
+    } on PlatformException {
+      // Ignore cancellation failures on unsupported platforms.
+    } on MissingPluginException {
+      // Ignore cancellation failures in tests.
+    }
   }
 
   /// Check if notifications are enabled on the system level.
   Future<bool> areNotificationsEnabled() async {
-    final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    await initialize();
 
-    if (androidPlugin != null) {
-      final enabled = await androidPlugin.areNotificationsEnabled();
-      return enabled ?? false;
+    try {
+      final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+
+      if (androidPlugin != null) {
+        final enabled = await androidPlugin.areNotificationsEnabled();
+        return enabled ?? false;
+      }
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
     }
 
     return true;
   }
 
-  /// Get a discrete notification message by ID.
-  _NotificationMessage _getDiscreteMessage(int id) {
-    final index = id % _discreteMessages.length;
-    return _discreteMessages[index];
+  /// Get a preview message for the active notification mode.
+  String getPreviewMessage({required bool discrete}) {
+    return discrete ? _discreteMessages.first.body : _standardMessages.first.body;
+  }
+
+  /// Get a notification message by ID and mode.
+  _NotificationMessage _getMessage(int id, {required bool discrete}) {
+    final messages = discrete ? _discreteMessages : _standardMessages;
+    final index = id % messages.length;
+    return messages[index];
   }
 
   /// Calculate the next instance of a given time.
@@ -163,8 +223,9 @@ class NotificationService {
   }
 
   /// Get all available discrete notification messages for preview.
-  List<String> getDiscreteNotificationMessages() {
-    return _discreteMessages.map((m) => m.body).toList();
+  List<String> getNotificationMessages({required bool discrete}) {
+    final messages = discrete ? _discreteMessages : _standardMessages;
+    return messages.map((m) => m.body).toList();
   }
 
   /// Discrete notification messages (privacy-safe).
@@ -188,6 +249,29 @@ class NotificationService {
     _NotificationMessage(
       title: 'Innenkompass',
       body: 'Dein Innenkompass erinnert dich.',
+    ),
+  ];
+
+  static const List<_NotificationMessage> _standardMessages = [
+    _NotificationMessage(
+      title: 'Innenkompass',
+      body: 'Zeit für einen kurzen Check-in mit deinen Gedanken und Gefühlen.',
+    ),
+    _NotificationMessage(
+      title: 'Innenkompass',
+      body: 'Nimm dir einen Moment und halte fest, was heute in dir los ist.',
+    ),
+    _NotificationMessage(
+      title: 'Innenkompass',
+      body: 'Wie geht es dir gerade wirklich? Eine kurze Reflexion kann helfen.',
+    ),
+    _NotificationMessage(
+      title: 'Innenkompass',
+      body: 'Wenn gerade viel los ist, kann ein kurzer Eintrag wieder Ordnung schaffen.',
+    ),
+    _NotificationMessage(
+      title: 'Innenkompass',
+      body: 'Vielleicht ist jetzt ein guter Zeitpunkt für einen bewussten Rückblick.',
     ),
   ];
 }

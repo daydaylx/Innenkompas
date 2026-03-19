@@ -9,6 +9,7 @@ import 'package:innenkompass/core/constants/context_types.dart';
 import 'package:innenkompass/core/constants/emotion_types.dart';
 import 'package:innenkompass/core/constants/impulse_types.dart';
 import 'package:innenkompass/core/constants/intervention_types.dart';
+import 'package:innenkompass/core/constants/system_states.dart';
 import 'package:innenkompass/data/db/app_database.dart';
 import 'package:innenkompass/domain/models/intervention_library.dart';
 import 'package:innenkompass/domain/models/situation_draft.dart';
@@ -87,6 +88,62 @@ void main() {
       final interventions = container.read(recommendedInterventionsProvider);
 
       expect(interventions.map((item) => item.id), [intervention.id]);
+    });
+
+    test('escalates detected crises to crisis-safe interventions', () {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+
+      final container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(database),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final controller =
+          container.read(newSituationFlowControllerProvider.notifier);
+      controller.updateEventData(
+        SituationEventData(
+          description: 'Ich sitze allein nach einem heftigen Streit.',
+          context: ContextType.family,
+          timestamp: DateTime(2026, 3, 17, 23, 15),
+        ),
+      );
+      controller.updateEmotionData(
+        const SituationEmotionData(
+          intensity: 9,
+          bodyTension: 9,
+          primaryEmotion: EmotionType.fear,
+        ),
+      );
+      controller.updateThoughtImpulseData(
+        const SituationThoughtImpulseData(
+          automaticThought: 'Es ist hoffnungslos und ich halte das nicht aus.',
+          firstImpulse: ImpulseType.withdraw,
+        ),
+      );
+      controller.updateReflectionData(
+        const SituationReflectionData(
+          needOrWoundedPoint: 'Ich brauche sofort Sicherheit.',
+          nextStep: 'Ich hole mir Hilfe und gehe nicht allein damit weiter.',
+        ),
+      );
+
+      final classification = container.read(classificationResultProvider);
+      final interventions = container.read(recommendedInterventionsProvider);
+
+      expect(classification, isNotNull);
+      expect(classification!.isCrisis, isTrue);
+      expect(classification.systemState, SystemState.crisis);
+      expect(classification.recommendedInterventions.first,
+          InterventionType.regulation);
+      expect(
+        classification.recommendedInterventions,
+        isNot(contains(InterventionType.factCheck)),
+      );
+      expect(interventions, isNotEmpty);
+      expect(interventions.first.type, InterventionType.regulation);
     });
   });
 }

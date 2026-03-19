@@ -59,7 +59,7 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
                 // Datum und Zeit
                 _buildSectionHeader(
                   Icons.calendar_today,
-                  _formatDateTime(entry.createdAt),
+                  _formatDateTime(entry.timestamp),
                 ),
 
                 const SizedBox(height: AppConstants.spacingMedium),
@@ -376,7 +376,7 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'Hilfreichkeit: ${entry.helpfulnessRating}/5',
+                                  'Hilfreichkeit: ${entry.helpfulnessRating}/10',
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               ],

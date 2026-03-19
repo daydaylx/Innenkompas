@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/colors.dart';
-import '../../../application/providers/settings_provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/router.dart';
+import '../../../application/controllers/crisis_controller.dart';
+import '../../../application/providers/bootstrap_provider.dart';
+import '../../../application/providers/database_provider.dart';
+import '../../../application/providers/intervention_providers.dart';
+import '../../../application/providers/lock_provider.dart';
+import '../../../application/providers/new_situation_providers.dart';
+import '../../../application/providers/settings_provider.dart';
 import 'app_list_tile.dart';
 
 /// Data cleanup button for settings.
@@ -45,12 +51,20 @@ class DataCleanupButton extends ConsumerWidget {
 
     if (confirmed == true && context.mounted) {
       try {
-        // Reset onboarding through settings provider
-        await ref.read(settingsNotifierProvider.notifier).resetOnboarding();
+        await ref.read(databaseProvider).clearAllData();
+        await ref.read(lockServiceProvider).clearLockData();
 
-        // Navigate to onboarding
+        ref.invalidate(newSituationFlowControllerProvider);
+        ref.invalidate(interventionFlowStateProvider);
+        ref.invalidate(postEvaluationStateProvider);
+        ref.invalidate(crisisControllerProvider);
+        ref.invalidate(settingsProvider);
+        ref.invalidate(settingsNotifierProvider);
+        ref.invalidate(lockStateProvider);
+        ref.invalidate(appBootstrapProvider);
+
         if (context.mounted) {
-          context.go(AppRoutes.onboarding);
+          context.go(AppRoutes.root);
         }
       } catch (e) {
         if (context.mounted) {
@@ -70,7 +84,7 @@ class DataCleanupButton extends ConsumerWidget {
     return AppListTile(
       leading: const Icon(Icons.delete_outline, color: AppColors.error),
       title: 'Alle Daten löschen',
-      subtitle: 'Alle Einträge und Einstellungen entfernen',
+      subtitle: 'Alle Einträge, Einstellungen und Sperrdaten entfernen',
       onTap: () => _showConfirmationDialog(context, ref),
     );
   }

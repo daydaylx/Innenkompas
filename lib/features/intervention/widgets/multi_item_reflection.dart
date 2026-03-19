@@ -30,11 +30,25 @@ class _MultiItemReflectionState extends State<MultiItemReflection> {
   @override
   void initState() {
     super.initState();
-    final initial =
-        widget.initialItems?.where((s) => s.isNotEmpty).toList() ?? [];
+    final initial = _normalizedInitialItems(widget.initialItems);
     _controllers = initial.isEmpty
         ? [TextEditingController()]
         : initial.map((text) => TextEditingController(text: text)).toList();
+  }
+
+  @override
+  void didUpdateWidget(covariant MultiItemReflection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final previous = _normalizedInitialItems(oldWidget.initialItems);
+    final current = _normalizedInitialItems(widget.initialItems);
+    if (previous.join('|') != current.join('|')) {
+      for (final controller in _controllers) {
+        controller.dispose();
+      }
+      _controllers = current.isEmpty
+          ? [TextEditingController()]
+          : current.map((text) => TextEditingController(text: text)).toList();
+    }
   }
 
   @override
@@ -51,6 +65,10 @@ class _MultiItemReflectionState extends State<MultiItemReflection> {
         .where((s) => s.isNotEmpty)
         .toList();
     widget.onChanged(items);
+  }
+
+  List<String> _normalizedInitialItems(List<String>? items) {
+    return items?.where((s) => s.isNotEmpty).toList() ?? const [];
   }
 
   void _addItem() {

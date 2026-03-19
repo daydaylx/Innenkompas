@@ -7,10 +7,16 @@ import 'package:innenkompass/shared/widgets/buttons/app_primary_button.dart';
 ///
 /// Hilft Nutzern, objektive Fakten von subjektiven Interpretationen zu trennen
 class FactCheckForm extends StatefulWidget {
+  final String? initialFact;
+  final String? initialInterpretation;
+  final String? initialAlternative;
   final Function(Map<String, dynamic>) onComplete;
 
   const FactCheckForm({
     super.key,
+    this.initialFact,
+    this.initialInterpretation,
+    this.initialAlternative,
     required this.onComplete,
   });
 
@@ -22,6 +28,32 @@ class _FactCheckFormState extends State<FactCheckForm> {
   final _factController = TextEditingController();
   final _interpretationController = TextEditingController();
   final _alternativeController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _factController.text = widget.initialFact ?? '';
+    _interpretationController.text = widget.initialInterpretation ?? '';
+    _alternativeController.text = widget.initialAlternative ?? '';
+  }
+
+  @override
+  void didUpdateWidget(covariant FactCheckForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialFact != widget.initialFact &&
+        _factController.text != (widget.initialFact ?? '')) {
+      _factController.text = widget.initialFact ?? '';
+    }
+    if (oldWidget.initialInterpretation != widget.initialInterpretation &&
+        _interpretationController.text !=
+            (widget.initialInterpretation ?? '')) {
+      _interpretationController.text = widget.initialInterpretation ?? '';
+    }
+    if (oldWidget.initialAlternative != widget.initialAlternative &&
+        _alternativeController.text != (widget.initialAlternative ?? '')) {
+      _alternativeController.text = widget.initialAlternative ?? '';
+    }
+  }
 
   @override
   void dispose() {
@@ -167,6 +199,7 @@ class _FactCheckFormState extends State<FactCheckForm> {
           controller: controller,
           maxLines: 4,
           maxLength: 500,
+          onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
             hintText: hint,
             border: const OutlineInputBorder(

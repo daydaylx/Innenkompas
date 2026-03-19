@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../app/router.dart';
 import '../../../app/theme/colors.dart';
-import '../../../application/providers/database_provider.dart';
+import '../../../application/providers/bootstrap_provider.dart';
 import '../../../application/providers/lock_provider.dart';
-import '../../../application/providers/settings_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../shared/widgets/app_scaffold.dart';
 import '../../../shared/widgets/cards/app_card.dart';
@@ -20,28 +17,10 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen> {
-  bool _didNavigate = false;
-
   @override
   Widget build(BuildContext context) {
-    final setupState = ref.watch(databaseSetupProvider);
-    final settings = ref.watch(settingsNotifierProvider);
+    final bootstrapState = ref.watch(appBootstrapProvider);
     final lockState = ref.watch(lockStateProvider);
-
-    final canRoute = setupState.hasValue && settings != null && !_didNavigate;
-    if (canRoute) {
-      final target = lockState.isLocked
-          ? AppRoutes.lock
-          : settings.onboardingCompleted
-              ? AppRoutes.home
-              : AppRoutes.onboarding;
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted || _didNavigate) return;
-        _didNavigate = true;
-        context.go(target);
-      });
-    }
 
     return AppScaffold(
       title: AppConstants.appName,
@@ -89,14 +68,38 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 const CircularProgressIndicator(),
                 const SizedBox(height: AppConstants.spacingMedium),
                 Text(
-                  setupState.hasError
+                  bootstrapState.hasError
                       ? 'Lokale Daten konnten nicht vorbereitet werden.'
-                      : 'Lokale Daten werden vorbereitet.',
+                      : lockState.isLoading || bootstrapState.isLoading
+                          ? 'Lokale Daten werden vorbereitet.'
+                          : 'App-Start wird abgeschlossen.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondary,
                       ),
                   textAlign: TextAlign.center,
                 ),
+                if (bootstrapState.hasError) ...[
+                  const SizedBox(height: AppConstants.spacingSmall),
+                  Text(
+                    '${bootstrapState.error}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.error,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+                if (!bootstrapState.hasError) ...[
+                  const SizedBox(height: AppConstants.spacingSmall),
+                  Text(
+                    lockState.isLoading
+                        ? 'Sperrzustand wird geladen.'
+                        : 'Lokale Daten werden vorbereitet.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ],
             ),
           ),

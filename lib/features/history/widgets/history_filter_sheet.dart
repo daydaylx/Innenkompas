@@ -131,7 +131,9 @@ class _HistoryFilterSheetState extends State<HistoryFilterSheet> {
                   _buildSectionHeader('Zeitraum'),
                   Wrap(
                     spacing: 8,
-                    children: DateRangeFilter.values.map((range) {
+                    children: DateRangeFilter.values
+                        .where((range) => range != DateRangeFilter.benutzerdefiniert)
+                        .map((range) {
                       final isSelected = _selectedDateRange == range;
                       return FilterChip(
                         label: Text(range.toDisplayString()),

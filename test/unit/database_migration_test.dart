@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
@@ -139,6 +140,18 @@ void main() {
     expect(upgradedEntry.primaryEmotion, 'Wut');
     expect(upgradedEntry.needOrWoundedPoint, isNull);
     expect(upgradedEntry.nextStep, isNull);
+
+    final updated = upgradedEntry.copyWith(
+      needOrWoundedPoint: const Value('Ich brauche Abstand.'),
+      nextStep: const Value('Ich antworte spaeter ruhiger.'),
+    );
+    final writeResult = await database.updateSituationEntry(updated);
+    expect(writeResult, isTrue);
+
+    final rewrittenEntry = await database.getSituationEntryById(1);
+    expect(rewrittenEntry, isNotNull);
+    expect(rewrittenEntry!.needOrWoundedPoint, 'Ich brauche Abstand.');
+    expect(rewrittenEntry.nextStep, 'Ich antworte spaeter ruhiger.');
 
     final versionRow =
         await database.customSelect('PRAGMA user_version;').getSingle();

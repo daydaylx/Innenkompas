@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/colors.dart';
 import '../../../application/providers/lock_provider.dart';
+import '../../../application/providers/settings_provider.dart';
 import 'app_list_tile.dart';
 
 /// Toggle widget for app lock in settings.
@@ -93,6 +94,9 @@ class AppLockToggle extends ConsumerWidget {
 
       if (!context.mounted) return;
       await notifier.enableLock(choice);
+      await ref
+          .read(settingsNotifierProvider.notifier)
+          .updateAppLockSettings(true, lockType: choice);
     } else {
       // Only PIN available
       final pin = await _showPinDialog(context);
@@ -100,6 +104,9 @@ class AppLockToggle extends ConsumerWidget {
       await notifier.setPin(pin);
       if (!context.mounted) return;
       await notifier.enableLock('pin');
+      await ref
+          .read(settingsNotifierProvider.notifier)
+          .updateAppLockSettings(true, lockType: 'pin');
     }
   }
 
@@ -128,6 +135,9 @@ class AppLockToggle extends ConsumerWidget {
 
     if (confirmed == true) {
       await ref.read(lockStateProvider.notifier).disableLock();
+      await ref
+          .read(settingsNotifierProvider.notifier)
+          .updateAppLockSettings(false, clearLockType: true);
     }
   }
 

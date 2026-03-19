@@ -30,18 +30,39 @@ class _InterventionScreenState extends ConsumerState<InterventionScreen> {
   @override
   void initState() {
     super.initState();
-    // Intervention starten
-    // Die Intervention sollte bereits im Flow gestartet worden sein
-    // Falls eine interventionId übergeben wurde, laden wir diese
-    if (widget.interventionId != null) {
-      final intervention = InterventionLibrary.getById(widget.interventionId!);
-      if (intervention != null) {
-        ref
-            .read(interventionFlowStateProvider.notifier)
-            .startIntervention(intervention);
-      }
+    _scheduleDirectInterventionStartIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(covariant InterventionScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.interventionId != widget.interventionId) {
+      _scheduleDirectInterventionStartIfNeeded();
     }
-    // Ansonsten verwenden wir die Intervention aus dem Flow (die bereits mit entryId gestartet wurde)
+  }
+
+  void _scheduleDirectInterventionStartIfNeeded() {
+    final interventionId = widget.interventionId;
+    if (interventionId == null) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      final flowState = ref.read(interventionFlowStateProvider);
+      final shouldReuseExistingFlow = flowState.intervention?.id ==
+              interventionId &&
+          flowState.entryId != null &&
+          !flowState.isCompleted &&
+          !flowState.wasAborted;
+      if (shouldReuseExistingFlow) return;
+
+      final intervention = InterventionLibrary.getById(interventionId);
+      if (intervention == null) return;
+
+      ref
+          .read(interventionFlowStateProvider.notifier)
+          .startIntervention(intervention);
+    });
   }
 
   @override
@@ -107,6 +128,7 @@ class _InterventionScreenState extends ConsumerState<InterventionScreen> {
                 : SingleChildScrollView(
                     padding: const EdgeInsets.all(AppConstants.spacingMedium),
                     child: InterventionStepRenderer(
+                      key: ValueKey(currentStep.id),
                       step: currentStep,
                       onResponse: (response) {
                         ref

@@ -68,13 +68,11 @@ class AppRouter {
       debugLogDiagnostics: true,
       redirect: (context, state) {
         final appReady = isAppReady?.call() ?? true;
-        if (!appReady && state.matchedLocation == AppRoutes.root) {
-          return null;
+        if (!appReady) {
+          return state.matchedLocation == AppRoutes.root ? null : AppRoutes.root;
         }
 
-        if (!appReady) {
-          return AppRoutes.root;
-        }
+        final onboardingCompleted = isOnboardingCompleted();
 
         // Lock guard: redirect to lock screen if app is locked
         final appLocked = isAppLocked?.call() ?? false;
@@ -86,8 +84,9 @@ class AppRouter {
           return AppRoutes.lock;
         }
 
-        // Check if onboarding is completed
-        final onboardingCompleted = isOnboardingCompleted();
+        if (!appLocked && isLockRoute) {
+          return onboardingCompleted ? AppRoutes.home : AppRoutes.onboarding;
+        }
 
         if (state.matchedLocation == AppRoutes.root) {
           return onboardingCompleted ? AppRoutes.home : AppRoutes.onboarding;

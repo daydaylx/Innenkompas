@@ -3,6 +3,8 @@ import 'package:local_auth/local_auth.dart';
 import '../../domain/services/lock_service.dart';
 import 'settings_provider.dart';
 
+const _lockTypeUnset = Object();
+
 /// Provider for LocalAuthentication instance.
 final localAuthProvider = Provider<LocalAuthentication>((ref) {
   return LocalAuthentication();
@@ -22,7 +24,7 @@ class LockState {
     this.isEnabled = false,
     this.isLocked = false,
     this.lockType,
-    this.isLoading = false,
+    this.isLoading = true,
   });
 
   final bool isEnabled;
@@ -33,13 +35,14 @@ class LockState {
   LockState copyWith({
     bool? isEnabled,
     bool? isLocked,
-    String? lockType,
+    Object? lockType = _lockTypeUnset,
     bool? isLoading,
   }) {
     return LockState(
       isEnabled: isEnabled ?? this.isEnabled,
       isLocked: isLocked ?? this.isLocked,
-      lockType: lockType ?? this.lockType,
+      lockType:
+          identical(lockType, _lockTypeUnset) ? this.lockType : lockType as String?,
       isLoading: isLoading ?? this.isLoading,
     );
   }
@@ -47,17 +50,15 @@ class LockState {
 
 /// Notifier for lock state.
 class LockStateNotifier extends StateNotifier<LockState> {
-  LockStateNotifier(this._service) : super(const LockState()) {
-    initialize();
-  }
+  LockStateNotifier(this._service) : super(const LockState());
 
   final LockService _service;
 
-  /// Initialize lock state from secure storage.
-  Future<void> initialize() async {
-    state = state.copyWith(isLoading: true);
-    final isEnabled = await _service.isLockEnabled();
-    final lockType = await _service.getLockType();
+  /// Hydrate lock state from the bootstrap flow.
+  void hydrate({
+    required bool isEnabled,
+    required String? lockType,
+  }) {
     state = state.copyWith(
       isEnabled: isEnabled,
       isLocked: isEnabled,
@@ -73,6 +74,7 @@ class LockStateNotifier extends StateNotifier<LockState> {
       isEnabled: true,
       isLocked: true,
       lockType: type,
+      isLoading: false,
     );
   }
 
@@ -84,6 +86,7 @@ class LockStateNotifier extends StateNotifier<LockState> {
       isEnabled: false,
       isLocked: false,
       lockType: null,
+      isLoading: false,
     );
   }
 

@@ -29,6 +29,25 @@ class _PostEvaluationScreenState extends ConsumerState<PostEvaluationScreen> {
   int _helpfulnessRating = 7;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(postEvaluationStateProvider.notifier)
+          .updatePostIntensity(_postIntensity);
+      ref
+          .read(postEvaluationStateProvider.notifier)
+          .updatePostBodyTension(_postBodyTension);
+      ref
+          .read(postEvaluationStateProvider.notifier)
+          .updatePostClarity(_postClarity);
+      ref
+          .read(postEvaluationStateProvider.notifier)
+          .updateHelpfulnessRating(_helpfulnessRating);
+    });
+  }
+
+  @override
   void dispose() {
     _noteController.dispose();
     super.dispose();

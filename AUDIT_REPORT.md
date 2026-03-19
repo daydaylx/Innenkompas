@@ -1,0 +1,812 @@
+# 1. Executive Summary
+- Gesamtbewertung: Das Root-Repository ist kein Totalausfall, aber es ist nicht release-hart. Die Kernstruktur ist nachvollziehbar, die Sicherheits-, Settings- und Analysepfade sind jedoch an mehreren Stellen widersprüchlich oder unvollständig verdrahtet.
+- Reifegrad: MVP bis frühe Produktivitätsstufe. UI und Datenmodell sind weit aufgebaut, aber zentrale Betriebs- und Sicherheitsflüsse sind nicht sauber abgesichert.
+- Hauptprobleme:
+  - Die App-Sperre kann beim Start und nach Lifecycle-Wechseln umgangen werden.
+  - Benachrichtigungs-Einstellungen sind von der Persistenz entkoppelt; die UI verspricht mehr, als der Code tatsächlich liefert.
+  - "Alle Daten löschen" löscht nicht alle Daten.
+  - Ereigniszeit (`timestamp`) und Erstellzeit (`createdAt`) werden semantisch vermischt; dadurch sind Verlauf und Musteranalyse fachlich falsch.
+  - Krisenerkennung und Interventionsauswahl sind logisch getrennt; erkannte Krisen landen nicht zuverlässig in krisenspezifischen Interventionen.
+- Größte Risiken:
+  - Sicherheits- und Datenschutzbruch durch Lock-Bypass.
+  - Falsches Vertrauen der Nutzer in Datenlöschung und Notification-Konfiguration.
+  - Fachlich fehlerhafte Historie und Analytik bei rückdatierten Einträgen.
+  - Fixes liegen teilweise nur in der ignorierten Referenzkopie `innenkompass/`; das Root-Repo driftet von einer offensichtlich weitergehenden Arbeitsversion weg.
+- Technische Gesamteinschätzung: Das Repo ist architektonisch lesbar, aber die betriebliche Zuverlässigkeit leidet unter fehlendem einheitlichem Bootstrap, doppelten Zustandsquellen und schwacher Absicherung sicherheitskritischer Flüsse. Ohne Sanierung der High-Severity-Punkte sollte dieses Root-Repo nicht als verlässlicher Release-Stand betrachtet werden.
+
+# 2. Architekturüberblick
+- Tech-Stack:
+  - Flutter / Dart, Riverpod, GoRouter, Drift, `flutter_secure_storage`, `local_auth`, `flutter_local_notifications`, `timezone`, `fl_chart`, Freezed/JSON Codegen.
+- Projektziel:
+  - Laut [README.md](README.md) eine lokal-first App zur situationsbasierten Selbstwahrnehmung, Klassifikation, Intervention und Krisenplan-Verwaltung.
+- Entrypoints:
+  - `lib/main.dart`
+  - `lib/app/app.dart`
+  - `lib/app/router.dart`
+- Hauptmodule:
+  - `lib/app`: App-Start, Theme, Routing.
+  - `lib/application`: Riverpod-Provider, Controller, Flow-State.
+  - `lib/data`: Drift-Datenbank, Tabellen, DAOs, Repository.
+  - `lib/domain`: Modelle, Regelwerke, Services.
+  - `lib/features`: UI-Screens und Widgets für Splash, Onboarding, Home, New Situation, Intervention, History, Patterns, Crisis, Lock, Settings.
+  - `lib/shared`: wiederverwendbare Widgets.
+- Datenfluss / Verantwortlichkeiten:
+  - Neue Situationen laufen über `new_situation_providers.dart` in `ClassificationService`, werden dann als `SituationEntries` in Drift persistiert.
+  - Verlauf und Musteranalyse lesen direkt aus der Datenbank und laufen durch `PatternAnalyzer`.
+  - Settings und Lock sind über mehrere Provider verteilt: `settings_provider.dart`, `lock_provider.dart`, `notification_provider.dart`, `app_providers.dart`, `splash_screen.dart`.
+  - Krisenplan läuft über `CrisisRepositoryImpl` und `crisis_controller.dart`.
+- Build- und Testsystem:
+  - Flutter-Standardprojekt mit Android, iOS, macOS, Linux, Windows, Web.
+  - CI in `.github/workflows/ci.yml` mit `flutter pub get`, Codegen, `flutter analyze`, `flutter test`.
+  - Unit- und Widget-Tests im Root-Repo; zusätzlich existiert `integration_test/app_smoke_test.dart`.
+- Konfigurationsdateien:
+  - `pubspec.yaml`
+  - `analysis_options.yaml`
+  - `.github/workflows/ci.yml`
+  - plattformspezifische Build-Dateien unter `android/`, `ios/`, `linux/`, `macos/`, `windows/`, `web/`
+- Umgebungsvariablen / Secrets-relevante Stellen:
+  - Kein `.env` im versionierten Repo gefunden.
+  - Release-Signing-Setup liegt als Platzhalter in `android/key.properties.example` und `docs/release/signing-setup.md`.
+  - Lock-Geheimnisse werden lokal über `flutter_secure_storage` verwaltet (`lib/application/providers/settings_provider.dart`, `lib/domain/services/lock_service.dart`).
+  - Scan auf offensichtliche reale Secrets ergab nur Platzhalter, keine eingecheckten Schlüssel.
+- Strukturelle Auffälligkeiten:
+  - Das Root-Repo enthält eine ignorierte Referenzkopie `innenkompass/` (`.gitignore:56-57`), die an mehreren sicherheits- und bootstraprelevanten Stellen weiter ist als das eigentliche Lieferrepo.
+  - Startup-Logik ist nicht zentralisiert, sondern zwischen Router, Splash-Screen und Lock-State verteilt.
+  - Settings- und Notification-State haben konkurrierende Wahrheitsquellen.
+  - Zeitsemantik ist nicht einheitlich modelliert: Fachzeitpunkt und Persistenzzeitpunkt werden abwechselnd verwendet.
+
+# 3. Audit-Ergebnis nach Schweregrad
+## Kritisch
+- [AUD-001] App-Sperre kann beim Start und nach Lifecycle-Wechseln umgangen werden
+
+## Hoch
+- [AUD-002] Notification-UI ist von der persistenten Settings-Quelle entkoppelt
+- [AUD-003] Notification-Service wird nie initialisiert
+- [AUD-004] "Alle Daten löschen" löscht die Daten nicht
+- [AUD-005] Settings-Updates sind hart auf `id == 1` verdrahtet
+- [AUD-006] Krisenerkennung eskaliert nicht in krisenspezifische Interventionen
+- [AUD-007] Ereigniszeit und Erstellzeit werden fachlich falsch vermischt
+- [AUD-008] Root-Repo driftet bei nativer SQLite-Abhängigkeit von der Referenzkopie weg
+
+## Mittel
+- [AUD-009] Öffentlicher Interventions-Routenhelfer ist funktional kaputt
+- [AUD-010] Interventions-Schrittrenderer hält veralteten lokalen Zustand fest
+- [AUD-011] Nachbewertungs-Screen zeigt Defaultwerte, initialisiert sie aber nicht im State
+- [AUD-012] Hilfreichkeits-Skala ist inkonsistent implementiert
+- [AUD-013] Umschalter für diskrete vs. normale Notifications ist ein toter Pfad
+- [AUD-014] Lock-Service behandelt Secure-Storage-Fehler nicht defensiv
+- [AUD-016] Migrationstest vermittelt eine trügerische Sicherheit
+
+## Niedrig
+- [AUD-015] "Benutzerdefiniert" im Datumsfilter ist nicht implementiert
+- [AUD-017] Rechtliche und Support-Dokumente sind nur Templates
+- [AUD-018] Verlassene Settings-Artefakte erschweren die Wartung
+
+# 4. Detaillierte Findings
+## [AUD-001] App-Sperre kann beim Start und nach Lifecycle-Wechseln umgangen werden
+- Schweregrad: Kritisch
+- Kategorie: Sicherheit
+- Status: Bestätigt
+- Fundort:
+  - Datei: `lib/application/providers/app_providers.dart`
+  - Klasse / Funktion / Komponente / Modul: `routerProvider`
+  - Zeile(n): 30-47, 88-90
+  - Datei: `lib/features/splash/screens/splash_screen.dart`
+  - Klasse / Funktion / Komponente / Modul: `_SplashScreenState.build`
+  - Zeile(n): 27-43
+  - Datei: `lib/application/providers/lock_provider.dart`
+  - Klasse / Funktion / Komponente / Modul: `LockStateNotifier.initialize`
+  - Zeile(n): 49-66
+  - Datei: `lib/app/app.dart`
+  - Klasse / Funktion / Komponente / Modul: `_InnenkompassAppState.didChangeAppLifecycleState`
+  - Zeile(n): 29-32
+  - Datei: `innenkompass/lib/application/providers/bootstrap_provider.dart`
+  - Klasse / Funktion / Komponente / Modul: `appBootstrapProvider`
+  - Zeile(n): 21-42
+- Problem:
+  - Die Routing-Entscheidung hängt von einem asynchron geladenen Lock-State ab, der im Root-Repo nicht sauber in den Bootstrap integriert ist. Der Router liest den Lock-State synchron per `ref.read(...)` statt reaktiv per `watch(...)`. Gleichzeitig routet der Splash-Screen, sobald Datenbank und Settings bereit sind, ohne auf das Ende der Lock-Initialisierung zu warten.
+- Warum problematisch:
+  - Ein aktivierter App-Lock schützt sensitive lokale Inhalte nicht zuverlässig. Bei Cold Start oder Resume kann die App direkt auf Home oder Onboarding springen, obwohl sie gesperrt sein sollte.
+- Beleg:
+  - `routerProvider` watched `databaseSetupProvider` und `settingsNotifierProvider`, aber nicht `lockStateProvider`; `isAppLocked()` liest nur `ref.read(lockStateProvider)` in `lib/application/providers/app_providers.dart:44-46`.
+  - `SplashScreen` setzt `canRoute` nur aus `setupState.hasValue`, `settings != null` und `_didNavigate`, nicht aus `lockState.isLoading == false`, in `lib/features/splash/screens/splash_screen.dart:31-43`.
+  - `LockStateNotifier` initialisiert `isEnabled` und `isLocked` asynchron im Konstruktor in `lib/application/providers/lock_provider.dart:49-66`.
+  - Beim Pausieren wird nur der Lock-State gesetzt (`lock()`), aber der Router baut darauf nicht reaktiv um in `lib/app/app.dart:29-32`.
+  - Die Referenzkopie hat genau dafür bereits einen zentralen Bootstrap in `innenkompass/lib/application/providers/bootstrap_provider.dart:21-42`.
+- Reproduktion:
+  - 1. App-Lock aktivieren.
+  - 2. App vollständig beenden oder in den Hintergrund schicken.
+  - 3. App neu öffnen.
+  - 4. Wenn Settings schneller bereit sind als die Lock-Hydrierung, kann direkt zur Startseite geroutet werden.
+- Risiko/Folgen:
+  - Sicherheitsbruch, Datenschutzbruch, unautorisierter Zugriff auf Verlauf, Krisenplan und letzte Einträge.
+- Empfohlene Behebung:
+  - Einen einzigen Bootstrap-Provider einführen, der Settings und Lock-Zustand vollständig hydriert, bevor Routing stattfindet; Router auf `lockStateProvider` reaktiv machen; Splash erst nach abgeschlossener Lock-Initialisierung routen.
+- Confidence:
+  - Hoch
+
+## [AUD-002] Notification-UI ist von der persistenten Settings-Quelle entkoppelt
+- Schweregrad: Hoch
+- Kategorie: Bug
+- Status: Bestätigt
+- Fundort:
+  - Datei: `lib/features/settings/screens/settings_screen.dart`
+  - Klasse / Funktion / Komponente / Modul: `SettingsScreen.build`
+  - Zeile(n): 65-67
+  - Datei: `lib/features/settings/widgets/notification_settings_section.dart`
+  - Klasse / Funktion / Komponente / Modul: `NotificationSettingsSection.build`
+  - Zeile(n): 13-16, 21-71, 105-134
+  - Datei: `lib/application/providers/notification_provider.dart`
+  - Klasse / Funktion / Komponente / Modul: `NotificationSettingsNotifier`
+  - Zeile(n): 43-47, 51-77, 79-94
+  - Datei: `lib/features/settings/widgets/notification_toggle.dart`
+  - Klasse / Funktion / Komponente / Modul: `NotificationToggle.build`
+  - Zeile(n): 16-31
+- Problem:
+  - Die aktuelle Settings-Oberfläche schreibt nur in einen flüchtigen `notificationSettingsProvider`. Persistente Settings in `user_settings` werden weder geladen noch aktualisiert. `_loadSettings()` ist leer.
+- Warum problematisch:
+  - Nutzer konfigurieren Benachrichtigungen, Zeiten und Diskret-Modus in einer UI, die diese Änderungen beim nächsten App-Start verliert.
+- Beleg:
+  - `SettingsScreen` verwendet `NotificationSettingsSection`, nicht den älteren DB-gebundenen `NotificationToggle`, in `lib/features/settings/screens/settings_screen.dart:65-67`.
+  - `NotificationSettingsNotifier._loadSettings()` ist leer in `lib/application/providers/notification_provider.dart:51-53`.
+  - `toggleEnabled`, `updateTimes` und `toggleDiscrete` mutieren ausschließlich `state`, ohne DAO- oder DB-Schreibzugriff, in `lib/application/providers/notification_provider.dart:56-94`.
+  - `NotificationToggle` zeigt, dass es bereits einen DB-gebundenen Settings-Pfad gab (`settingsNotifierProvider.notifier.toggleNotifications(...)`) in `lib/features/settings/widgets/notification_toggle.dart:27-31`.
+- Reproduktion:
+  - 1. In den Einstellungen Benachrichtigungen aktivieren und Zeiten hinzufügen.
+  - 2. App neu starten.
+  - 3. Die Werte fallen auf Default zurück, weil sie nie in `user_settings` gespeichert wurden.
+- Risiko/Folgen:
+  - Falsches Verhalten, verlorene Konfiguration, inkonsistente UI und nicht reproduzierbares Notification-Verhalten.
+- Empfohlene Behebung:
+  - Notification-Einstellungen an eine einzige persistente Quelle koppeln; entweder `notificationSettingsProvider` aus `settingsNotifierProvider` ableiten oder direkte DAO-Methoden für `notificationsEnabled`, `notificationTimes` und `discreteNotifications` verwenden.
+- Confidence:
+  - Hoch
+
+## [AUD-003] Notification-Service wird nie initialisiert
+- Schweregrad: Hoch
+- Kategorie: Bug
+- Status: Bestätigt
+- Fundort:
+  - Datei: `lib/application/providers/notification_provider.dart`
+  - Klasse / Funktion / Komponente / Modul: `notificationServiceProvider`
+  - Zeile(n): 12-15
+  - Datei: `lib/domain/services/notification_service.dart`
+  - Klasse / Funktion / Komponente / Modul: `NotificationService.initialize`
+  - Zeile(n): 20-37
+  - Datei: `lib/domain/services/notification_service.dart`
+  - Klasse / Funktion / Komponente / Modul: `scheduleMultiple`
+  - Zeile(n): 103-115
+  - Datei: Repo-weite Suche
+  - Klasse / Funktion / Komponente / Modul: Call-Sites für `initialize()`
+  - Zeile(n): `rg -n "initialize\\(" lib test` ergab keinen Aufruf von `NotificationService.initialize()`
+- Problem:
+  - Der Notification-Service wird konstruiert und verwendet, aber nie initialisiert. Dadurch fehlen die initiale Plugin-Initialisierung und die Timezone-Initialisierung im normalen App-Fluss.
+- Warum problematisch:
+  - Scheduling und Plattformintegration laufen auf einem nicht vorbereiteten Service. Das ist kein kosmetischer Mangel, sondern ein fehlerhafter Lebenszyklus des Plugins.
+- Beleg:
+  - `initialize()` enthält `tz_data.initializeTimeZones()` und `_plugin.initialize(settings)` in `lib/domain/services/notification_service.dart:21-37`.
+  - `notificationServiceProvider` gibt nur ein Objekt zurück; es ruft `initialize()` nicht auf in `lib/application/providers/notification_provider.dart:13-15`.
+  - Die Repo-Suche zeigt keinen produktiven oder testseitigen Aufruf des Initialisierungspfads.
+- Reproduktion:
+  - 1. Den Call-Graph von `NotificationService` verfolgen.
+  - 2. Es existiert kein Bootstrap-Pfad, der `initialize()` vor `requestPermissions()` oder `scheduleMultiple()` ausführt.
+- Risiko/Folgen:
+  - Hohe Wahrscheinlichkeit für instabiles Scheduling, fehlende Plugin-Initialisierung und schwer reproduzierbare Notification-Fehler.
+- Empfohlene Behebung:
+  - Service einmalig im App-Bootstrap initialisieren und Initialisierungserfolg explizit in den Startup-Flow aufnehmen.
+- Confidence:
+  - Hoch
+
+## [AUD-004] "Alle Daten löschen" löscht die Daten nicht
+- Schweregrad: Hoch
+- Kategorie: Bug
+- Status: Bestätigt
+- Fundort:
+  - Datei: `lib/features/settings/widgets/data_cleanup_button.dart`
+  - Klasse / Funktion / Komponente / Modul: `_showConfirmationDialog`
+  - Zeile(n): 9-15, 46-54
+  - Datei: `lib/application/providers/settings_provider.dart`
+  - Klasse / Funktion / Komponente / Modul: `SettingsNotifier.resetOnboarding`
+  - Zeile(n): 97-104
+  - Datei: `lib/data/db/app_database.dart`
+  - Klasse / Funktion / Komponente / Modul: `clearAllData`
+  - Zeile(n): 201-207
+- Problem:
+  - Die UI kommuniziert vollständige Datenlöschung, der Button setzt aber nur `onboardingCompleted` zurück und navigiert anschließend zum Onboarding.
+- Warum problematisch:
+  - Das Verhalten widerspricht direkt dem Text in Dialog und Menüpunkt. Nutzer verlassen sich hier auf eine Löschzusage, die nicht eingehalten wird.
+- Beleg:
+  - Dialogtext verspricht "alle deine Einträge und Einstellungen dauerhaft löschen" in `lib/features/settings/widgets/data_cleanup_button.dart:25-29`.
+  - Implementiert ist nur `resetOnboarding()` in `lib/features/settings/widgets/data_cleanup_button.dart:48-49`.
+  - `resetOnboarding()` schreibt lediglich `onboardingCompleted: false` in `lib/application/providers/settings_provider.dart:97-104`.
+  - Eine tatsächliche Löschmethode existiert mit `clearAllData()` in `lib/data/db/app_database.dart:201-207`, wird hier aber nicht verwendet.
+- Reproduktion:
+  - 1. Einen oder mehrere Situationseinträge erstellen.
+  - 2. In Settings "Alle Daten löschen" auslösen.
+  - 3. Danach erneut in Verlauf/Krisenplan gehen oder DB inspizieren; die Daten bleiben erhalten.
+- Risiko/Folgen:
+  - Datenschutzproblem, Vertrauensbruch, falsche Löschannahmen, potenziell regulatorisch problematisch.
+- Empfohlene Behebung:
+  - Tatsächlich `clearAllData()` ausführen, Secure-Storage-Lockdaten löschen, Riverpod-State zurücksetzen und erst dann neu routen.
+- Confidence:
+  - Hoch
+
+## [AUD-005] Settings-Updates sind hart auf `id == 1` verdrahtet
+- Schweregrad: Hoch
+- Kategorie: Bug
+- Status: Bestätigt
+- Fundort:
+  - Datei: `lib/data/dao/settings_dao.dart`
+  - Klasse / Funktion / Komponente / Modul: alle Update-Methoden
+  - Zeile(n): 17-75
+  - Datei: `lib/data/db/app_database.dart`
+  - Klasse / Funktion / Komponente / Modul: `getOrCreateUserSettings`, `setOnboardingCompleted`, `clearAllData`
+  - Zeile(n): 141-167, 201-207
+- Problem:
+  - Sämtliche Settings-Updates adressieren den Datensatz über `where((t) => t.id.equals(1))`. Nach einer Tabellensäuberung oder einem Re-Insert ist diese Annahme nicht mehr belastbar.
+- Warum problematisch:
+  - Settings-Änderungen können danach stillschweigend ins Leere laufen, obwohl der Code keine Fehler signalisiert.
+- Beleg:
+  - `SettingsDao` nutzt in jeder Update-Methode `t.id.equals(1)` in `lib/data/dao/settings_dao.dart:18-75`.
+  - `getOrCreateUserSettings()` erzeugt einen neuen Datensatz per `autoIncrement()` in `lib/data/db/app_database.dart:147-161`.
+  - `clearAllData()` löscht alle Zeilen, setzt aber keinen Primärschlüsselzähler zurück in `lib/data/db/app_database.dart:201-207`.
+  - `setOnboardingCompleted()` ist ebenfalls auf `id == 1` fest verdrahtet in `lib/data/db/app_database.dart:165-167`.
+- Reproduktion:
+  - 1. `user_settings` leeren.
+  - 2. App erneut starten, sodass `getOrCreateUserSettings()` einen neuen Datensatz anlegt.
+  - 3. Danach Locale/Notifications/App-Lock ändern.
+  - 4. Updates können scheitern, wenn die neue Zeile nicht `id == 1` hat.
+- Risiko/Folgen:
+  - Silent data loss, inkonsistente Settings, schwer zu diagnostizierende Zustandsfehler.
+- Empfohlene Behebung:
+  - Settings als echten Single-Row-Datensatz behandeln: zuerst Datensatz holen und per `replace(currentRow.copyWith(...))` schreiben oder Update auf die tatsächlich vorhandene ID beziehen.
+- Confidence:
+  - Hoch
+
+## [AUD-006] Krisenerkennung eskaliert nicht in krisenspezifische Interventionen
+- Schweregrad: Hoch
+- Kategorie: Logik
+- Status: Bestätigt
+- Fundort:
+  - Datei: `lib/domain/services/classification_service.dart`
+  - Klasse / Funktion / Komponente / Modul: `ClassificationService.classify`
+  - Zeile(n): 45-80
+  - Datei: `lib/domain/rules/state_classifier.dart`
+  - Klasse / Funktion / Komponente / Modul: `StateClassifier.classify`
+  - Zeile(n): 25-75
+  - Datei: `lib/domain/rules/intervention_selector.dart`
+  - Klasse / Funktion / Komponente / Modul: `_getStateBasedInterventions`
+  - Zeile(n): 57-114
+  - Datei: `lib/domain/models/intervention_library.dart`
+  - Klasse / Funktion / Komponente / Modul: Kriseninterventionen
+  - Zeile(n): 1153-1156
+- Problem:
+  - Die Krisenerkennung läuft getrennt von der Systemzustandsklassifikation. `isCrisis == true` ändert aber den an den InterventionSelector übergebenen `systemState` nicht.
+- Warum problematisch:
+  - Das System erkennt eine Krise, nutzt diese Information aber nicht konsequent für die Interventionsauswahl. Damit kann genau im kritischen Fall eine unpassende, zu kognitive oder zu schwache Intervention priorisiert werden.
+- Beleg:
+  - `ClassificationService.classify()` berechnet erst `systemState`, dann `crisisResult`, gibt aber an `InterventionSelector.selectInterventions(...)` weiterhin den ursprünglichen `systemState` weiter in `lib/domain/services/classification_service.dart:45-70`.
+  - `StateClassifier.classify()` liefert nie `SystemState.crisis`; der Default endet bei `reflectiveReady` in `lib/domain/rules/state_classifier.dart:72-74`.
+  - Der Selector hat einen expliziten Krisenzweig in `lib/domain/rules/intervention_selector.dart:108-114`.
+  - Die Bibliothek markiert Kriseninterventionen als `recommendedForStates: [SystemState.crisis, ...]` in `lib/domain/models/intervention_library.dart:1153-1156`.
+- Reproduktion:
+  - 1. Einen Fall konstruieren, den `CrisisDetector` als Krise erkennt.
+  - 2. `ClassificationService.classify()` aufrufen.
+  - 3. `isCrisis` wird `true`, aber die empfohlene Intervention bleibt an einem Nicht-Krisen-`systemState` orientiert.
+- Risiko/Folgen:
+  - Sicherheitsrelevante Fehlpriorisierung von Interventionen im Krisenfall.
+- Empfohlene Behebung:
+  - Krisenflag in den Systemzustand zurückspiegeln oder den Selector um ein explizites `isCrisis`/`crisisSeverity` erweitern, sodass erkannte Krisen immer den Krisenpfad dominieren.
+- Confidence:
+  - Hoch
+
+## [AUD-007] Ereigniszeit und Erstellzeit werden fachlich falsch vermischt
+- Schweregrad: Hoch
+- Kategorie: Logik
+- Status: Bestätigt
+- Fundort:
+  - Datei: `lib/data/db/tables/situation_entries.dart`
+  - Klasse / Funktion / Komponente / Modul: Tabellenschema
+  - Zeile(n): 14, 60
+  - Datei: `lib/data/db/app_database.dart`
+  - Klasse / Funktion / Komponente / Modul: `getAllSituationEntries`
+  - Zeile(n): 77-83
+  - Datei: `lib/domain/services/pattern_analyzer.dart`
+  - Klasse / Funktion / Komponente / Modul: `analyzePatterns`, `_calculateIntensityTrend`, `_calculateTensionTrend`, `_findMostEffectiveInterventions`, `_analyzeTimePatterns`, `filterEntries`
+  - Zeile(n): 23-29, 115-119, 141-145, 216-218, 319-323, 450-453
+  - Datei: `lib/application/providers/intervention_providers.dart`
+  - Klasse / Funktion / Komponente / Modul: `filteredHistoryEntries`, `last7DaysTrend`
+  - Zeile(n): 343-347, 375-376
+  - Datei: `lib/features/history/widgets/history_entry_card.dart`
+  - Klasse / Funktion / Komponente / Modul: `HistoryEntryCard.build`
+  - Zeile(n): 55-56
+  - Datei: `lib/features/history/screens/entry_detail_screen.dart`
+  - Klasse / Funktion / Komponente / Modul: `_buildSectionHeader` für Datum
+  - Zeile(n): 60-63
+  - Datei: `lib/features/home/widgets/last_entry_preview.dart`
+  - Klasse / Funktion / Komponente / Modul: `LastEntryPreview.build`
+  - Zeile(n): 89-92
+- Problem:
+  - Die App speichert sowohl den tatsächlichen Ereigniszeitpunkt (`timestamp`) als auch den Erstellzeitpunkt (`createdAt`). Verlauf, Filter und Analytik greifen an vielen Stellen jedoch auf `createdAt` zurück, obwohl die Fachlogik eigentlich `timestamp` meint.
+- Warum problematisch:
+  - Rückdatiert erfasste Situationen werden im Verlauf falsch einsortiert, in Musteranalysen falsch gruppiert und in der UI mit dem falschen Datum angezeigt.
+- Beleg:
+  - Das Schema trennt klar zwischen `timestamp` und `createdAt` in `lib/data/db/tables/situation_entries.dart:14,60`.
+  - Datenbankabfragen ordnen korrekt nach `timestamp` in `lib/data/db/app_database.dart:77-83`.
+  - `PatternAnalyzer` sortiert, gruppiert und filtert dagegen über `createdAt` in `lib/domain/services/pattern_analyzer.dart:23-29`, `115-119`, `141-145`, `216-218`, `319-323`, `450-453`.
+  - `filteredHistoryEntries` sortiert nochmals nach `createdAt` in `lib/application/providers/intervention_providers.dart:345-346`.
+  - History-Card, Detail-Screen und Home-Preview formatieren `createdAt` statt `timestamp`.
+- Reproduktion:
+  - 1. In der Ereignis-Erfassung einen zurückliegenden Zeitpunkt über den `timestamp_picker` wählen.
+  - 2. Eintrag speichern.
+  - 3. Verlauf, "Letzter Eintrag" und Muster-Screen vergleichen.
+  - 4. Anzeige und Analyse orientieren sich am Speicherdatum statt am Ereignisdatum.
+- Risiko/Folgen:
+  - Falsche Fachauswertung, irreführende UI, unzuverlässige Trends und Filter.
+- Empfohlene Behebung:
+  - `timestamp` als fachliche Standardzeit für Sortierung, Anzeige und Analyse definieren; `createdAt` nur noch für technische Metadaten verwenden.
+- Confidence:
+  - Hoch
+
+## [AUD-008] Root-Repo driftet bei nativer SQLite-Abhängigkeit von der Referenzkopie weg
+- Schweregrad: Hoch
+- Kategorie: Build
+- Status: Hohe Wahrscheinlichkeit
+- Fundort:
+  - Datei: `pubspec.yaml`
+  - Klasse / Funktion / Komponente / Modul: Datenbank-Dependencies
+  - Zeile(n): 22-27
+  - Datei: `innenkompass/pubspec.yaml`
+  - Klasse / Funktion / Komponente / Modul: Datenbank-Dependencies
+  - Zeile(n): 22-28
+  - Datei: `lib/data/db/app_database.dart`
+  - Klasse / Funktion / Komponente / Modul: `_openConnection`
+  - Zeile(n): 293-297
+  - Datei: Repo-Vergleich
+  - Klasse / Funktion / Komponente / Modul: `diff -rq . innenkompass`
+  - Zeile(n): `pubspec.yaml` und `pubspec.lock` unterscheiden sich
+- Problem:
+  - Das Root-Repo verwendet `drift/native.dart` und `NativeDatabase.createInBackground(...)`, lässt aber die in der Referenzkopie nachgezogene Abhängigkeit `sqlite3_flutter_libs` weg.
+- Warum problematisch:
+  - Native SQLite-Bindings sind plattformabhängig. Wenn eine funktionierende Referenzkopie zusätzliche native Hilfsbibliotheken benötigt, ist deren Fehlen im Lieferrepo ein Build- und Runtime-Risiko.
+- Beleg:
+  - Root `pubspec.yaml` enthält nur `drift` und `sqlite3` in `pubspec.yaml:22-27`.
+  - Die Referenzkopie ergänzt `sqlite3_flutter_libs` in `innenkompass/pubspec.yaml:22-28`.
+  - Das DB-Backend nutzt native SQLite-Dateien in `lib/data/db/app_database.dart:293-297`.
+  - Der Repo-Diff zeigt explizit abweichende `pubspec.yaml`/`pubspec.lock`.
+- Reproduktion:
+  - 1. Root-Repo und Referenzkopie dependency-seitig vergleichen.
+  - 2. Feststellen, dass die weiterentwickelte Kopie native SQLite-Libs ergänzt, das Hauptrepo aber nicht.
+  - 3. Lokaler Build-Check war hier nicht möglich, weil `flutter`/`dart` im Environment fehlen.
+- Risiko/Folgen:
+  - Hohe Wahrscheinlichkeit für Build- oder Startprobleme auf einzelnen Plattformen, nicht reproduzierbare Unterschiede zwischen Referenz und Lieferrepo.
+- Empfohlene Behebung:
+  - Dependency-Sets angleichen, Root-Repo gegen die Referenzkopie konsolidieren und anschließend echte Plattform-Builds auf Android/iOS/Desktop verifizieren.
+- Confidence:
+  - Mittel
+
+## [AUD-009] Öffentlicher Interventions-Routenhelfer ist funktional kaputt
+- Schweregrad: Mittel
+- Kategorie: Logik
+- Status: Bestätigt
+- Fundort:
+  - Datei: `lib/app/router.dart`
+  - Klasse / Funktion / Komponente / Modul: `AppRouter.goToIntervention`
+  - Zeile(n): 289-299
+  - Datei: `lib/application/providers/app_providers.dart`
+  - Klasse / Funktion / Komponente / Modul: `interventionScreen`-Builder
+  - Zeile(n): 70-75
+  - Datei: `lib/features/crisis/screens/crisis_screen.dart`
+  - Klasse / Funktion / Komponente / Modul: Quick-Action Navigation
+  - Zeile(n): 117-134
+- Problem:
+  - Der öffentliche Helper `AppRouter.goToIntervention(...)` schreibt `extra['interventionId']`, aber der Screen-Builder liest `queryParameters['id']` oder `extra['type']`. Der Helper und der Reader haben keinen gemeinsamen Vertrag.
+- Warum problematisch:
+  - Jeder zukünftige Call-Site, der den offiziellen Helper verwendet, verliert die Zielintervention auf dem Weg zur Route.
+- Beleg:
+  - Helper setzt `interventionId` in `lib/app/router.dart:295-297`.
+  - Reader akzeptiert nur `id` oder `type` in `lib/application/providers/app_providers.dart:70-75`.
+  - `CrisisScreen` umgeht den Helper komplett und schreibt `type` direkt in `extra`, weil nur das funktioniert.
+- Reproduktion:
+  - 1. `AppRouter.goToIntervention(context, interventionId: '...')` aus beliebigem Screen aufrufen.
+  - 2. Im Zielscreen kommt `interventionId` nicht an.
+- Risiko/Folgen:
+  - Kaputte Navigation, toter API-Helper, erhöhte Drift zwischen Call-Sites.
+- Empfohlene Behebung:
+  - Einen einzigen Vertrag definieren und Helper sowie Route-Leser darauf umstellen, z. B. nur `queryParameters['id']` oder nur `extra['interventionId']`.
+- Confidence:
+  - Hoch
+
+## [AUD-010] Interventions-Schrittrenderer hält veralteten lokalen Zustand fest
+- Schweregrad: Mittel
+- Kategorie: Bug
+- Status: Bestätigt
+- Fundort:
+  - Datei: `lib/features/intervention/screens/intervention_screen.dart`
+  - Klasse / Funktion / Komponente / Modul: `InterventionStepRenderer`-Einbindung
+  - Zeile(n): 125-138
+  - Datei: `lib/features/intervention/widgets/intervention_step_renderer.dart`
+  - Klasse / Funktion / Komponente / Modul: `_InterventionStepRendererState`
+  - Zeile(n): 32-39
+  - Datei: `lib/features/intervention/widgets/intervention_step_renderer.dart`
+  - Klasse / Funktion / Komponente / Modul: `_ReflectionStepWidgetState`
+  - Zeile(n): 295-304
+  - Datei: `lib/features/intervention/widgets/intervention_step_renderer.dart`
+  - Klasse / Funktion / Komponente / Modul: `_SelectionStepWidgetState`
+  - Zeile(n): 370-378
+  - Datei: `lib/features/intervention/widgets/intervention_step_renderer.dart`
+  - Klasse / Funktion / Komponente / Modul: `_RatingStepWidgetState`
+  - Zeile(n): 514-520
+- Problem:
+  - Mehrere stateful Step-Widgets übernehmen `widget.response` nur in `initState()` und resynchronisieren nie, wenn sich der Schritt oder die bestehende Antwort ändert. Der Parent rendert den Step-Renderer außerdem ohne `Key`.
+- Warum problematisch:
+  - Bei Back/Forward-Navigation oder beim Laden vorhandener Antworten kann alter lokaler Zustand im falschen Schritt weiterverwendet werden.
+- Beleg:
+  - `InterventionStepRenderer` speichert `_currentResponse = widget.existingResponse` nur in `initState()` in `lib/features/intervention/widgets/intervention_step_renderer.dart:35-39`.
+  - Der Parent gibt keinen step-spezifischen `Key` mit in `lib/features/intervention/screens/intervention_screen.dart:130-138`.
+  - Text-, Auswahl- und Rating-Widgets initialisieren ihre Controller/State nur einmal in `initState()` und haben kein `didUpdateWidget()`.
+- Reproduktion:
+  - 1. Intervention starten, mehrere Schritte ausfüllen.
+  - 2. Zwischen Schritten vor- und zurücknavigieren.
+  - 3. Beobachten, dass lokaler Eingabestatus nicht deterministisch zum aktuellen Schritt passt.
+- Risiko/Folgen:
+  - Falsch dargestellte Antworten, UX-Verwirrung, potenziell falsche Persistenz bei Interventionsdaten.
+- Empfohlene Behebung:
+  - Step-Renderer mit `ValueKey(step.id)` instanziieren und in allen stateful Step-Widgets `didUpdateWidget()` implementieren oder den Zustand komplett aus dem Riverpod-Flow ableiten.
+- Confidence:
+  - Hoch
+
+## [AUD-011] Nachbewertungs-Screen zeigt Defaultwerte, initialisiert sie aber nicht im State
+- Schweregrad: Mittel
+- Kategorie: Bug
+- Status: Bestätigt
+- Fundort:
+  - Datei: `lib/features/intervention/screens/post_evaluation_screen.dart`
+  - Klasse / Funktion / Komponente / Modul: `_PostEvaluationScreenState`
+  - Zeile(n): 26-45, 104-116, 127-139, 150-162, 180-192, 242-245
+  - Datei: `innenkompass/lib/features/intervention/screens/post_evaluation_screen.dart`
+  - Klasse / Funktion / Komponente / Modul: `_PostEvaluationScreenState.initState`
+  - Zeile(n): 31-49
+- Problem:
+  - Der Screen zeigt vier Slider mit sichtbaren Defaultwerten, hält die zugrunde liegenden Provider-Felder aber zunächst auf `null`. Der Save-Button bleibt deaktiviert, bis jeder einzelne Slider bewegt wurde.
+- Warum problematisch:
+  - Die UI behauptet implizit, es gäbe bereits gültige Werte. Tatsächlich sind es nur lokale Widget-Defaults ohne fachliche Wirkung.
+- Beleg:
+  - Lokale Defaults werden als `_postIntensity = 5`, `_helpfulnessRating = 7` usw. gesetzt in `lib/features/intervention/screens/post_evaluation_screen.dart:26-29`.
+  - `isComplete` verlangt nicht-null Werte aus `postEvaluationStateProvider` in `lib/features/intervention/screens/post_evaluation_screen.dart:42-45`.
+  - Der Save-Button hängt an `isComplete` in `lib/features/intervention/screens/post_evaluation_screen.dart:242-245`.
+  - Die Referenzkopie behebt das Problem durch Initialisierung im `initState()` in `innenkompass/lib/features/intervention/screens/post_evaluation_screen.dart:31-49`.
+- Reproduktion:
+  - 1. Intervention abschließen.
+  - 2. Nachbewertung öffnen.
+  - 3. Ohne einen Slider zu bewegen bleibt "Speichern und abschließen" deaktiviert, obwohl alle Slider scheinbar schon Werte zeigen.
+- Risiko/Folgen:
+  - UX-Blockade, inkonsistentes Bedienmodell, unnötige Interaktion.
+- Empfohlene Behebung:
+  - Defaultwerte beim Öffnen in den Provider schreiben oder die Anzeige direkt aus dem Provider ableiten.
+- Confidence:
+  - Hoch
+
+## [AUD-012] Hilfreichkeits-Skala ist inkonsistent implementiert
+- Schweregrad: Mittel
+- Kategorie: Logik
+- Status: Bestätigt
+- Fundort:
+  - Datei: `lib/features/intervention/screens/post_evaluation_screen.dart`
+  - Klasse / Funktion / Komponente / Modul: Hilfreichkeits-Slider
+  - Zeile(n): 180-185
+  - Datei: `lib/application/providers/intervention_providers.dart`
+  - Klasse / Funktion / Komponente / Modul: `PostEvaluationData`
+  - Zeile(n): 300-303
+  - Datei: `lib/data/db/tables/situation_entries.dart`
+  - Klasse / Funktion / Komponente / Modul: `helpfulnessRating`
+  - Zeile(n): 55-56
+  - Datei: `lib/features/history/screens/entry_detail_screen.dart`
+  - Klasse / Funktion / Komponente / Modul: Anzeige Hilfreichkeit
+  - Zeile(n): 378-380
+- Problem:
+  - Die Nachbewertung sammelt Hilfreichkeit auf einer Skala 1-10, das Tabellenschema kommentiert dieselbe Spalte aber als 1-5, und die Detailansicht rendert `/5`.
+- Warum problematisch:
+  - Daten werden semantisch widersprüchlich gespeichert und angezeigt. Ein Wert `7` ist nach UI legitim, wird aber an anderer Stelle als `7/5` präsentiert.
+- Beleg:
+  - Slider auf `min: 1`, `max: 10`, `divisions: 9` in `lib/features/intervention/screens/post_evaluation_screen.dart:180-185`.
+  - Provider-Kommentar spricht von `Hilfreichkeits-Rating (1-10)` in `lib/application/providers/intervention_providers.dart:302-303`.
+  - Datenbankschema kommentiert `helpfulnessRating` als `1-5 helpfulness rating` in `lib/data/db/tables/situation_entries.dart:55-56`.
+  - Detailscreen zeigt `Hilfreichkeit: ... /5` in `lib/features/history/screens/entry_detail_screen.dart:378-380`.
+- Reproduktion:
+  - 1. Eine Intervention mit Hilfreichkeit 7 speichern.
+  - 2. Den Eintrag im Detailscreen öffnen.
+  - 3. Anzeige: `7/5`.
+- Risiko/Folgen:
+  - Falsche Dateninterpretation, fehlerhafte Reports, spätere Validierungsprobleme.
+- Empfohlene Behebung:
+  - Eine Skala festlegen, alle Kommentare, UI-Labels, Persistenz und Detailansichten darauf normieren und vorhandene Daten ggf. migrieren.
+- Confidence:
+  - Hoch
+
+## [AUD-013] Umschalter für diskrete vs. normale Notifications ist ein toter Pfad
+- Schweregrad: Mittel
+- Kategorie: Logik
+- Status: Bestätigt
+- Fundort:
+  - Datei: `lib/features/settings/widgets/notification_settings_section.dart`
+  - Klasse / Funktion / Komponente / Modul: Diskret-Toggle
+  - Zeile(n): 61-76
+  - Datei: `lib/application/providers/notification_provider.dart`
+  - Klasse / Funktion / Komponente / Modul: `toggleDiscrete`
+  - Zeile(n): 74-76
+  - Datei: `lib/domain/services/notification_service.dart`
+  - Klasse / Funktion / Komponente / Modul: `scheduleMultiple`, `_getDiscreteMessage`, `getDiscreteNotificationMessages`
+  - Zeile(n): 103-114, 141-167
+- Problem:
+  - Die UI bietet einen Moduswechsel zwischen diskreten und normalen Notifications an, der Service kennt aber ausschließlich diskrete Nachrichten.
+- Warum problematisch:
+  - Nutzer können eine Einstellung aktivieren, die keinerlei fachliche Wirkung hat.
+- Beleg:
+  - `NotificationSettingsSection` rendert einen Toggle und einen alternativen Untertitel in `lib/features/settings/widgets/notification_settings_section.dart:61-71`.
+  - `toggleDiscrete()` ändert nur einen Bool im flüchtigen State in `lib/application/providers/notification_provider.dart:74-76`.
+  - `scheduleMultiple()` nutzt immer `_getDiscreteMessage(...)`; es existiert keine alternative Nachrichtenauswahl für den nicht-diskreten Modus in `lib/domain/services/notification_service.dart:103-114, 141-167`.
+- Reproduktion:
+  - 1. Diskret-Modus deaktivieren.
+  - 2. Reminder planen.
+  - 3. Der Versandpfad kennt weiterhin nur diskrete Nachrichten.
+- Risiko/Folgen:
+  - Täuschende UX, inkonsistente Einstellungen, schwer nachvollziehbares Verhalten.
+- Empfohlene Behebung:
+  - Entweder den normalen Modus technisch implementieren oder den Toggle entfernen, bis echte Alternativen existieren.
+- Confidence:
+  - Hoch
+
+## [AUD-014] Lock-Service behandelt Secure-Storage-Fehler nicht defensiv
+- Schweregrad: Mittel
+- Kategorie: Sicherheit
+- Status: Hohe Wahrscheinlichkeit
+- Fundort:
+  - Datei: `lib/domain/services/lock_service.dart`
+  - Klasse / Funktion / Komponente / Modul: `setPin`, `verifyPin`, `hasPin`, `deletePin`, `isLockEnabled`, `setLockEnabled`, `getLockType`, `clearLockData`
+  - Zeile(n): 55-123
+  - Datei: `innenkompass/lib/domain/services/lock_service.dart`
+  - Klasse / Funktion / Komponente / Modul: dieselben Methoden in gehärteter Form
+  - Zeile(n): 55-170
+- Problem:
+  - Der Root-Lock-Service fängt Storage-seitige `PlatformException`/`MissingPluginException` für sichere Speicherung nicht ab. Die Referenzkopie tut das bereits.
+- Warum problematisch:
+  - Auf Testplattformen, in frühen App-Lifecycle-Phasen oder bei Plugin-Problemen kann genau der Sicherheitsmechanismus selbst abstürzen oder unkontrolliert fehlschlagen.
+- Beleg:
+  - Root-Version ruft `_secureStorage.read/write/delete(...)` direkt und ungeschützt in `lib/domain/services/lock_service.dart:55-123`.
+  - Referenzkopie kapselt dieselben Operationen in Catch-Blöcke in `innenkompass/lib/domain/services/lock_service.dart:55-170`.
+- Reproduktion:
+  - 1. Lock-Service in einem Kontext ohne korrekt initialisiertes Plugin oder auf einer nicht unterstützten Plattform aufrufen.
+  - 2. Storage-Operationen können Exceptions werfen; im Root-Repo fehlen Catch-Blöcke.
+- Risiko/Folgen:
+  - Abstürze im Lock-Fluss, fehlerhafte Degradation, instabile Tests und Unsicherheit darüber, ob der Lock überhaupt korrekt gesetzt wurde.
+- Empfohlene Behebung:
+  - Die defensive Fehlerbehandlung der Referenzkopie übernehmen und Lock-Setup bei Storage-Fehlern explizit als nicht verfügbar behandeln.
+- Confidence:
+  - Mittel
+
+## [AUD-015] "Benutzerdefiniert" im Datumsfilter ist nicht implementiert
+- Schweregrad: Niedrig
+- Kategorie: Logik
+- Status: Bestätigt
+- Fundort:
+  - Datei: `lib/domain/models/pattern_summary.dart`
+  - Klasse / Funktion / Komponente / Modul: `HistoryFilter`, `DateRangeFilter`, `getStartDate`
+  - Zeile(n): 167-220
+  - Datei: `lib/features/history/widgets/history_filter_sheet.dart`
+  - Klasse / Funktion / Komponente / Modul: Zeitraum-Chips
+  - Zeile(n): 130-150
+  - Datei: `lib/domain/services/pattern_analyzer.dart`
+  - Klasse / Funktion / Komponente / Modul: `filterEntries`
+  - Zeile(n): 448-454
+- Problem:
+  - `DateRangeFilter.benutzerdefiniert` ist im Modell und in der UI sichtbar, besitzt aber weder Eingabefelder für Start-/Enddatum noch irgendeine eigene Filterlogik.
+- Warum problematisch:
+  - Die UI bietet eine Option an, die fachlich nichts tut.
+- Beleg:
+  - Enum enthält `benutzerdefiniert` in `lib/domain/models/pattern_summary.dart:198-204`.
+  - `getStartDate()` gibt für `benutzerdefiniert` `null` zurück in `lib/domain/models/pattern_summary.dart:218-219`.
+  - `HistoryFilterSheet` rendert FilterChips für alle Enum-Werte in `lib/features/history/widgets/history_filter_sheet.dart:134-150`.
+  - `filterEntries()` filtert nur, wenn `getStartDate()` nicht `null` ist in `lib/domain/services/pattern_analyzer.dart:448-454`.
+- Reproduktion:
+  - 1. Im Verlauf den Zeitraum "Benutzerdefiniert" auswählen.
+  - 2. Filter anwenden.
+  - 3. Es wird kein benutzerdefinierter Zeitraum erfasst und faktisch nicht gefiltert.
+- Risiko/Folgen:
+  - Tote UX, irreführende Filteroberfläche.
+- Empfohlene Behebung:
+  - Entweder Start-/Enddatum in `HistoryFilter` ergänzen und mit DatePicker verknüpfen oder die Option bis zur echten Implementierung entfernen.
+- Confidence:
+  - Hoch
+
+## [AUD-016] Migrationstest vermittelt eine trügerische Sicherheit
+- Schweregrad: Mittel
+- Kategorie: Test
+- Status: Bestätigt
+- Fundort:
+  - Datei: `test/unit/database_migration_test.dart`
+  - Klasse / Funktion / Komponente / Modul: Migrationstest
+  - Zeile(n): 93-145
+  - Datei: `lib/application/providers/new_situation_providers.dart`
+  - Klasse / Funktion / Komponente / Modul: Persistierung neuer Einträge
+  - Zeile(n): 109-139
+- Problem:
+  - Der Test prüft nur, dass neue Spalten nach der Migration existieren und alte Werte lesbar bleiben. Er prüft nicht, ob alte semantische Werte zum realen heutigen Enum- und Stringformat passen.
+- Warum problematisch:
+  - Eine Datenmigration kann fachlich falsche Altwerte in der DB belassen und trotzdem "grün" durch den Test gehen.
+- Beleg:
+  - Der Test seedet Altwerte wie `context = 'Arbeit'`, `primary_emotion = 'Wut'`, `system_state = 'activated'` in `test/unit/database_migration_test.dart:108-116`.
+  - Die aktuelle Persistierung schreibt Enum-Namen (`eventData.context.name`, `emotionData.primaryEmotion.name`, `classification.systemState.name`) in `lib/application/providers/new_situation_providers.dart:109-139`.
+  - Der Test validiert danach nur Feldexistenz und dieselben Altstrings, nicht deren Interpretierbarkeit in aktuellen Rule- und Analysepfaden.
+- Reproduktion:
+  - 1. Den Migrationstest lesen.
+  - 2. Feststellen, dass keine fachliche Roundtrip-Prüfung gegen aktuelle Parser/Analyzer stattfindet.
+- Risiko/Folgen:
+  - Scheinabsicherung einer für Bestandsdaten kritischen Migrationsstrecke.
+- Empfohlene Behebung:
+  - Migrationstests um fachliche Assertions ergänzen: Einträge nach Migration durch Analyzer/History/UI-kompatible Parser laufen lassen und gegen aktuelle Enum-Namen verifizieren.
+- Confidence:
+  - Hoch
+
+## [AUD-017] Rechtliche und Support-Dokumente sind nur Templates
+- Schweregrad: Niedrig
+- Kategorie: Doku
+- Status: Bestätigt
+- Fundort:
+  - Datei: `docs/legal/privacy-policy-template.md`
+  - Klasse / Funktion / Komponente / Modul: Dokumentinhalt
+  - Zeile(n): 3, 6-8, 31
+  - Datei: `docs/legal/support-template.md`
+  - Klasse / Funktion / Komponente / Modul: Dokumentinhalt
+  - Zeile(n): 3, 6-7
+- Problem:
+  - Die vorgesehenen Release-Dokumente enthalten weiterhin Platzhalter für juristische Entität, Kontaktadresse, Support-Mail und Website.
+- Warum problematisch:
+  - Für ein Datenschutz- und Krisenkontext-Produkt sind unvollständige rechtliche Angaben kein Nebendetail.
+- Beleg:
+  - Privacy Policy markiert sich selbst als "Template for release completion" und enthält `[REPLACE]`-Platzhalter in `docs/legal/privacy-policy-template.md:3,6-8,31`.
+  - Support-Dokument ist ebenfalls explizit nur ein Template in `docs/legal/support-template.md:3,6-7`.
+- Reproduktion:
+  - Dokumente öffnen.
+- Risiko/Folgen:
+  - Nicht release-fähige Dokumentation, fehlende Support-/Datenschutzangaben.
+- Empfohlene Behebung:
+  - Vor Release harte inhaltliche Fertigstellung plus Checklisten-Gate in `docs/release/go-live-checklist.md`.
+- Confidence:
+  - Hoch
+
+## [AUD-018] Verlassene Settings-Artefakte erschweren die Wartung
+- Schweregrad: Niedrig
+- Kategorie: Architektur
+- Status: Bestätigt
+- Fundort:
+  - Datei: `lib/features/settings/widgets/emergency_contacts_section.dart`
+  - Klasse / Funktion / Komponente / Modul: `EmergencyContactsSection`
+  - Zeile(n): 9-10
+  - Datei: `lib/features/settings/widgets/notification_toggle.dart`
+  - Klasse / Funktion / Komponente / Modul: `NotificationToggle`
+  - Zeile(n): 12-13
+  - Datei: `lib/application/providers/settings_provider.dart`
+  - Klasse / Funktion / Komponente / Modul: `onboardingCompletedProvider`, `onboardingCompletedSyncProvider`, `settingsProvider`
+  - Zeile(n): 21-38
+  - Datei: `lib/features/settings/screens/settings_screen.dart`
+  - Klasse / Funktion / Komponente / Modul: aktuelle Settings-Zusammensetzung
+  - Zeile(n): 65-67, 98-145
+- Problem:
+  - Mehrere Widgets und Provider sind im Root-Repo noch vorhanden, aber aus der aktiven Oberfläche entfernt oder funktional ersetzt. Die tote Struktur verschleiert die echte Source of Truth.
+- Warum problematisch:
+  - Genau diese Drift ist bereits Teil der Notification- und Crisis-Settings-Probleme. Toter Code erhöht die Wahrscheinlichkeit weiterer inkonsistenter Änderungen.
+- Beleg:
+  - Repo-Suche findet für `NotificationToggle`, `EmergencyContactsSection`, `onboardingCompletedProvider`, `onboardingCompletedSyncProvider` und `settingsProvider` nur deren Deklarationen; aktuelle Settings-Screen-Komposition nutzt stattdessen `NotificationSettingsSection` und Krisenplan-Verlinkung.
+- Reproduktion:
+  - 1. Repo-weit nach den genannten Symbolen suchen.
+  - 2. Es existieren keine produktiven Verwendungen außerhalb der Deklaration.
+- Risiko/Folgen:
+  - Wartungsrauschen, Fehlannahmen über aktive Datenpfade, weitere Drift.
+- Empfohlene Behebung:
+  - Unbenutzte Artefakte entfernen oder konsequent reaktivieren; die aktive Settings-Architektur danach dokumentieren.
+- Confidence:
+  - Hoch
+
+# 5. Versteckte / systemische Probleme
+- Startup und Routing haben keine zentrale Autorität. Lock, Settings und Datenbank werden parallel initialisiert und später implizit zusammengeführt. Das erklärt den Lock-Bypass und die Bootstrapping-Unschärfe.
+- Das Repo leidet an mehrfacher Zustandsrepräsentation:
+  - Notifications existieren als DB-Settings und als separater flüchtiger Provider.
+  - Zeitpunkte existieren als `timestamp` und `createdAt`, ohne klaren Standard für Fachlogik.
+- Die ignorierte Referenzkopie `innenkompass/` enthält bereits teilweise bessere Implementierungen. Das ist kein harmloser Backup-Ordner, sondern ein systemischer Drift-Indikator. Sicherheits- und UX-Fixes landen dadurch außerhalb des Haupt-Repos.
+- Stateful UI-Komponenten verlassen sich mehrfach auf Einmal-Initialisierung in `initState()` statt auf reaktive Synchronisation. Das ist ein wiederkehrendes Fehlermuster in Interventions- und Startup-Flows.
+- Kritische Flüsse sind schlechter getestet als harmlose Regelwerke. Es gibt Unit-Tests für Classifier/Selector, aber fast keine belastbaren Schutznetze für Lock, Settings, Cleanup und Notifications.
+
+# 6. Tote oder fragwürdige Bereiche
+- Tote oder unbenutzte Settings-Artefakte:
+  - `lib/features/settings/widgets/notification_toggle.dart`
+  - `lib/features/settings/widgets/emergency_contacts_section.dart`
+  - `lib/application/providers/settings_provider.dart:21-38`
+- Halbfertiger Filterpfad:
+  - `lib/domain/models/pattern_summary.dart:198-219`
+  - `lib/features/history/widgets/history_filter_sheet.dart:134-150`
+- Fragwürdige Doppel-Codebasis:
+  - `.gitignore:56-57` schließt `innenkompass/` explizit aus.
+  - `diff -rq` zeigt sicherheits- und bootstraprelevante Unterschiede zwischen Root und Referenz.
+- Unvollständige Persistenz-Signatur:
+  - `lib/data/db/app_database.dart:54-74` nimmt `completedAt` entgegen, persistiert diesen Zeitpunkt aber nirgends.
+- Referenzkopie mit inhaltlicher Textkorruption:
+  - `innenkompass/lib/domain/models/intervention_library.dart:399`
+  - `innenkompass/lib/domain/models/intervention_library.dart:467`
+
+# 7. Test- und Absicherungslücken
+- Kritisch ungetestet:
+  - App-Start mit aktiviertem Lock.
+  - Resume aus dem Hintergrund mit aktiviertem Lock.
+  - Notification-Persistenz und Notification-Service-Initialisierung.
+  - "Alle Daten löschen" inklusive DB- und Secure-Storage-Löschung.
+  - Backdated Entries mit abweichendem `timestamp` vs `createdAt`.
+  - Krisenerkennung inklusive Auswahl krisenspezifischer Interventionen.
+- Konkret fehlende Tests:
+  - Widget-/Integrationstest für Splash/Router/Lock-Redirect.
+  - Widget-Test für Settings-Cleanup mit echter DB-Assertion.
+  - Provider-/Integrationstest für Notification-Load, Save, Restart und Scheduling.
+  - Regressionstest für `AppRouter.goToIntervention(...)`.
+  - Widget-Test für Interventionsschritte mit Vor-/Zurücknavigation und bereits gespeicherten Antworten.
+  - Semantischer Migrationstest gegen heutige Enum-Namen und Analyzer/History-Pfade.
+- Bestehende Tests haben Lücken:
+  - `test/unit/database_migration_test.dart` prüft nur Schema-Upgrade, nicht fachliche Datenkompatibilität.
+  - `integration_test/app_smoke_test.dart` existiert, wird in der aktuellen CI aber nicht ausgeführt.
+
+# 8. Build-, CI- und Deployment-Risiken
+- Lokal ausführbar waren nur statische Prüfungen:
+  - Repo-Strukturscan (`rg --files`)
+  - gezielte Code- und Konfigurationsprüfung
+  - Drift-Vergleich zwischen Root und `innenkompass/`
+  - Git-Status-Prüfung
+  - Secret-/Placeholder-Scan
+- Lokal nicht ausführbar:
+  - `flutter --version` schlug fehl mit `command not found`
+  - `dart --version` schlug fehl mit `command not found`
+  - `fvm --version` schlug fehl mit `command not found`
+  - Deshalb wurden `flutter pub get`, Codegen, `flutter analyze`, `flutter test`, Builds und echte Plattform-Smokes in diesem Environment nicht ausgeführt.
+- CI-Risiken:
+  - `.github/workflows/ci.yml:24-27` verwendet das schwimmende Flutter-Channel-Label `stable` statt einer gepinnten Version; Builds sind damit nicht deterministisch.
+  - `.github/workflows/ci.yml:29-39` führt zwar Codegen, Analyze und Unit-Tests aus, aber kein `integration_test/app_smoke_test.dart`.
+  - Root und Referenzkopie haben unterschiedliche Dependency-Stände (`pubspec.yaml`, `pubspec.lock`), insbesondere im SQLite-Bereich.
+- Deployment-/Release-Risiken:
+  - Rechtliche und Support-Dokumente sind noch Templates.
+  - Die Löschfunktion hält die in Settings versprochene Datenbereinigung nicht ein.
+  - Das Root-Repo ist aktuell nicht sauber: `git status --short --branch` zeigt eine Modifikation in `lib/features/intervention/screens/intervention_screen.dart` und untracked `test/features/`. Das ist kein Bug an sich, erhöht aber den Integrations- und Audit-Aufwand.
+- Secrets-Einschätzung:
+  - Keine realen Secrets im versionierten Repo gefunden.
+  - Signinginhalte sind korrekt als Platzhalter oder `.example` gehalten (`android/key.properties.example`, `docs/release/signing-setup.md`).
+
+# 9. Quick Wins
+- Bootstrap zentralisieren und dabei die härtere Referenzkopie als Vorlage verwenden.
+- Notification-UI an die persistente Settings-Schicht anbinden und den Service einmalig initialisieren.
+- "Alle Daten löschen" auf echte DB- und Secure-Storage-Löschung umstellen.
+- Harte `id == 1`-Annahmen aus `SettingsDao` entfernen.
+- In Verlauf, Home und Pattern-Analyse konsequent `timestamp` statt `createdAt` verwenden.
+- `InterventionStepRenderer` per `ValueKey(step.id)` remounten und lokale Substates auf `didUpdateWidget()` umstellen.
+- Hilfreichkeits-Skala auf eine einzige Definition harmonisieren.
+- Tote Settings-Artefakte entfernen, damit die aktive Architektur wieder lesbar wird.
+
+# 10. Priorisierte Sanierungsreihenfolge
+- 1. Lock-Bootstrap und Lifecycle-Routing reparieren.
+  - Begründung: Das ist das einzige bestätigte Kritisch-Finding und betrifft direkten Schutz sensibler Daten.
+- 2. Irreführende Datenpfade reparieren: echte Datenlöschung und robuste Settings-Updates.
+  - Begründung: Hier werden Nutzerzusagen verletzt und Zustände können stillschweigend inkonsistent werden.
+- 3. Notification-Subsystem konsolidieren.
+  - Begründung: Aktuell existieren drei Probleme gleichzeitig: keine Initialisierung, keine Persistenz, toter Diskret-Modus.
+- 4. Fachlogik korrigieren: Kriseneskalation und Zeitsemantik.
+  - Begründung: Diese Fehler verfälschen Empfehlungen und Analytik.
+- 5. Intervention- und Nachbewertungs-UX stabilisieren.
+  - Begründung: Kein Sicherheitsproblem, aber direkte Bedienfehler und inkonsistentes Formularverhalten.
+- 6. Repo-Drift abbauen und CI härten.
+  - Begründung: Sonst werden Korrekturen weiter in Nebenpfaden versanden und Builds bleiben nicht reproduzierbar.
+- 7. Tests gezielt auf kritische Flüsse ausbauen.
+  - Begründung: Erst danach sind die o. g. Korrekturen regressionssicher.
+
+# 11. Optionaler Anhang
+- Referenzkopie `innenkompass/` enthält zusätzliche Struktur (`core/error`, `core/extensions`, `core/logging`, `core/utils`, `bootstrap_provider.dart`), die im Root-Repo fehlt. Das verstärkt den Eindruck eines halb zurückportierten Stands.
+- In der Referenzkopie gibt es offensichtliche Textartefakte:
+  - `innenkompass/lib/domain/models/intervention_library.dart:399` enthält `比如`
+  - `innenkompass/lib/domain/models/intervention_library.dart:467` enthält semantisch fragwürdiges `vorwurfsvoll`
+- Die aktuelle CI ist grundsätzlich vorhanden und nicht tot. Das Problem ist nicht Abwesenheit von CI, sondern ihre Unvollständigkeit und fehlende Versionsfixierung.
+- Keine harten Belege für eingecheckte Laufzeit-Secrets gefunden.

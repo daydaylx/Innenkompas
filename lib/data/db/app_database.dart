@@ -162,9 +162,15 @@ class AppDatabase extends _$AppDatabase {
   }
 
   /// Set onboarding completed
-  Future<void> setOnboardingCompleted(bool completed) {
-    return (update(userSettings)..where((t) => t.id.equals(1)))
-        .write(UserSettingsCompanion(onboardingCompleted: Value(completed)));
+  Future<void> setOnboardingCompleted(bool completed) async {
+    final settings = await getOrCreateUserSettings();
+    await updateUserSettings(
+      settings.copyWith(
+        onboardingCompleted: completed,
+        isFirstLaunch: !completed,
+        updatedAt: DateTime.now(),
+      ),
+    );
   }
 
   // ========== Crisis Plan ==========

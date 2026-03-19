@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../data/db/app_database.dart';
@@ -24,13 +25,6 @@ final onboardingCompletedProvider = FutureProvider<bool>((ref) async {
   return settings?.onboardingCompleted ?? false;
 });
 
-/// Provider for current onboarding status (synchronous version for router)
-final onboardingCompletedSyncProvider = Provider<bool>((ref) {
-  // Default to false, will be updated by the async provider
-  // This is used by the router which needs synchronous access
-  return false;
-});
-
 /// Provider for reading user settings from database.
 final settingsProvider = FutureProvider<UserSettingsData>((ref) async {
   final db = ref.watch(databaseProvider);
@@ -41,67 +35,104 @@ final settingsProvider = FutureProvider<UserSettingsData>((ref) async {
 ///
 /// This will be used to manage app-wide settings.
 class SettingsNotifier extends StateNotifier<UserSettingsData?> {
-  SettingsNotifier(this.ref) : super(null) {
-    _loadSettings();
-  }
+  SettingsNotifier(this.ref) : super(null);
 
   final Ref ref;
 
-  Future<void> _loadSettings() async {
+  void hydrate(UserSettingsData settings) {
+    state = settings;
+  }
+
+  Future<UserSettingsData> _requireSettings() async {
+    final current = state;
+    if (current != null) {
+      return current;
+    }
+
     final db = ref.read(databaseProvider);
-    state = await db.getOrCreateUserSettings();
+    final loaded = await db.getOrCreateUserSettings();
+    state = loaded;
+    return loaded;
+  }
+
+  Future<void> _persist(
+    UserSettingsData Function(UserSettingsData current) buildUpdated,
+  ) async {
+    final db = ref.read(databaseProvider);
+    final current = await _requireSettings();
+    final updated = buildUpdated(current).copyWith(updatedAt: DateTime.now());
+    await db.updateUserSettings(updated);
+    state = updated;
   }
 
   Future<void> updateLocale(String locale) async {
-    if (state == null) return;
-    final db = ref.read(databaseProvider);
-    final updated = state!.copyWith(locale: locale);
-    await db.updateUserSettings(updated);
-    state = updated;
+    await _persist((current) => current.copyWith(locale: locale));
   }
 
   Future<void> toggleNotifications(bool enabled) async {
-    if (state == null) return;
-    final db = ref.read(databaseProvider);
-    final updated = state!.copyWith(notificationsEnabled: enabled);
-    await db.updateUserSettings(updated);
-    state = updated;
+    await updateNotificationSettings(notificationsEnabled: enabled);
   }
 
   Future<void> toggleAppLock(bool enabled) async {
-    if (state == null) return;
-    final db = ref.read(databaseProvider);
-    final updated = state!.copyWith(appLockEnabled: enabled);
-    await db.updateUserSettings(updated);
-    state = updated;
+    await updateAppLockSettings(enabled);
+  }
+
+  Future<void> updateNotificationSettings({
+    bool? notificationsEnabled,
+    String? notificationTimes,
+    bool clearNotificationTimes = false,
+    bool? discreteNotifications,
+  }) async {
+    await _persist(
+      (current) => current.copyWith(
+        notificationsEnabled: notificationsEnabled,
+        notificationTimes: clearNotificationTimes
+            ? const Value(null)
+            : notificationTimes != null
+                ? Value(notificationTimes)
+                : const Value.absent(),
+        discreteNotifications: discreteNotifications,
+      ),
+    );
+  }
+
+  Future<void> updateAppLockSettings(
+    bool enabled, {
+    String? lockType,
+    bool clearLockType = false,
+  }) async {
+    await _persist(
+      (current) => current.copyWith(
+        appLockEnabled: enabled,
+        appLockType: clearLockType
+            ? const Value(null)
+            : lockType != null
+                ? Value(lockType)
+                : const Value.absent(),
+      ),
+    );
   }
 
   Future<void> updateThemeMode(String themeMode) async {
-    if (state == null) return;
-    final db = ref.read(databaseProvider);
-    final updated = state!.copyWith(themeMode: themeMode);
-    await db.updateUserSettings(updated);
-    state = updated;
+    await _persist((current) => current.copyWith(themeMode: themeMode));
   }
 
   Future<void> completeOnboarding() async {
-    final db = ref.read(databaseProvider);
-    final currentSettings = await db.getOrCreateUserSettings();
-    final updated = currentSettings.copyWith(
-      onboardingCompleted: true,
+    await _persist(
+      (current) => current.copyWith(
+        onboardingCompleted: true,
+        isFirstLaunch: false,
+      ),
     );
-    await db.updateUserSettings(updated);
-    state = updated;
   }
 
   Future<void> resetOnboarding() async {
-    final db = ref.read(databaseProvider);
-    final currentSettings = await db.getOrCreateUserSettings();
-    final updated = currentSettings.copyWith(
-      onboardingCompleted: false,
+    await _persist(
+      (current) => current.copyWith(
+        onboardingCompleted: false,
+        isFirstLaunch: true,
+      ),
     );
-    await db.updateUserSettings(updated);
-    state = updated;
   }
 }
 
@@ -110,33 +141,3 @@ final settingsNotifierProvider =
     StateNotifierProvider<SettingsNotifier, UserSettingsData?>((ref) {
   return SettingsNotifier(ref);
 });
-
-/// UserSettingsData extension for copyWith.
-extension UserSettingsDataCopyWith on UserSettingsData {
-  UserSettingsData copyWith({
-    String? locale,
-    bool? notificationsEnabled,
-    bool? appLockEnabled,
-    String? themeMode,
-    DateTime? lastBackupAt,
-  }) {
-    return UserSettingsData(
-      id: id,
-      onboardingCompleted: onboardingCompleted,
-      isFirstLaunch: isFirstLaunch,
-      locale: locale ?? this.locale,
-      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-      notificationTimes: notificationTimes,
-      discreteNotifications: discreteNotifications,
-      appLockEnabled: appLockEnabled ?? this.appLockEnabled,
-      appLockType: appLockType,
-      themeMode: themeMode ?? this.themeMode,
-      emergencyContacts: emergencyContacts,
-      analyticsEnabled: analyticsEnabled,
-      lastBackupAt: lastBackupAt ?? this.lastBackupAt,
-      lastDataCleanupAt: lastDataCleanupAt,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-    );
-  }
-}

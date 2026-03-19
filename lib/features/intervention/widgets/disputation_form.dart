@@ -10,6 +10,8 @@ class DisputationForm extends StatefulWidget {
   final List<String> answerOptions;
   final String? noteLabel;
   final int? noteMaxLength;
+  final String? initialSelectedAnswer;
+  final String? initialNote;
   final Function(String answer, String? note) onComplete;
 
   const DisputationForm({
@@ -17,6 +19,8 @@ class DisputationForm extends StatefulWidget {
     required this.answerOptions,
     this.noteLabel,
     this.noteMaxLength,
+    this.initialSelectedAnswer,
+    this.initialNote,
     required this.onComplete,
   });
 
@@ -27,6 +31,25 @@ class DisputationForm extends StatefulWidget {
 class _DisputationFormState extends State<DisputationForm> {
   String? _selectedAnswer;
   final _noteController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedAnswer = widget.initialSelectedAnswer;
+    _noteController.text = widget.initialNote ?? '';
+  }
+
+  @override
+  void didUpdateWidget(covariant DisputationForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialSelectedAnswer != widget.initialSelectedAnswer) {
+      _selectedAnswer = widget.initialSelectedAnswer;
+    }
+    if (oldWidget.initialNote != widget.initialNote &&
+        _noteController.text != (widget.initialNote ?? '')) {
+      _noteController.text = widget.initialNote ?? '';
+    }
+  }
 
   @override
   void dispose() {

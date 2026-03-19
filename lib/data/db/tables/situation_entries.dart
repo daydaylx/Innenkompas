@@ -53,7 +53,7 @@ class SituationEntries extends Table {
   IntColumn get postClarity =>
       integer().nullable()(); // Clarity after intervention
   IntColumn get helpfulnessRating =>
-      integer().nullable()(); // 1-5 helpfulness rating
+      integer().nullable()(); // 1-10 helpfulness rating
   TextColumn get postNote => text().nullable()(); // Optional note after
 
   // Metadata

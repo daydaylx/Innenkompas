@@ -19,35 +19,32 @@ import '../../features/lock/screens/lock_screen.dart';
 import '../../features/patterns/screens/patterns_screen.dart';
 import '../../features/intervention/screens/intervention_screen.dart';
 import '../../features/intervention/screens/post_evaluation_screen.dart';
+import 'bootstrap_provider.dart';
 import 'database_provider.dart';
-import 'settings_provider.dart';
 import 'lock_provider.dart';
+import 'settings_provider.dart';
 
 /// Provider for the GoRouter instance.
 ///
 /// This is the main router provider that depends on onboarding status
 /// and database initialization.
 final routerProvider = Provider<GoRouter>((ref) {
-  // Watch the database initialization to ensure it's ready
   ref.watch(databaseInitProvider);
-  final setupState = ref.watch(databaseSetupProvider);
-
-  // Watch settings provider for reactive onboarding status updates
-  ref.watch(settingsNotifierProvider);
+  final bootstrapState = ref.watch(appBootstrapProvider);
+  final settings = ref.watch(settingsNotifierProvider);
+  final lockState = ref.watch(lockStateProvider);
 
   // Check onboarding status from settings provider
   bool isOnboardingCompleted() {
-    final settings = ref.read(settingsNotifierProvider);
     return settings?.onboardingCompleted ?? false;
   }
 
   bool isAppLocked() {
-    final lockState = ref.read(lockStateProvider);
     return lockState.isLocked;
   }
 
   bool isAppReady() {
-    return setupState.hasValue;
+    return bootstrapState.hasValue && !lockState.isLoading && settings != null;
   }
 
   return AppRouter.createRouter(
@@ -70,7 +67,9 @@ final routerProvider = Provider<GoRouter>((ref) {
     interventionScreen: (context, state) => InterventionScreen(
       interventionId: state.uri.queryParameters['id'] ??
           ((state.extra is Map<String, dynamic>)
-              ? (state.extra as Map<String, dynamic>)['type'] as String?
+              ? ((state.extra as Map<String, dynamic>)['interventionId']
+                      as String?) ??
+                  ((state.extra as Map<String, dynamic>)['type'] as String?)
               : null),
     ),
     postEvaluationScreen: (context, state) => const PostEvaluationScreen(),
@@ -96,9 +95,8 @@ final routerProvider = Provider<GoRouter>((ref) {
 /// This provider can be used to show a splash screen while the app
 /// initializes (database, settings, etc.)
 final appInitProvider = Provider<bool>((ref) {
-  final databaseInit = ref.watch(databaseInitProvider);
-  // Add other initialization providers here as needed
-  return databaseInit;
+  final bootstrapState = ref.watch(appBootstrapProvider);
+  return bootstrapState.hasValue;
 });
 
 /// Provider for the current locale/language.
@@ -120,7 +118,6 @@ final notificationsEnabledProvider = Provider<bool>((ref) {
 
 /// Provider for app lock enabled status.
 final appLockEnabledProvider = Provider<bool>((ref) {
-  // Watch settings provider for reactive app lock updates
-  final settings = ref.watch(settingsNotifierProvider);
-  return settings?.appLockEnabled ?? AppConstants.defaultAppLockEnabled;
+  final lockState = ref.watch(lockStateProvider);
+  return lockState.isEnabled;
 });

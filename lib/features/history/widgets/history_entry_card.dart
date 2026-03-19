@@ -52,7 +52,7 @@ class HistoryEntryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _formatDate(entry.createdAt),
+                      _formatDate(entry.timestamp),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppColors.textTertiary,
                           ),

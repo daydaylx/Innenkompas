@@ -13,7 +13,10 @@ class NotificationSettingsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final settings = ref.watch(notificationSettingsProvider);
-    final notifier = ref.read(notificationSettingsProvider.notifier);
+    final controller = ref.read(notificationSettingsControllerProvider);
+    final previewText = ref
+        .read(notificationServiceProvider)
+        .getPreviewMessage(discrete: settings.discrete);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,7 +32,18 @@ class NotificationSettingsSection extends ConsumerWidget {
           subtitle: settings.enabled ? 'Aktiviert' : 'Deaktiviert',
           trailing: Switch(
             value: settings.enabled,
-            onChanged: (value) => notifier.toggleEnabled(value),
+            onChanged: (value) async {
+              final updated = await controller.toggleEnabled(value);
+              if (!updated && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Benachrichtigungen wurden auf diesem Gerät nicht freigegeben.',
+                    ),
+                  ),
+                );
+              }
+            },
           ),
         ),
 
@@ -41,7 +55,7 @@ class NotificationSettingsSection extends ConsumerWidget {
               title: 'Erinnerung ${entry.key + 1}',
               subtitle:
                   '${entry.value.hour.toString().padLeft(2, '0')}:${entry.value.minute.toString().padLeft(2, '0')}',
-              onTap: () => _pickTime(context, notifier, settings, entry.key),
+              onTap: () => _pickTime(context, controller, settings, entry.key),
             );
           }),
 
@@ -52,9 +66,23 @@ class NotificationSettingsSection extends ConsumerWidget {
                 horizontal: AppConstants.spacingMedium,
               ),
               child: TextButton.icon(
-                onPressed: () => _addTime(context, notifier, settings),
+                onPressed: () => _addTime(context, controller, settings),
                 icon: const Icon(Icons.add),
                 label: const Text('Erinnerung hinzufügen'),
+              ),
+            ),
+
+          if (settings.times.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.spacingMedium,
+                vertical: AppConstants.spacingSmall,
+              ),
+              child: Text(
+                'Füge mindestens eine Uhrzeit hinzu, damit Erinnerungen geplant werden.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.textTertiary,
+                ),
               ),
             ),
 
@@ -67,34 +95,32 @@ class NotificationSettingsSection extends ConsumerWidget {
                 : 'Normale Benachrichtigungen',
             trailing: Switch(
               value: settings.discrete,
-              onChanged: (value) => notifier.toggleDiscrete(value),
+              onChanged: (value) => controller.toggleDiscrete(value),
             ),
           ),
 
           // Preview
-          if (settings.discrete)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.spacingMedium,
-                vertical: AppConstants.spacingSmall,
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline,
-                      size: 16, color: AppColors.textTertiary),
-                  const SizedBox(width: AppConstants.spacingSmall),
-                  Expanded(
-                    child: Text(
-                      'Vorschau: "Zeit für einen kurzen Rückblick."',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.textTertiary,
-                        fontStyle: FontStyle.italic,
-                      ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.spacingMedium,
+              vertical: AppConstants.spacingSmall,
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, size: 16, color: AppColors.textTertiary),
+                const SizedBox(width: AppConstants.spacingSmall),
+                Expanded(
+                  child: Text(
+                    'Vorschau: "$previewText"',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textTertiary,
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
           const SizedBox(height: AppConstants.spacingSmall),
         ],
@@ -104,7 +130,7 @@ class NotificationSettingsSection extends ConsumerWidget {
 
   Future<void> _pickTime(
     BuildContext context,
-    NotificationSettingsNotifier notifier,
+    NotificationSettingsController controller,
     NotificationSettings settings,
     int index,
   ) async {
@@ -115,13 +141,13 @@ class NotificationSettingsSection extends ConsumerWidget {
     if (picked != null) {
       final newTimes = List<TimeOfDay>.from(settings.times);
       newTimes[index] = picked;
-      await notifier.updateTimes(newTimes);
+      await controller.updateTimes(newTimes);
     }
   }
 
   Future<void> _addTime(
     BuildContext context,
-    NotificationSettingsNotifier notifier,
+    NotificationSettingsController controller,
     NotificationSettings settings,
   ) async {
     final picked = await showTimePicker(
@@ -130,7 +156,7 @@ class NotificationSettingsSection extends ConsumerWidget {
     );
     if (picked != null) {
       final newTimes = [...settings.times, picked];
-      await notifier.updateTimes(newTimes);
+      await controller.updateTimes(newTimes);
     }
   }
 }

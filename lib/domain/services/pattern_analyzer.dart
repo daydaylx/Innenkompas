@@ -21,12 +21,12 @@ class PatternAnalyzer {
     }
 
     final sortedEntries = entries
-      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
     return PatternSummary(
       totalEntries: entries.length,
-      startDate: sortedEntries.first.createdAt,
-      endDate: sortedEntries.last.createdAt,
+      startDate: sortedEntries.first.timestamp,
+      endDate: sortedEntries.last.timestamp,
       emotionFrequency: _calculateEmotionFrequency(entries),
       contextFrequency: _calculateContextFrequency(entries),
       impulseFrequency: _calculateImpulseFrequency(entries),
@@ -113,9 +113,9 @@ class PatternAnalyzer {
     final grouped = <DateTime, List<double>>{};
     for (final entry in sortedEntries) {
       final day = DateTime(
-        entry.createdAt.year,
-        entry.createdAt.month,
-        entry.createdAt.day,
+        entry.timestamp.year,
+        entry.timestamp.month,
+        entry.timestamp.day,
       );
       grouped[day] = [...grouped[day] ?? [], entry.intensity.toDouble()];
     }
@@ -139,9 +139,9 @@ class PatternAnalyzer {
     final grouped = <DateTime, List<double>>{};
     for (final entry in sortedEntries) {
       final day = DateTime(
-        entry.createdAt.year,
-        entry.createdAt.month,
-        entry.createdAt.day,
+        entry.timestamp.year,
+        entry.timestamp.month,
+        entry.timestamp.day,
       );
       grouped[day] = [...grouped[day] ?? [], entry.bodyTension.toDouble()];
     }
@@ -214,7 +214,7 @@ class PatternAnalyzer {
             : helpfulnessRatings.reduce((a, b) => a + b) /
                 helpfulnessRatings.length,
         lastUsedAt: typeEntries
-            .map((e) => e.createdAt)
+            .map((e) => e.timestamp)
             .reduce((a, b) => a.isAfter(b) ? a : b),
       );
     }).toList();
@@ -316,11 +316,11 @@ class PatternAnalyzer {
     };
 
     for (final entry in entries) {
-      final weekday = entry.createdAt.weekday % 7; // 0=Montag, 6=Sonntag
+      final weekday = entry.timestamp.weekday % 7; // 0=Montag, 6=Sonntag
       weekdayDist[weekday]++;
       weekdayIntensity[weekday].add(entry.intensity.toDouble());
 
-      final hour = entry.createdAt.hour;
+      final hour = entry.timestamp.hour;
       if (hour >= 6 && hour < 12) {
         timeOfDayDist['morgen'] = timeOfDayDist['morgen']! + 1;
       } else if (hour >= 12 && hour < 18) {
@@ -450,7 +450,7 @@ class PatternAnalyzer {
       final startDate = filter.dateRange!.getStartDate();
       if (startDate != null) {
         filtered =
-            filtered.where((e) => e.createdAt.isAfter(startDate)).toList();
+            filtered.where((e) => e.timestamp.isAfter(startDate)).toList();
       }
     }
 

@@ -87,7 +87,7 @@ class LastEntryPreview extends ConsumerWidget {
               }
 
               final latest = entries.first;
-              final date = latest.createdAt;
+              final date = latest.timestamp;
               final dateStr =
                   '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
 

@@ -343,7 +343,7 @@ Future<List<SituationEntryData>> filteredHistoryEntries(
   final allEntries = await db.getAllSituationEntries();
   final filtered = PatternAnalyzer.filterEntries(allEntries, filter);
   // Sortiere: Neueste zuerst
-  filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  filtered.sort((a, b) => b.timestamp.compareTo(a.timestamp));
   return filtered;
 }
 
@@ -373,7 +373,7 @@ Future<TrendData> last7DaysTrend(Ref ref) async {
   final sevenDaysAgo = now.subtract(const Duration(days: 7));
 
   final recentEntries =
-      allEntries.where((e) => e.createdAt.isAfter(sevenDaysAgo)).toList();
+      allEntries.where((e) => e.timestamp.isAfter(sevenDaysAgo)).toList();
 
   if (recentEntries.isEmpty) {
     return const TrendData(

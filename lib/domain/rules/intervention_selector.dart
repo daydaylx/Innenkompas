@@ -27,6 +27,10 @@ class InterventionSelector {
     // Start with state-based recommendations
     final stateBased = _getStateBasedInterventions(systemState);
 
+    if (systemState == SystemState.crisis) {
+      return stateBased.take(4).toList(growable: false);
+    }
+
     // Add emotion-based recommendations
     final emotionBased = _getEmotionBasedInterventions(primaryEmotion);
 

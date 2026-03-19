@@ -19,14 +19,3 @@ final databaseInitProvider = Provider<bool>((ref) {
   // migrations or other async initialization logic.
   return true;
 });
-
-/// Provider for initializing settings and crisis plan on first launch.
-final databaseSetupProvider = FutureProvider<void>((ref) async {
-  final db = ref.watch(databaseProvider);
-
-  // Ensure settings exist
-  await db.getOrCreateUserSettings();
-
-  // Ensure crisis plan exists
-  await db.getOrCreateCrisisPlan();
-});

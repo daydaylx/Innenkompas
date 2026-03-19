@@ -61,16 +61,18 @@ class ClassificationService {
       context: context,
     );
 
+    final effectiveSystemState =
+        crisisResult.isCrisis ? SystemState.crisis : systemState;
+
     // Step 3: Select interventions
-    // Note: If crisis is detected, we may want to adjust recommendations
     final interventions = InterventionSelector.selectInterventions(
-      systemState: systemState,
+      systemState: effectiveSystemState,
       primaryEmotion: primaryEmotion,
       intensity: intensity,
     );
 
     return CompleteClassificationResult(
-      systemState: systemState,
+      systemState: effectiveSystemState,
       isCrisis: crisisResult.isCrisis,
       crisisIndicators: crisisResult.indicators,
       crisisSeverity: crisisResult.severity,

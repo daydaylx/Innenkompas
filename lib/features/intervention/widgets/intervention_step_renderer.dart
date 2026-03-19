@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:innenkompass/core/constants/app_constants.dart';
 import 'package:innenkompass/domain/models/intervention_step.dart';
@@ -36,6 +38,15 @@ class _InterventionStepRendererState extends State<InterventionStepRenderer> {
   void initState() {
     super.initState();
     _currentResponse = widget.existingResponse;
+  }
+
+  @override
+  void didUpdateWidget(covariant InterventionStepRenderer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.step.id != widget.step.id ||
+        oldWidget.existingResponse != widget.existingResponse) {
+      _currentResponse = widget.existingResponse;
+    }
   }
 
   void _updateResponse(InterventionStepResponse response) {
@@ -304,6 +315,16 @@ class _ReflectionStepWidgetState extends State<_ReflectionStepWidget> {
   }
 
   @override
+  void didUpdateWidget(covariant _ReflectionStepWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final nextText = widget.response?.textResponse ?? '';
+    if (oldWidget.response?.textResponse != widget.response?.textResponse &&
+        _controller.text != nextText) {
+      _controller.text = nextText;
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -375,6 +396,16 @@ class _SelectionStepWidgetState extends State<_SelectionStepWidget> {
     super.initState();
     final raw = widget.response?.selectionResponse ?? '';
     _selectedOptions = raw.isEmpty ? [] : raw.split('|');
+  }
+
+  @override
+  void didUpdateWidget(covariant _SelectionStepWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final raw = widget.response?.selectionResponse ?? '';
+    final nextOptions = raw.isEmpty ? <String>[] : raw.split('|');
+    if (oldWidget.response?.selectionResponse != widget.response?.selectionResponse) {
+      _selectedOptions = nextOptions;
+    }
   }
 
   @override
@@ -466,11 +497,14 @@ class _FactCheckStepWidget extends StatelessWidget {
       final answerOptions = List<String>.from(rawOptions);
       final noteLabel = metadata['note_label'] as String?;
       final noteMaxLength = metadata['note_max_length'] as int?;
+      final existingParts = _parseDisputationResponse(response?.textResponse);
 
       return DisputationForm(
         answerOptions: answerOptions,
         noteLabel: noteLabel,
         noteMaxLength: noteMaxLength,
+        initialSelectedAnswer: existingParts.$1,
+        initialNote: existingParts.$2,
         onComplete: (answer, note) {
           onResponse(InterventionStepResponse(
             stepId: step.id,
@@ -482,12 +516,17 @@ class _FactCheckStepWidget extends StatelessWidget {
       );
     }
 
+    final existingData = _parseFactCheckResponse(response?.textResponse);
+
     return FactCheckForm(
+      initialFact: existingData['fact'],
+      initialInterpretation: existingData['interpretation'],
+      initialAlternative: existingData['alternative'],
       onComplete: (data) {
         onResponse(InterventionStepResponse(
           stepId: step.id,
           type: step.type,
-          textResponse: data.toString(),
+          textResponse: jsonEncode(data),
           answeredAt: DateTime.now(),
         ));
       },
@@ -521,6 +560,15 @@ class _RatingStepWidgetState extends State<_RatingStepWidget> {
   }
 
   @override
+  void didUpdateWidget(covariant _RatingStepWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final nextRating = widget.response?.ratingResponse ?? 5;
+    if (oldWidget.response?.ratingResponse != widget.response?.ratingResponse) {
+      _rating = nextRating;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return RatingStep(
       rating: _rating,
@@ -537,4 +585,44 @@ class _RatingStepWidgetState extends State<_RatingStepWidget> {
       },
     );
   }
+}
+
+(String?, String?) _parseDisputationResponse(String? raw) {
+  if (raw == null || raw.isEmpty) {
+    return (null, null);
+  }
+
+  final parts = raw.split('|||');
+  final answer = parts.isEmpty || parts.first.isEmpty ? null : parts.first;
+  final note = parts.length > 1 && parts[1].isNotEmpty ? parts[1] : null;
+  return (answer, note);
+}
+
+Map<String, String?> _parseFactCheckResponse(String? raw) {
+  if (raw == null || raw.isEmpty) {
+    return const {
+      'fact': null,
+      'interpretation': null,
+      'alternative': null,
+    };
+  }
+
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is Map<String, dynamic>) {
+      return {
+        'fact': decoded['fact'] as String?,
+        'interpretation': decoded['interpretation'] as String?,
+        'alternative': decoded['alternative'] as String?,
+      };
+    }
+  } catch (_) {
+    // Fall back to empty values for legacy in-memory responses.
+  }
+
+  return const {
+    'fact': null,
+    'interpretation': null,
+    'alternative': null,
+  };
 }
