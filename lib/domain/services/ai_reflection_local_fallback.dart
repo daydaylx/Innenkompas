@@ -43,8 +43,8 @@ class AiReflectionLocalFallback {
       startedAt: startedAt,
       content: AiReflectionStartContent(
         observation: _observationFor(entry, mode),
-        question: _questionFor(mode),
-        helperStarters: _helperStartersFor(mode),
+        question: _questionFor(entry, mode),
+        helperStarters: _helperStartersFor(entry, mode),
       ),
     );
   }
@@ -79,6 +79,12 @@ class AiReflectionLocalFallback {
     SituationEntryData entry,
     AiReflectionMode mode,
   ) {
+    final neededSupport = _primaryNeededSupport(entry);
+    if (neededSupport != null &&
+        mode != AiReflectionMode.stabilize &&
+        mode != AiReflectionMode.organize) {
+      return 'Im Eintrag fällt auf, dass nicht nur Anspannung da war, sondern auch etwas gefehlt hat: $neededSupport.';
+    }
     if (mode == AiReflectionMode.stabilize ||
         entry.intensity >= 9 ||
         entry.bodyTension >= 9) {
@@ -95,11 +101,18 @@ class AiReflectionLocalFallback {
     return 'Der Eintrag zeigt bereits eine erkennbare Kette aus Anspannung, Reaktion und dem, was danach gefehlt hat.';
   }
 
-  static String _questionFor(AiReflectionMode mode) {
+  static String _questionFor(
+    SituationEntryData entry,
+    AiReflectionMode mode,
+  ) {
     switch (mode) {
       case AiReflectionMode.understand:
         return 'Was war deiner Meinung nach schon vor dem eigentlichen Moment das größere Thema?';
       case AiReflectionMode.redirect:
+        final realisticAlternative = entry.realisticAlternative?.trim();
+        if (realisticAlternative != null && realisticAlternative.isNotEmpty) {
+          return 'Du hast schon notiert: "$realisticAlternative". Was hätte dir geholfen, dort früher hinzukommen?';
+        }
         return 'Welcher kleine Schritt wäre realistischer gewesen: kurz stoppen, Abstand schaffen, etwas sagen oder etwas anderes?';
       case AiReflectionMode.organize:
         return 'Soll ich dir daraus eher einen kurzen Lernsatz oder einen nächsten kleinen Schritt formulieren?';
@@ -108,7 +121,10 @@ class AiReflectionLocalFallback {
     }
   }
 
-  static List<String> _helperStartersFor(AiReflectionMode mode) {
+  static List<String> _helperStartersFor(
+    SituationEntryData entry,
+    AiReflectionMode mode,
+  ) {
     switch (mode) {
       case AiReflectionMode.understand:
         return const [
@@ -117,6 +133,13 @@ class AiReflectionLocalFallback {
           'Schon vorher war da ...',
         ];
       case AiReflectionMode.redirect:
+        if ((entry.realisticAlternative ?? '').trim().isNotEmpty) {
+          return const [
+            'Geholfen hätte ...',
+            'Früher merkbar wäre ...',
+            'Dafür hätte ich gebraucht ...',
+          ];
+        }
         return const [
           'Realistisch wäre gewesen ...',
           'Ich hätte eher kurz ...',
@@ -140,9 +163,10 @@ class AiReflectionLocalFallback {
     required AiReflectionMode mode,
     required String userReply,
   }) {
-    final reply = userReply.trim();
-    final replySentence =
-        reply.isEmpty ? null : 'Deine Antwort spricht eher dafür, dass $reply';
+    final replySentence = _replyMirrorSentence(
+      mode: mode,
+      userReply: userReply,
+    );
 
     switch (mode) {
       case AiReflectionMode.stabilize:
@@ -172,12 +196,70 @@ class AiReflectionLocalFallback {
     }
   }
 
+  static String? _replyMirrorSentence({
+    required AiReflectionMode mode,
+    required String userReply,
+  }) {
+    final reply = _normalizeQuotedReply(userReply);
+    if (reply == null) {
+      return null;
+    }
+
+    switch (mode) {
+      case AiReflectionMode.understand:
+        return 'Du benennst als wichtiges Hintergrundthema: "$reply".';
+      case AiReflectionMode.redirect:
+        return 'Als realistische Abzweigung nennst du: "$reply".';
+      case AiReflectionMode.organize:
+        return 'Du hältst als knappe Sortierung fest: "$reply".';
+      case AiReflectionMode.stabilize:
+        return 'Gerade wirkt für dich am ehesten machbar: "$reply".';
+    }
+  }
+
+  static String? _normalizeQuotedReply(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return null;
+    }
+
+    final collapsedWhitespace = trimmed.replaceAll(RegExp(r'\s+'), ' ');
+    var normalized = collapsedWhitespace;
+    while (normalized.isNotEmpty && _isQuoteCharacter(normalized[0])) {
+      normalized = normalized.substring(1).trimLeft();
+    }
+    while (normalized.isNotEmpty &&
+        _isQuoteCharacter(normalized[normalized.length - 1])) {
+      normalized = normalized.substring(0, normalized.length - 1).trimRight();
+    }
+    normalized = normalized.replaceAll(RegExp(r'[.!?]+$'), '').trim();
+
+    if (normalized.isEmpty) {
+      return null;
+    }
+
+    return normalized;
+  }
+
+  static bool _isQuoteCharacter(String value) {
+    return value == '"' ||
+        value == '\'' ||
+        value == '`' ||
+        value == '“' ||
+        value == '”' ||
+        value == '„';
+  }
+
   static String _likelyCoreFor(
     SituationEntryData entry,
     AiReflectionMode mode,
   ) {
+    final neededSupport = _primaryNeededSupport(entry);
     if (mode == AiReflectionMode.stabilize) {
       return 'Wahrscheinlich ist gerade nicht mehr Analyse, sondern weniger Druck der hilfreichste Kern.';
+    }
+    if (neededSupport != null) {
+      return 'Möglich ist, dass hier weniger nur der Auslöser, sondern eher das fehlende $neededSupport mitgewirkt hat.';
     }
     if ((entry.backgroundTheme ?? '').trim().isNotEmpty) {
       return 'Möglich ist, dass nicht nur der Auslöser, sondern auch ${entry.backgroundTheme!.trim()} mitgewirkt hat.';
@@ -201,6 +283,16 @@ class AiReflectionLocalFallback {
     }
     if ((entry.preTriggerLoad ?? 0) >= 7) {
       return 'Gekippt ist es wahrscheinlich schon, als der Kopf vorher voll war und die Reizbarkeit gestiegen ist.';
+    }
+    if (entry.tippingPointAwareness == 'early') {
+      return 'Der Kipppunkt war schon früh merkbar. Dort lohnt sich eher eine bewusste Entscheidung als späteres Reparieren.';
+    }
+    if (entry.tippingPointAwareness == 'late') {
+      return 'Der Kipppunkt war wohl mitten in der laufenden Eskalation merkbar. Dort braucht es eher eine kurze Unterbrechung als mehr Analyse.';
+    }
+    if (entry.tippingPointAwareness == 'afterwards' ||
+        entry.tippingPointAwareness == 'none') {
+      return 'Der früheste Kipppunkt war wahrscheinlich ein Körper- oder Spannungszeichen, das erst später klar wurde.';
     }
     if (entry.bodyTension >= 7) {
       return 'Ein früher Kipppunkt war wahrscheinlich der Moment, in dem die körperliche Anspannung deutlich hochging.';
@@ -255,6 +347,10 @@ class AiReflectionLocalFallback {
       case AiReflectionMode.organize:
         return 'Halte einen kurzen Lernsatz fest und lass es für heute dabei bewenden.';
       case AiReflectionMode.redirect:
+        final realisticAlternative = entry.realisticAlternative?.trim();
+        if (realisticAlternative != null && realisticAlternative.isNotEmpty) {
+          return 'Notiere kurz, was dich früher zu "$realisticAlternative" gebracht hätte.';
+        }
         return 'Notiere den frühesten Kipppunkt in einem Satz, damit du ihn nächstes Mal früher erkennst.';
       case AiReflectionMode.understand:
         return 'Schreibe in einem Satz auf, was wahrscheinlich das eigentliche Thema hinter dem Anlass war.';
@@ -265,15 +361,27 @@ class AiReflectionLocalFallback {
     SituationEntryData entry,
     AiReflectionMode mode,
   ) {
+    final neededSupport = _primaryNeededSupport(entry);
     if (mode == AiReflectionMode.stabilize) {
       return 'Erst runterkommen, dann sortieren.';
+    }
+    if (neededSupport != null) {
+      return '$neededSupport zuerst, dann der Rest.';
     }
     if ((entry.preTriggerLoad ?? 0) >= 7 ||
         entry.triggerAsLastDrop == 'yes' ||
         entry.triggerAsLastDrop == 'partly') {
-      return 'Nicht nur der Auslöser, sondern auch der volle Kopf hat mitgewirkt.';
+      return 'Wenn du schon voll bist, ist früheres Entlasten der eigentliche Schritt.';
     }
     return null;
+  }
+
+  static String? _primaryNeededSupport(SituationEntryData entry) {
+    final decoded = _decodeStringList(entry.neededSupports);
+    if (decoded.isEmpty) {
+      return null;
+    }
+    return decoded.first.toLowerCase();
   }
 
   static List<String> _decodeStringList(String? raw) {

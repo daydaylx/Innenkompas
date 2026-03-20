@@ -1,25 +1,33 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:innenkompass/app/router.dart';
 import 'package:innenkompass/core/constants/app_constants.dart';
+import 'package:innenkompass/core/constants/intervention_types.dart'
+    show InterventionType;
 import 'package:innenkompass/domain/models/intervention.dart';
 import 'package:innenkompass/domain/models/intervention_library.dart';
 import 'package:innenkompass/domain/models/intervention_step.dart';
 import 'package:innenkompass/application/providers/intervention_providers.dart';
+import 'package:innenkompass/data/db/app_database.dart';
 import 'package:innenkompass/shared/widgets/app_scaffold.dart';
 import 'package:innenkompass/shared/widgets/buttons/app_primary_button.dart';
 import 'package:innenkompass/shared/widgets/buttons/app_secondary_button.dart';
+import 'package:innenkompass/shared/widgets/cards/app_card.dart';
 import 'package:innenkompass/features/intervention/widgets/intervention_step_renderer.dart';
 import 'package:innenkompass/features/intervention/widgets/progress_indicator.dart';
 
 /// Screen für die Durchführung einer Intervention
 class InterventionScreen extends ConsumerStatefulWidget {
   final String? interventionId;
+  final String? completionRoute;
 
   const InterventionScreen({
     super.key,
     this.interventionId,
+    this.completionRoute,
   });
 
   @override
@@ -69,6 +77,9 @@ class _InterventionScreenState extends ConsumerState<InterventionScreen> {
   Widget build(BuildContext context) {
     final flowState = ref.watch(interventionFlowStateProvider);
     final intervention = flowState.intervention;
+    final entryId = flowState.entryId;
+    final entryAsync =
+        entryId == null ? null : ref.watch(interventionEntryProvider(entryId));
 
     if (intervention == null) {
       return AppScaffold(
@@ -127,15 +138,47 @@ class _InterventionScreenState extends ConsumerState<InterventionScreen> {
                 ? const Center(child: CircularProgressIndicator())
                 : SingleChildScrollView(
                     padding: const EdgeInsets.all(AppConstants.spacingMedium),
-                    child: InterventionStepRenderer(
-                      key: ValueKey(currentStep.id),
-                      step: currentStep,
-                      onResponse: (response) {
-                        ref
-                            .read(interventionFlowStateProvider.notifier)
-                            .saveStepResponse(response);
-                      },
-                      existingResponse: flowState.stepResponses[currentStep.id],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (currentStepIndex == 0 && entryAsync != null)
+                          entryAsync.maybeWhen(
+                            data: (entry) {
+                              if (entry == null) {
+                                return const SizedBox.shrink();
+                              }
+                              final intro = _contextualIntroFor(
+                                entry: entry,
+                                intervention: intervention,
+                              );
+                              if (intro == null) {
+                                return const SizedBox.shrink();
+                              }
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: AppConstants.spacingMedium,
+                                ),
+                                child: AppCard(
+                                  variant: AppCardVariant.soft,
+                                  margin: EdgeInsets.zero,
+                                  child: Text(intro),
+                                ),
+                              );
+                            },
+                            orElse: () => const SizedBox.shrink(),
+                          ),
+                        InterventionStepRenderer(
+                          key: ValueKey(currentStep.id),
+                          step: currentStep,
+                          onResponse: (response) {
+                            ref
+                                .read(interventionFlowStateProvider.notifier)
+                                .saveStepResponse(response);
+                          },
+                          existingResponse:
+                              flowState.stepResponses[currentStep.id],
+                        ),
+                      ],
                     ),
                   ),
           ),
@@ -233,6 +276,8 @@ class _InterventionScreenState extends ConsumerState<InterventionScreen> {
   /// Handle Weiter-Button
   void _handleNext(Intervention intervention) {
     final flowState = ref.read(interventionFlowStateProvider);
+    final shouldResumeDraftFlow =
+        widget.completionRoute != null && flowState.entryId == null;
 
     if (flowState.currentStepIndex < intervention.steps.length - 1) {
       // Weiter zum nächsten Schritt
@@ -240,6 +285,12 @@ class _InterventionScreenState extends ConsumerState<InterventionScreen> {
     } else {
       // Intervention abschließen
       ref.read(interventionFlowStateProvider.notifier).completeIntervention();
+      if (shouldResumeDraftFlow) {
+        ref.read(postEvaluationStateProvider.notifier).reset();
+        ref.read(interventionFlowStateProvider.notifier).reset();
+        context.go(widget.completionRoute!);
+        return;
+      }
       // Zur Nachbewertung
       context.push(AppRoutes.postEvaluation);
     }
@@ -249,22 +300,29 @@ class _InterventionScreenState extends ConsumerState<InterventionScreen> {
   void _showAbortDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Intervention abbrechen?'),
         content: const Text(
           'Möchtest du diese Intervention wirklich abbrechen? Deine Fortschritte gehen verloren.',
         ),
         actions: [
           TextButton(
-            onPressed: () => context.pop(),
+            onPressed: () => dialogContext.pop(),
             child: const Text('Abbrechen'),
           ),
           TextButton(
             onPressed: () {
+              final shouldReturnToDraft = widget.completionRoute != null &&
+                  ref.read(interventionFlowStateProvider).entryId == null;
               ref
                   .read(interventionFlowStateProvider.notifier)
                   .abortIntervention();
-              context.go(AppRoutes.home);
+              dialogContext.pop();
+              if (shouldReturnToDraft) {
+                this.context.pop();
+                return;
+              }
+              this.context.go(AppRoutes.home);
             },
             child: const Text(
               'Ja, abbrechen',
@@ -274,5 +332,86 @@ class _InterventionScreenState extends ConsumerState<InterventionScreen> {
         ],
       ),
     );
+  }
+
+  String? _contextualIntroFor({
+    required SituationEntryData entry,
+    required Intervention intervention,
+  }) {
+    final neededSupports = _decodeStringList(entry.neededSupports);
+    final bodyReactions = _decodeStringList(entry.initialBodyReactions);
+    final realisticAlternative = entry.realisticAlternative?.trim();
+    final preEscalationRelief = entry.preEscalationRelief?.trim();
+    final triggerAsLastDrop = entry.triggerAsLastDrop;
+    final highPreload = (entry.preTriggerLoad ?? 0) >= 8 &&
+        (triggerAsLastDrop == 'yes' || triggerAsLastDrop == 'partly');
+
+    switch (intervention.type) {
+      case InterventionType.regulation:
+        if (bodyReactions.isNotEmpty) {
+          return 'Du hast ${bodyReactions.first.toLowerCase()} beschrieben. Setz in dieser Übung genau dort an und nimm dieses Körpersignal als Startpunkt.';
+        }
+        if (highPreload) {
+          return 'Du warst offenbar schon vor dem Auslöser sehr voll. Diese Übung soll nicht alles lösen, sondern den Druck zuerst etwas senken.';
+        }
+        break;
+      case InterventionType.impulsePause:
+        if (entry.tippingPointAwareness == 'late') {
+          return 'Du hast den Kipppunkt erst mittendrin bemerkt. Nutze diese Übung als kurze Unterbrechung genau in diesem laufenden Moment.';
+        }
+        if (entry.tippingPointAwareness == 'early') {
+          return 'Du hast den Kipppunkt schon früh bemerkt. Diese Übung hilft dir, dieses frühe Signal ernster zu nehmen und früher zu stoppen.';
+        }
+        break;
+      case InterventionType.factCheck:
+      case InterventionType.communication:
+      case InterventionType.selfValueCheck:
+        if (realisticAlternative != null && realisticAlternative.isNotEmpty) {
+          return 'Du hast selbst notiert: "$realisticAlternative". Nutze diese Übung, um diesen realistischeren Zielpunkt greifbarer zu machen.';
+        }
+        break;
+      case InterventionType.overwhelmStructure:
+        if (highPreload) {
+          return 'Der Auslöser wirkt eher wie der letzte Tropfen auf viel Vorbelastung. Hier geht es zuerst darum, wieder etwas Struktur und Luft hineinzubringen.';
+        }
+        break;
+      case InterventionType.ruminationStop:
+        if (preEscalationRelief != null && preEscalationRelief.isNotEmpty) {
+          return 'Du hast schon beschrieben, was früher etwas Druck herausgenommen hätte: "$preEscalationRelief". Nutze das hier als Spur für einen kleinen Unterbruch.';
+        }
+        break;
+      case InterventionType.abc3:
+      case InterventionType.rsaAbcde:
+        break;
+    }
+
+    if (neededSupports.isNotEmpty) {
+      return 'Du hast in dem Moment eher ${neededSupports.first.toLowerCase()} gebraucht. Nimm diese Übung als Versuch, dir davon jetzt etwas eher zu geben.';
+    }
+    if (highPreload) {
+      return 'Der Auslöser wirkt eher wie der letzte Tropfen auf schon hohe Vorbelastung. Diese Übung setzt deshalb zuerst bei Entlastung an.';
+    }
+    return null;
+  }
+
+  List<String> _decodeStringList(String? raw) {
+    if (raw == null || raw.trim().isEmpty) {
+      return const [];
+    }
+
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is List) {
+        return decoded
+            .whereType<String>()
+            .map((value) => value.trim())
+            .where((value) => value.isNotEmpty)
+            .toList(growable: false);
+      }
+    } catch (_) {
+      return const [];
+    }
+
+    return const [];
   }
 }

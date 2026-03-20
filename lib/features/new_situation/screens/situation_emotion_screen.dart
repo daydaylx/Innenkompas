@@ -84,7 +84,47 @@ class _SituationEmotionScreenState
           ),
         );
 
-    context.push(AppRoutes.newSituationThoughtImpulse);
+    if (_intensity >= 8 || _bodyTension >= 7) {
+      _showHighIntensityDialog();
+    } else {
+      context.push(AppRoutes.newSituationThoughtImpulse);
+    }
+  }
+
+  void _showHighIntensityDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Dein System ist gerade sehr aktiviert'),
+        content: const Text(
+          'Bei hoher Aktivierung fällt Reflexion oft schwerer. '
+          'Möchtest du dich erst kurz stabilisieren? '
+          'Danach kannst du die Erfassung mit etwas mehr Abstand fortsetzen.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              context.push(AppRoutes.newSituationThoughtImpulse);
+            },
+            child: const Text('Weiter erfassen'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              context.push(
+                AppRoutes.intervention,
+                extra: {
+                  'interventionId': 'regulation_4_6_breathing',
+                  'completionRoute': AppRoutes.newSituationThoughtImpulse,
+                },
+              );
+            },
+            child: const Text('Erst stabilisieren'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _handleBack() {

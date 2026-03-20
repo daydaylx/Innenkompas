@@ -110,8 +110,18 @@ class EvaluationContentBundle {
     background: {
       'background_pressure_already_high':
           'Wahrscheinlich war die innere Belastung schon vorher erhöht.',
+      'background_need_rest':
+          'Du hast wahrscheinlich eher Ruhe, Abstand oder eine Pause gebraucht. Das ist nicht zu viel verlangt.',
+      'background_need_validation':
+          'Du hast wahrscheinlich eher Zuspruch, Verständnis oder Ernstgenommenwerden gebraucht. Das ist nicht zu viel verlangt.',
+      'background_need_clarity':
+          'Du hast wahrscheinlich eher Klarheit, Struktur oder Entscheidungshilfe gebraucht als noch mehr inneren Druck.',
+      'background_need_support':
+          'Du hättest hier wahrscheinlich eher Unterstützung gebraucht, nicht noch mehr Allein-durchhalten.',
+      'background_need_boundaries':
+          'Es wirkt so, als hättest du eher klare Grenzen oder Schutz gebraucht als weitere Anpassung.',
       'background_need_hit':
-          'Es scheint weniger nur um den Anlass zu gehen, sondern um etwas, das in dir getroffen wurde.',
+          'Es scheint weniger nur um den Anlass zu gehen, sondern darum, dass in dir etwas Wichtiges getroffen wurde.',
       'background_interpretation':
           'Ein Teil des Drucks kommt vermutlich aus Deutung, Befürchtung oder innerem Vorausdenken.',
       'background_control':
@@ -126,6 +136,8 @@ class EvaluationContentBundle {
     helpfulNow: {
       'helpful_stabilize_body':
           'Gerade ist Stabilisierung hilfreicher als weiteres Analysieren.',
+      'helpful_reduce_load_before_trigger':
+          'Wichtiger als weitere Analyse ist hier wahrscheinlich, die Vorbelastung früher zu bemerken und schon davor etwas Druck herauszunehmen.',
       'helpful_reduce_input':
           'Weniger Reize und mehr Abstand wären jetzt wahrscheinlich hilfreicher als weitere Klärung.',
       'helpful_pause_before_contact':
@@ -142,6 +154,10 @@ class EvaluationContentBundle {
           'Der früheste Abzweig lag wahrscheinlich schon vor dem Auslöser, bei der Vorbelastung.',
       'learning_notice_body_first':
           'Der früheste merkbare Punkt war wahrscheinlich im Körper und nicht erst im Verhalten.',
+      'learning_pause_inside_moment':
+          'Der hilfreiche Lernpunkt liegt wahrscheinlich mitten im Moment: eine kurze Pause, bevor die Eskalation ganz übernimmt.',
+      'learning_decide_earlier':
+          'Du hast den Kipppunkt schon früh bemerkt. Der Lernpunkt wäre, dieses frühe Signal ernster zu nehmen und früher zu entscheiden.',
       'learning_name_automatic_thought':
           'Ein früher Abzweig könnte sein, den ersten Gedanken schneller als Deutung zu erkennen.',
       'learning_interrupt_pattern':
@@ -169,6 +185,10 @@ class EvaluationContentBundle {
       'write_alternative_view': 'Eine realistischere Sicht dazuschreiben.',
       'limit_thinking_loop': 'Die Gedankenspirale bewusst begrenzen.',
       'choose_one_step': 'Nur den kleinsten nächsten Schritt festlegen.',
+      'check_load_before_contact':
+          'Vor dem nächsten ähnlichen Moment kurz prüfen, wie voll du innerlich schon bist.',
+      'honor_early_signal':
+          'Das frühe Kippsignal ernst nehmen und lieber früher abbremsen.',
       'reduce_stimuli': 'Reize und Input erst einmal reduzieren.',
       'collect_counterevidence':
           'Gegenbelege sammeln, bevor du dich bewertest.',
@@ -198,6 +218,10 @@ class EvaluationContentBundle {
       'limit_loop': 'Setze der Denkschleife bewusst eine Grenze.',
       'repetition_not_clarity':
           'Mehr darüber nachdenken ist nicht automatisch mehr Klarheit.',
+      'notice_load_before_trigger':
+          'Prüfe früher, wie hoch deine innere Vorbelastung schon ist, bevor noch ein Auslöser dazukommt.',
+      'protect_small_buffer':
+          'Wenn du innerlich schon bei 7 bist, ist ein kleiner Puffer oft wichtiger als noch mehr Durchhalten.',
       'not_everything_at_once': 'Nicht alles gleichzeitig lösen wollen.',
       'reduce_stimuli_then_plan': 'Erst Reize runter, dann planen.',
       'more_analysis_not_solution':

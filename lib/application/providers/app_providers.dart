@@ -68,14 +68,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         const SituationThoughtImpulseScreen(),
     newSituationReflectionScreen: (context, state) =>
         const SituationReflectionScreen(),
-    interventionScreen: (context, state) => InterventionScreen(
-      interventionId: state.uri.queryParameters['id'] ??
-          ((state.extra is Map<String, dynamic>)
-              ? ((state.extra as Map<String, dynamic>)['interventionId']
-                      as String?) ??
-                  ((state.extra as Map<String, dynamic>)['type'] as String?)
-              : null),
-    ),
+    interventionScreen: (context, state) {
+      final extra = state.extra is Map<String, dynamic>
+          ? state.extra as Map<String, dynamic>
+          : null;
+      return InterventionScreen(
+        interventionId: state.uri.queryParameters['id'] ??
+            (extra?['interventionId'] as String?) ??
+            (extra?['type'] as String?),
+        completionRoute: extra?['completionRoute'] as String?,
+      );
+    },
     postEvaluationScreen: (context, state) => const PostEvaluationScreen(),
     entryEvaluationScreen: (context, state) {
       final id = int.tryParse(state.pathParameters['id'] ?? '');

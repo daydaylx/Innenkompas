@@ -105,4 +105,64 @@ void main() {
     expect(summary.intensityTrend.first.date, DateTime(2026, 3, 1));
     expect(summary.intensityTrend.last.date, DateTime(2026, 3, 5));
   });
+
+  test('builds a lightweight repeated-pattern hint for matching context/state',
+      () {
+    final entries = List.generate(
+      4,
+      (index) => SituationEntryData(
+        id: index + 1,
+        situationDescription: 'Wiederkehrende Arbeitssituation $index',
+        context: 'work',
+        timestamp: DateTime(2026, 3, 10 + index, 9, 0),
+        involvedPerson: null,
+        intensity: 8,
+        bodyTension: 7,
+        primaryEmotion: 'fear',
+        secondaryEmotion: null,
+        bodySymptoms: null,
+        automaticThought: 'Das kippt gleich.',
+        firstImpulse: 'withdraw',
+        factInterpretationResult: null,
+        actualBehavior: null,
+        needOrWoundedPoint: null,
+        nextStep: null,
+        systemState: 'overwhelm',
+        isCrisis: false,
+        evaluationHeadlineKey: null,
+        evaluationMeaningKey: null,
+        suggestedTipIds: null,
+        suggestedNextActionKey: null,
+        selectedNextActionKey: null,
+        aiEvaluationStatus: null,
+        aiEvaluationProvider: null,
+        aiEvaluationModel: null,
+        aiEvaluationRequestedAt: null,
+        aiEvaluationCompletedAt: null,
+        aiEvaluationConsentGiven: false,
+        aiEvaluationText: null,
+        aiEvaluationSchemaVersion: null,
+        interventionType: null,
+        interventionId: null,
+        interventionCompleted: false,
+        interventionDurationSec: null,
+        postIntensity: null,
+        postBodyTension: null,
+        postClarity: null,
+        helpfulnessRating: null,
+        postNote: null,
+        createdAt: DateTime(2026, 3, 10 + index, 10, 0),
+        updatedAt: DateTime(2026, 3, 10 + index, 10, 0),
+        isDraft: false,
+      ),
+    );
+
+    final hint = PatternAnalyzer.buildEntryPatternHint(
+      entry: entries.last,
+      entries: entries,
+    );
+
+    expect(hint, contains('wiederholt in Arbeit'));
+    expect(hint, contains('überforderung'));
+  });
 }

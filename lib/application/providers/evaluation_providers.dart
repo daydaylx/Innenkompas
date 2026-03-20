@@ -25,6 +25,20 @@ final evaluationEntryProvider =
   return db.getSituationEntryById(entryId);
 });
 
+final evaluationPatternHintProvider =
+    FutureProvider.family<String?, int>((ref, entryId) async {
+  final db = ref.watch(databaseProvider);
+  final entry = await db.getSituationEntryById(entryId);
+  if (entry == null) {
+    return null;
+  }
+  final entries = await db.getAllSituationEntries();
+  return PatternAnalyzer.buildEntryPatternHint(
+    entry: entry,
+    entries: entries,
+  );
+});
+
 /// Compile-time feature configuration for the optional AI evaluation flow.
 final aiEvaluationConfigProvider = Provider<AiEvaluationConfig>((ref) {
   return AiEvaluationConfig.fromEnvironment();

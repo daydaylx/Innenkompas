@@ -241,7 +241,7 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
                             : () => _startIntervention(
                                   selectedActionKey,
                                   entry,
-                                  resolvedIntervention!,
+                                  resolvedIntervention,
                                 ),
                         label: 'Passende Übung starten',
                         isLoading: _isSavingAction,

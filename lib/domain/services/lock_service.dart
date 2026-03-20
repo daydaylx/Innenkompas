@@ -146,7 +146,8 @@ class LockService {
         return true;
       }
 
-      final isLegacyPlaintextPin = !_isHashedPin(storedPin) && storedPin == pin;
+      final isLegacyPlaintextPin =
+          !_isHashedPin(storedPin) && _constantTimeEquals(storedPin, pin);
       if (!isLegacyPlaintextPin) {
         return false;
       }
@@ -262,5 +263,14 @@ class LockService {
 
   static bool _isHashedPin(String value) {
     return value.startsWith(_hashedPinPrefix);
+  }
+
+  static bool _constantTimeEquals(String a, String b) {
+    if (a.length != b.length) return false;
+    var result = 0;
+    for (var i = 0; i < a.length; i++) {
+      result |= a.codeUnitAt(i) ^ b.codeUnitAt(i);
+    }
+    return result == 0;
   }
 }

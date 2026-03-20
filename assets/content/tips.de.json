@@ -12,6 +12,8 @@
     "choose_next_step": "Wenn ja: wähle einen nächsten Schritt.",
     "limit_loop": "Wenn nein: begrenze die Denkschleife bewusst.",
     "repetition_not_clarity": "Wiederholung ist nicht automatisch Klärung.",
+    "notice_load_before_trigger": "Prüfe früher, wie hoch deine innere Vorbelastung schon ist, bevor noch ein Auslöser dazukommt.",
+    "protect_small_buffer": "Wenn du innerlich schon bei 7 bist, ist ein kleiner Puffer oft wichtiger als noch mehr Durchhalten.",
     "not_everything_at_once": "Nicht alles gleichzeitig lösen.",
     "reduce_stimuli_then_plan": "Erst Reize reduzieren, dann planen.",
     "more_analysis_not_solution": "Wenn alles zu viel ist, ist mehr Analyse oft nicht die Lösung.",

@@ -22,6 +22,13 @@ void main() {
         final body = jsonDecode(request.body) as Map<String, dynamic>;
         expect(body['model'], 'openai/gpt-4.1-mini');
         expect(body['messages'], isA<List<dynamic>>());
+        final messages = body['messages'] as List<dynamic>;
+        final payload = jsonDecode(messages[1]['content'] as String)
+            as Map<String, dynamic>;
+        final entry = payload['entry'] as Map<String, dynamic>;
+        expect(entry['needed_supports'], contains('Verständnis'));
+        expect(entry['need_or_wounded_point'], contains('ernst genommen'));
+        expect(entry['pattern_familiarity'], 'sometimes');
 
         return http.Response(
           jsonEncode({
@@ -222,7 +229,10 @@ SituationEntryData _entry({bool isCrisis = false}) {
     factInterpretationResult: 'mostlyInterpretation',
     actualBehavior: 'Ich habe erst einmal nichts geantwortet.',
     actualBehaviorTags: jsonEncode(const ['zurückgezogen']),
+    needOrWoundedPoint: 'Ich will ernst genommen werden.',
+    neededSupports: jsonEncode(const ['Verständnis']),
     realisticAlternative: 'Kurz stoppen und sagen, dass ich später antworte.',
+    patternFamiliarity: 'sometimes',
     nextStep: 'Ich notiere zuerst die Fakten.',
     systemState: isCrisis ? 'crisis' : 'interpretation',
     isCrisis: isCrisis,

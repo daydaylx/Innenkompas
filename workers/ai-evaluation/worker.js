@@ -373,6 +373,10 @@ Moduslogik:
 - redirect: frühester Kipppunkt, kleine realistische Alternative
 - organize: kurz sortieren ohne Tiefenanalyse
 - stabilize: Stabilisierung vor Analyse, nur machbare Beruhigung
+
+Wichtig fuer redirect:
+- Wenn bereits eine realistic_alternative im Input steht, frage NICHT erneut nach einer Alternative.
+- Nutze sie stattdessen als Ausgangspunkt und frage, was frueher dorthin geholfen haette oder woran der Kipppunkt merkbar gewesen waere.
 `.trim();
 
 const REFLECTION_COMPLETE_PROMPT = `
@@ -399,6 +403,7 @@ Qualitätsregeln:
 - Keine Wiederholung derselben Aussage in allen Feldern.
 - Wenn die Faktenlage dünn ist, Unsicherheit knapp benennen.
 - Im stabilize-Modus Fokus auf Entlastung, Unterbrechung und späteren Wiedereinstieg.
+- Wenn bereits eine realistic_alternative im Input steht, verwende sie als Ausgangspunkt statt eine neue, redundante Alternative zu erfinden.
 `.trim();
 
 export default {

@@ -151,6 +151,36 @@ void main() {
       expect(find.text('Kurz ordnen'), findsNothing);
       expect(find.text('Später mit Abstand reflektieren'), findsOneWidget);
     });
+
+    testWidgets('shows a lightweight repeated pattern hint in the evaluation',
+        (WidgetTester tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+
+      for (var i = 0; i < 3; i++) {
+        await _insertEntry(
+          database,
+          status: 'failed',
+          consentGiven: true,
+          requestedAt: DateTime.now().subtract(const Duration(minutes: 1)),
+        );
+      }
+
+      final entryId = await _insertEntry(
+        database,
+        status: 'failed',
+        consentGiven: true,
+        requestedAt: DateTime.now().subtract(const Duration(minutes: 1)),
+      );
+
+      await _pumpScreen(
+        tester,
+        database: database,
+        entryId: entryId,
+      );
+
+      expect(find.textContaining('wiederholt in Arbeit'), findsOneWidget);
+    });
   });
 }
 

@@ -25,6 +25,9 @@ class EvaluationEngine {
     required TippingPointAwareness tippingPointAwareness,
     required TriggerAsLastDrop triggerAsLastDrop,
     required List<String> touchedThemes,
+    required List<String> neededSupports,
+    String? needOrWoundedPoint,
+    String? backgroundTheme,
   }) {
     final statusKeys = _statusKeysFor(
       systemState: systemState,
@@ -38,6 +41,10 @@ class EvaluationEngine {
     final nextActionOptions = _nextActionOptionsFor(
       statusKeys: statusKeys,
       systemState: systemState,
+      preTriggerLoad: preTriggerLoad,
+      triggerAsLastDrop: triggerAsLastDrop,
+      neededSupports: neededSupports,
+      tippingPointAwareness: tippingPointAwareness,
       factInterpretation: factInterpretation,
       context: context,
       systemReaction: systemReaction,
@@ -58,10 +65,16 @@ class EvaluationEngine {
         factInterpretation: factInterpretation,
         triggerAsLastDrop: triggerAsLastDrop,
         touchedThemes: touchedThemes,
+        neededSupports: neededSupports,
+        needOrWoundedPoint: needOrWoundedPoint,
+        backgroundTheme: backgroundTheme,
         context: context,
       ),
       helpfulNowKey: _helpfulNowKeyFor(
         statusKeys: statusKeys,
+        preTriggerLoad: preTriggerLoad,
+        triggerAsLastDrop: triggerAsLastDrop,
+        neededSupports: neededSupports,
         factInterpretation: factInterpretation,
         systemReaction: systemReaction,
       ),
@@ -80,6 +93,8 @@ class EvaluationEngine {
         factInterpretation: factInterpretation,
         systemReaction: systemReaction,
         thoughtPatterns: thoughtPatterns,
+        preTriggerLoad: preTriggerLoad,
+        triggerAsLastDrop: triggerAsLastDrop,
         intensity: intensity,
         bodyTension: bodyTension,
       ),
@@ -174,16 +189,64 @@ class EvaluationEngine {
     required FactInterpretationResult factInterpretation,
     required TriggerAsLastDrop triggerAsLastDrop,
     required List<String> touchedThemes,
+    required List<String> neededSupports,
+    required String? needOrWoundedPoint,
+    required String? backgroundTheme,
     required ContextType context,
   }) {
     if (systemState == SystemState.crisis) {
       return 'background_safety_first';
     }
-    if (preTriggerLoad >= 7) {
-      return 'background_pressure_already_high';
+    final normalizedSupportSet =
+        neededSupports.map((value) => value.trim()).toSet();
+    final normalizedNeedOrWoundedPoint = needOrWoundedPoint?.trim();
+    final normalizedBackgroundTheme = backgroundTheme?.trim();
+
+    if (normalizedSupportSet.any(
+      (value) => {
+        'Ruhe',
+        'Abstand',
+        'Pause',
+        'Schlaf oder körperliche Entlastung',
+      }.contains(value),
+    )) {
+      return 'background_need_rest';
+    }
+    if (normalizedSupportSet.any(
+      (value) => {
+        'Zuspruch',
+        'Ernst genommen werden',
+        'Verständnis',
+      }.contains(value),
+    )) {
+      return 'background_need_validation';
+    }
+    if (normalizedSupportSet.any(
+      (value) => {
+        'Klarheit',
+        'Struktur',
+        'Entscheidungshilfe',
+      }.contains(value),
+    )) {
+      return 'background_need_clarity';
+    }
+    if (normalizedSupportSet.contains('Hilfe')) {
+      return 'background_need_support';
+    }
+    if (normalizedSupportSet.contains('Grenzen')) {
+      return 'background_need_boundaries';
+    }
+    if ((normalizedNeedOrWoundedPoint != null &&
+            normalizedNeedOrWoundedPoint.isNotEmpty) ||
+        (normalizedBackgroundTheme != null &&
+            normalizedBackgroundTheme.isNotEmpty)) {
+      return 'background_need_hit';
     }
     if (factInterpretation == FactInterpretationResult.mostlyInterpretation) {
       return 'background_interpretation';
+    }
+    if (preTriggerLoad >= 7) {
+      return 'background_pressure_already_high';
     }
     if (triggerAsLastDrop != TriggerAsLastDrop.no) {
       return 'background_need_hit';
@@ -204,11 +267,25 @@ class EvaluationEngine {
 
   static String _helpfulNowKeyFor({
     required List<String> statusKeys,
+    required int preTriggerLoad,
+    required TriggerAsLastDrop triggerAsLastDrop,
+    required List<String> neededSupports,
     required FactInterpretationResult factInterpretation,
     required SystemReactionType systemReaction,
   }) {
     if (statusKeys.contains('stabilize_before_analysis')) {
       return 'helpful_stabilize_body';
+    }
+    if (preTriggerLoad >= 8 &&
+        (triggerAsLastDrop == TriggerAsLastDrop.yes ||
+            triggerAsLastDrop == TriggerAsLastDrop.partly)) {
+      return 'helpful_reduce_load_before_trigger';
+    }
+    if (neededSupports.any(
+      (value) =>
+          value == 'Hilfe' || value == 'Zuspruch' || value == 'Verständnis',
+    )) {
+      return 'helpful_seek_support';
     }
     if (systemReaction == SystemReactionType.attack ||
         systemReaction == SystemReactionType.flight) {
@@ -217,7 +294,10 @@ class EvaluationEngine {
     if (factInterpretation == FactInterpretationResult.mostlyInterpretation) {
       return 'helpful_name_facts';
     }
-    if (statusKeys.contains('strong_inner_pressure')) {
+    if (statusKeys.contains('strong_inner_pressure') ||
+        neededSupports.any(
+          (value) => value == 'Ruhe' || value == 'Abstand' || value == 'Pause',
+        )) {
       return 'helpful_reduce_input';
     }
     return 'helpful_choose_small_step';
@@ -241,6 +321,12 @@ class EvaluationEngine {
         tippingPointAwareness == TippingPointAwareness.none) {
       return 'learning_notice_body_first';
     }
+    if (tippingPointAwareness == TippingPointAwareness.late) {
+      return 'learning_pause_inside_moment';
+    }
+    if (tippingPointAwareness == TippingPointAwareness.early) {
+      return 'learning_decide_earlier';
+    }
     if (factInterpretation == FactInterpretationResult.mostlyInterpretation) {
       return 'learning_name_automatic_thought';
     }
@@ -253,6 +339,10 @@ class EvaluationEngine {
   static List<String> _nextActionOptionsFor({
     required List<String> statusKeys,
     required SystemState systemState,
+    required int preTriggerLoad,
+    required TriggerAsLastDrop triggerAsLastDrop,
+    required List<String> neededSupports,
+    required TippingPointAwareness tippingPointAwareness,
     required FactInterpretationResult factInterpretation,
     required ContextType context,
     required SystemReactionType systemReaction,
@@ -265,11 +355,35 @@ class EvaluationEngine {
       ];
     }
 
+    if (preTriggerLoad >= 8 &&
+        (triggerAsLastDrop == TriggerAsLastDrop.yes ||
+            triggerAsLastDrop == TriggerAsLastDrop.partly)) {
+      return [
+        'check_load_before_contact',
+        'reduce_stimuli',
+        if (neededSupports.any(
+          (value) =>
+              value == 'Hilfe' || value == 'Zuspruch' || value == 'Verständnis',
+        ))
+          'seek_support_now'
+        else
+          'choose_one_step',
+      ];
+    }
+
     if (statusKeys.contains('stabilize_before_analysis')) {
       return const [
         'regulate_body_first',
         'reduce_stimuli',
         'pause_now',
+      ];
+    }
+
+    if (tippingPointAwareness == TippingPointAwareness.early) {
+      return const [
+        'honor_early_signal',
+        'address_later',
+        'choose_one_step',
       ];
     }
 
@@ -319,6 +433,8 @@ class EvaluationEngine {
     required FactInterpretationResult factInterpretation,
     required SystemReactionType systemReaction,
     required List<String> thoughtPatterns,
+    required int preTriggerLoad,
+    required TriggerAsLastDrop triggerAsLastDrop,
     required int intensity,
     required int bodyTension,
   }) {
@@ -338,6 +454,15 @@ class EvaluationEngine {
       addAll(const [
         'regulate_body_before_analysis',
         'do_not_react_first_impulse',
+      ]);
+    }
+
+    if (preTriggerLoad >= 7 ||
+        triggerAsLastDrop == TriggerAsLastDrop.yes ||
+        triggerAsLastDrop == TriggerAsLastDrop.partly) {
+      addAll(const [
+        'notice_load_before_trigger',
+        'protect_small_buffer',
       ]);
     }
 

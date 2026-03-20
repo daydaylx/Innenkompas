@@ -14,7 +14,7 @@ void main() {
       final result = EvaluationEngine.evaluate(
         systemState: SystemState.interpretation,
         primaryEmotion: EmotionType.fear,
-        preTriggerLoad: 7,
+        preTriggerLoad: 8,
         intensity: 6,
         bodyTension: 5,
         systemReaction: SystemReactionType.control,
@@ -25,13 +25,17 @@ void main() {
         tippingPointAwareness: TippingPointAwareness.afterwards,
         triggerAsLastDrop: TriggerAsLastDrop.yes,
         touchedThemes: const ['Kontrolle'],
+        neededSupports: const ['Klarheit'],
+        needOrWoundedPoint: 'Getroffen: Kontrolle. Gebraucht: Klarheit.',
+        backgroundTheme: 'Leistungsdruck',
       );
 
       expect(result.whatStandsOutKey, 'small_trigger_big_load');
-      expect(result.whatMayBeBehindItKey, 'background_pressure_already_high');
-      expect(result.suggestedTipIds, contains('check_facts_not_assumptions'));
-      expect(result.suggestedNextActionKey, 'check_facts_first');
-      expect(result.nextActionOptions, contains('write_alternative_view'));
+      expect(result.whatMayBeBehindItKey, 'background_need_clarity');
+      expect(result.learningPointKey, 'learning_before_trigger');
+      expect(result.suggestedTipIds, contains('notice_load_before_trigger'));
+      expect(result.suggestedNextActionKey, 'check_load_before_contact');
+      expect(result.nextActionOptions, contains('reduce_stimuli'));
     });
 
     test('prioritizes regulation-first advice for acute activation', () {
@@ -49,12 +53,41 @@ void main() {
         tippingPointAwareness: TippingPointAwareness.late,
         triggerAsLastDrop: TriggerAsLastDrop.partly,
         touchedThemes: const ['Respekt'],
+        neededSupports: const ['Grenzen'],
+        needOrWoundedPoint: 'Getroffen: Respekt. Gebraucht: Grenzen.',
+        backgroundTheme: '',
       );
 
       expect(result.whatStandsOutKey, 'automatic_reaction_fast');
       expect(result.suggestedNextActionKey, 'regulate_body_first');
       expect(result.suggestedTipIds.first, 'regulate_body_before_analysis');
       expect(result.suggestedTipIds, contains('do_not_react_first_impulse'));
+    });
+
+    test('maps early awareness to an earlier decision-oriented learning point',
+        () {
+      final result = EvaluationEngine.evaluate(
+        systemState: SystemState.conflict,
+        primaryEmotion: EmotionType.anger,
+        preTriggerLoad: 4,
+        intensity: 6,
+        bodyTension: 5,
+        systemReaction: SystemReactionType.attack,
+        context: ContextType.work,
+        factInterpretation: FactInterpretationResult.mixed,
+        thoughtPatterns: const ['Vorwürfe an andere'],
+        actualBehaviorTags: const ['raise_voice'],
+        tippingPointAwareness: TippingPointAwareness.early,
+        triggerAsLastDrop: TriggerAsLastDrop.no,
+        touchedThemes: const ['Respekt'],
+        neededSupports: const ['Grenzen'],
+        needOrWoundedPoint: 'Getroffen: Respekt. Gebraucht: Grenzen.',
+        backgroundTheme: '',
+      );
+
+      expect(result.whatMayBeBehindItKey, 'background_need_boundaries');
+      expect(result.learningPointKey, 'learning_decide_earlier');
+      expect(result.suggestedNextActionKey, 'honor_early_signal');
     });
   });
 }

@@ -157,6 +157,9 @@ Map<String, dynamic> buildAiReflectionEntryPayload({
       aiReflectionMaxEntryFieldLengths['system_state']!,
     ),
     'is_crisis': entry.isCrisis,
+    'need_or_wounded_point': _trimValue(entry.needOrWoundedPoint),
+    'needed_supports': _decodeStringList(entry.neededSupports),
+    'pattern_familiarity': _trimValue(entry.patternFamiliarity),
     'evaluation_status_keys': _decodeStringList(entry.evaluationStatusKeys),
     'selected_next_action_key': entry.selectedNextActionKey,
   };

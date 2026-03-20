@@ -4,6 +4,31 @@ import '../../../../app/theme/colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/emotion_types.dart';
 
+typedef _EmotionCluster = ({String label, List<EmotionType> emotions});
+
+final List<_EmotionCluster> _emotionClusters = [
+  (label: 'Wut & Gereiztheit', emotions: [EmotionType.anger, EmotionType.annoyance]),
+  (
+    label: 'Angst & Druck',
+    emotions: [
+      EmotionType.fear,
+      EmotionType.overwhelm,
+      EmotionType.powerlessness,
+      EmotionType.helplessness,
+    ]
+  ),
+  (
+    label: 'Schmerz & Verlust',
+    emotions: [
+      EmotionType.hurt,
+      EmotionType.sadness,
+      EmotionType.disappointment,
+      EmotionType.emptiness,
+    ]
+  ),
+  (label: 'Ich & Selbstbild', emotions: [EmotionType.shame, EmotionType.guilt]),
+];
+
 class EmotionSelector extends StatelessWidget {
   const EmotionSelector({
     super.key,
@@ -33,17 +58,15 @@ class EmotionSelector extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppConstants.spacingSmall),
-        Wrap(
-          spacing: AppConstants.spacingSmall,
-          runSpacing: AppConstants.spacingSmall,
-          children: EmotionType.flowOptions.map((emotion) {
+        ..._buildClusteredChips(
+          theme: theme,
+          isChipVisible: (_) => true,
+          isChipSelected: (e) => primaryEmotion == e,
+          isChipDisabled: (_) => false,
+          onChipTap: (emotion) {
             final isSelected = primaryEmotion == emotion;
-            return _EmotionChip(
-              emotion: emotion,
-              isSelected: isSelected,
-              onTap: () => onPrimaryChanged(isSelected ? null : emotion),
-            );
-          }).toList(),
+            onPrimaryChanged(isSelected ? null : emotion);
+          },
         ),
         const SizedBox(height: AppConstants.spacingLarge),
         Text(
@@ -53,37 +76,74 @@ class EmotionSelector extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppConstants.spacingSmall),
-        Wrap(
-          spacing: AppConstants.spacingSmall,
-          runSpacing: AppConstants.spacingSmall,
-          children: EmotionType.flowOptions.where((emotion) {
-            return emotion != primaryEmotion;
-          }).map((emotion) {
-            final isSelected = additionalEmotions.contains(emotion);
-            final disableNewSelection =
-                additionalEmotions.length >= 2 && !isSelected;
-
-            return _EmotionChip(
-              emotion: emotion,
-              isSelected: isSelected,
-              isDisabled: disableNewSelection,
-              onTap: disableNewSelection
-                  ? null
-                  : () {
-                      final updated =
-                          List<EmotionType>.from(additionalEmotions);
-                      if (isSelected) {
-                        updated.remove(emotion);
-                      } else {
-                        updated.add(emotion);
-                      }
-                      onAdditionalChanged(updated);
-                    },
-            );
-          }).toList(),
+        ..._buildClusteredChips(
+          theme: theme,
+          isChipVisible: (e) => e != primaryEmotion,
+          isChipSelected: (e) => additionalEmotions.contains(e),
+          isChipDisabled: (e) =>
+              additionalEmotions.length >= 2 && !additionalEmotions.contains(e),
+          onChipTap: (emotion) {
+            final updated = List<EmotionType>.from(additionalEmotions);
+            if (additionalEmotions.contains(emotion)) {
+              updated.remove(emotion);
+            } else {
+              updated.add(emotion);
+            }
+            onAdditionalChanged(updated);
+          },
         ),
       ],
     );
+  }
+
+  List<Widget> _buildClusteredChips({
+    required ThemeData theme,
+    required bool Function(EmotionType) isChipVisible,
+    required bool Function(EmotionType) isChipSelected,
+    required bool Function(EmotionType) isChipDisabled,
+    required void Function(EmotionType) onChipTap,
+  }) {
+    final widgets = <Widget>[];
+    var isFirst = true;
+
+    for (final cluster in _emotionClusters) {
+      final visible = cluster.emotions.where(isChipVisible).toList();
+      if (visible.isEmpty) continue;
+
+      if (!isFirst) {
+        widgets.add(const SizedBox(height: AppConstants.spacingSmall));
+      }
+      isFirst = false;
+
+      widgets.add(
+        Text(
+          cluster.label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: AppColors.textTertiary,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+      );
+      widgets.add(const SizedBox(height: 4));
+      widgets.add(
+        Wrap(
+          spacing: AppConstants.spacingSmall,
+          runSpacing: AppConstants.spacingSmall,
+          children: visible.map((emotion) {
+            final disabled = isChipDisabled(emotion);
+            return _EmotionChip(
+              emotion: emotion,
+              isSelected: isChipSelected(emotion),
+              isDisabled: disabled,
+              onTap: disabled ? null : () => onChipTap(emotion),
+            );
+          }).toList(),
+        ),
+      );
+    }
+
+    return widgets;
   }
 }
 
