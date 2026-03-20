@@ -29,9 +29,22 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
   /// Get the ID of the last saved entry
   int? get lastSavedEntryId => _lastSavedEntryId;
 
+  /// Update event context data from step 1a
+  void updateEventContextData(SituationEventContextData data) {
+    state = state.copyWith(eventContextData: data);
+  }
+
   /// Update event data from step 1
   void updateEventData(SituationEventData data) {
-    state = state.copyWith(eventData: data);
+    state = state.copyWith(
+      eventContextData: SituationEventContextData(
+        description: data.description,
+        context: data.context,
+        timestamp: data.timestamp,
+        involvedEntities: data.involvedEntities,
+      ),
+      eventData: data,
+    );
   }
 
   /// Update emotion data from step 2
@@ -47,6 +60,23 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
   /// Update reflection data from step 4.
   void updateReflectionData(SituationReflectionData data) {
     state = state.copyWith(reflectionData: data);
+  }
+
+  void setCapturePath(NewSituationCapturePath path) {
+    if (state.capturePath == path) {
+      return;
+    }
+
+    state = NewSituationFlowState(
+      eventContextData: state.eventContextData,
+      eventData: state.eventData,
+      emotionData: state.emotionData,
+      thoughtImpulseData: state.thoughtImpulseData,
+      reflectionData:
+          path == NewSituationCapturePath.reduced ? null : state.reflectionData,
+      capturePath: path,
+      isSaving: state.isSaving,
+    );
   }
 
   /// Validate event data
@@ -100,7 +130,10 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
       final eventData = state.eventData!;
       final emotionData = state.emotionData!;
       final thoughtData = state.thoughtImpulseData!;
-      final reflectionData = state.reflectionData!;
+      final reflectionData = state.reflectionData;
+      final touchedThemes = reflectionData?.touchedThemes ?? const <String>[];
+      final neededSupports =
+          reflectionData?.neededSupports ?? const <String>[];
       final normalizedBehaviorTags = ActualBehaviorTypes.normalizeAll(
         thoughtData.actualBehaviorTags,
       );
@@ -115,8 +148,8 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
         thoughtData.actualBehaviorNote,
       );
       final needSummary = _buildLegacyNeedSummary(
-        reflectionData.touchedThemes,
-        reflectionData.neededSupports,
+        touchedThemes,
+        neededSupports,
       );
 
       // Perform classification using ClassificationService
@@ -133,7 +166,7 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
       final evaluation = EvaluationEngine.evaluate(
         systemState: classification.systemState,
         primaryEmotion: emotionData.primaryEmotion,
-        preTriggerLoad: emotionData.preTriggerLoad,
+        preTriggerLoad: eventData.preTriggerLoad,
         intensity: emotionData.intensity,
         bodyTension: emotionData.bodyTension,
         systemReaction: thoughtData.systemReaction,
@@ -142,11 +175,11 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
         thoughtPatterns: thoughtData.thoughtPatterns,
         actualBehaviorTags: normalizedBehaviorTags,
         tippingPointAwareness: thoughtData.tippingPointAwareness,
-        triggerAsLastDrop: reflectionData.triggerAsLastDrop,
-        touchedThemes: reflectionData.touchedThemes,
-        neededSupports: reflectionData.neededSupports,
+        triggerAsLastDrop: reflectionData?.triggerAsLastDrop,
+        touchedThemes: touchedThemes,
+        neededSupports: neededSupports,
         needOrWoundedPoint: needSummary,
-        backgroundTheme: reflectionData.backgroundTheme,
+        backgroundTheme: reflectionData?.backgroundTheme,
       );
 
       final systemState = classification.systemState.name;
@@ -175,7 +208,7 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
               ? Value(eventData.problemTiming!.name)
               : const Value.absent(),
           triggerDescription: Value(eventData.trigger),
-          preTriggerLoad: Value(emotionData.preTriggerLoad),
+          preTriggerLoad: Value(eventData.preTriggerLoad),
           intensity: emotionData.intensity,
           bodyTension: emotionData.bodyTension,
           primaryEmotion: emotionData.primaryEmotion.name,
@@ -213,19 +246,33 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
           fearOrPressurePoint: thoughtData.fearOrPressurePoint != null
               ? Value(thoughtData.fearOrPressurePoint)
               : const Value.absent(),
-          needOrWoundedPoint: Value(needSummary),
-          touchedThemes: Value(_encodeList(reflectionData.touchedThemes)),
-          neededSupports: Value(_encodeList(reflectionData.neededSupports)),
-          realisticAlternative: Value(reflectionData.realisticAlternative),
-          triggerAsLastDrop: Value(reflectionData.triggerAsLastDrop.name),
-          backgroundTheme: Value(reflectionData.backgroundTheme),
-          preEscalationRelief: reflectionData.preEscalationRelief != null
-              ? Value(reflectionData.preEscalationRelief)
+          needOrWoundedPoint: needSummary.isNotEmpty
+              ? Value(needSummary)
               : const Value.absent(),
-          patternFamiliarity: reflectionData.patternFamiliarity != null
-              ? Value(reflectionData.patternFamiliarity!.name)
+          touchedThemes: touchedThemes.isNotEmpty
+              ? Value(_encodeList(touchedThemes))
               : const Value.absent(),
-          nextStep: Value(reflectionData.nextStep),
+          neededSupports: neededSupports.isNotEmpty
+              ? Value(_encodeList(neededSupports))
+              : const Value.absent(),
+          realisticAlternative: reflectionData?.realisticAlternative != null
+              ? Value(reflectionData!.realisticAlternative)
+              : const Value.absent(),
+          triggerAsLastDrop: reflectionData?.triggerAsLastDrop != null
+              ? Value(reflectionData!.triggerAsLastDrop.name)
+              : const Value.absent(),
+          backgroundTheme: reflectionData?.backgroundTheme != null
+              ? Value(reflectionData!.backgroundTheme)
+              : const Value.absent(),
+          preEscalationRelief: reflectionData?.preEscalationRelief != null
+              ? Value(reflectionData!.preEscalationRelief)
+              : const Value.absent(),
+          patternFamiliarity: reflectionData?.patternFamiliarity != null
+              ? Value(reflectionData!.patternFamiliarity!.name)
+              : const Value.absent(),
+          nextStep: reflectionData?.nextStep != null
+              ? Value(reflectionData!.nextStep)
+              : const Value.absent(),
           systemState: systemState,
           isCrisis: Value(isCrisis),
           evaluationHeadlineKey: Value(evaluation.whatStandsOutKey),
@@ -317,6 +364,11 @@ final newSituationFlowControllerProvider =
 });
 
 /// Provider for the event data from the flow.
+final eventContextDataProvider = Provider<SituationEventContextData?>((ref) {
+  return ref.watch(newSituationFlowControllerProvider).eventContextData;
+});
+
+/// Provider for the event data from the flow.
 final eventDataProvider = Provider<SituationEventData?>((ref) {
   return ref.watch(newSituationFlowControllerProvider).eventData;
 });
@@ -337,7 +389,7 @@ final reflectionDataProvider = Provider<SituationReflectionData?>((ref) {
   return ref.watch(newSituationFlowControllerProvider).reflectionData;
 });
 
-/// Provider for the current step number (0-4).
+/// Provider for the current step number (0-5).
 final currentStepProvider = Provider<int>((ref) {
   return ref.watch(newSituationFlowControllerProvider).currentStep;
 });

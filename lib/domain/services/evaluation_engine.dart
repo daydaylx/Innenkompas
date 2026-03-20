@@ -23,7 +23,7 @@ class EvaluationEngine {
     required List<String> thoughtPatterns,
     required List<String> actualBehaviorTags,
     required TippingPointAwareness tippingPointAwareness,
-    required TriggerAsLastDrop triggerAsLastDrop,
+    TriggerAsLastDrop? triggerAsLastDrop,
     required List<String> touchedThemes,
     required List<String> neededSupports,
     String? needOrWoundedPoint,
@@ -110,7 +110,7 @@ class EvaluationEngine {
     required int bodyTension,
     required SystemReactionType systemReaction,
     required List<String> actualBehaviorTags,
-    required TriggerAsLastDrop triggerAsLastDrop,
+    TriggerAsLastDrop? triggerAsLastDrop,
   }) {
     final ordered = <String>{};
     final normalizedBehaviorTags =
@@ -157,7 +157,7 @@ class EvaluationEngine {
     required List<String> statusKeys,
     required int preTriggerLoad,
     required List<String> thoughtPatterns,
-    required TriggerAsLastDrop triggerAsLastDrop,
+    TriggerAsLastDrop? triggerAsLastDrop,
     required SystemReactionType systemReaction,
   }) {
     if (statusKeys.contains('safety_relevant_moment')) {
@@ -187,7 +187,7 @@ class EvaluationEngine {
     required SystemState systemState,
     required int preTriggerLoad,
     required FactInterpretationResult factInterpretation,
-    required TriggerAsLastDrop triggerAsLastDrop,
+    TriggerAsLastDrop? triggerAsLastDrop,
     required List<String> touchedThemes,
     required List<String> neededSupports,
     required String? needOrWoundedPoint,
@@ -248,7 +248,8 @@ class EvaluationEngine {
     if (preTriggerLoad >= 7) {
       return 'background_pressure_already_high';
     }
-    if (triggerAsLastDrop != TriggerAsLastDrop.no) {
+    if (triggerAsLastDrop == TriggerAsLastDrop.yes ||
+        triggerAsLastDrop == TriggerAsLastDrop.partly) {
       return 'background_need_hit';
     }
     if (touchedThemes.contains('Kontrolle') ||
@@ -268,7 +269,7 @@ class EvaluationEngine {
   static String _helpfulNowKeyFor({
     required List<String> statusKeys,
     required int preTriggerLoad,
-    required TriggerAsLastDrop triggerAsLastDrop,
+    TriggerAsLastDrop? triggerAsLastDrop,
     required List<String> neededSupports,
     required FactInterpretationResult factInterpretation,
     required SystemReactionType systemReaction,
@@ -340,7 +341,7 @@ class EvaluationEngine {
     required List<String> statusKeys,
     required SystemState systemState,
     required int preTriggerLoad,
-    required TriggerAsLastDrop triggerAsLastDrop,
+    TriggerAsLastDrop? triggerAsLastDrop,
     required List<String> neededSupports,
     required TippingPointAwareness tippingPointAwareness,
     required FactInterpretationResult factInterpretation,
@@ -434,7 +435,7 @@ class EvaluationEngine {
     required SystemReactionType systemReaction,
     required List<String> thoughtPatterns,
     required int preTriggerLoad,
-    required TriggerAsLastDrop triggerAsLastDrop,
+    TriggerAsLastDrop? triggerAsLastDrop,
     required int intensity,
     required int bodyTension,
   }) {

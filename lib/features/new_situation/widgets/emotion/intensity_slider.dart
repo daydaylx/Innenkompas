@@ -6,18 +6,14 @@ import '../../../../core/constants/app_constants.dart';
 class IntensitySlider extends StatelessWidget {
   const IntensitySlider({
     super.key,
-    required this.preTriggerLoad,
     required this.intensity,
     required this.bodyTension,
-    required this.onPreTriggerLoadChanged,
     required this.onIntensityChanged,
     required this.onBodyTensionChanged,
   });
 
-  final int preTriggerLoad;
   final int intensity;
   final int bodyTension;
-  final ValueChanged<int> onPreTriggerLoadChanged;
   final ValueChanged<int> onIntensityChanged;
   final ValueChanged<int> onBodyTensionChanged;
 
@@ -38,13 +34,6 @@ class IntensitySlider extends StatelessWidget {
           helper: 'Auch hier reicht eine schnelle grobe Zahl.',
           value: bodyTension,
           onChanged: onBodyTensionChanged,
-        ),
-        const SizedBox(height: AppConstants.spacingLarge),
-        _SegmentSection(
-          label: 'Wie voll war dein Tank schon davor?',
-          helper: '0 heißt kaum belastet, 10 heißt schon vorher maximal voll.',
-          value: preTriggerLoad,
-          onChanged: onPreTriggerLoadChanged,
         ),
       ],
     );

@@ -12,7 +12,6 @@ class NewSituationOptionLists {
     'Unruhe',
     'Tunnelblick',
     'Kloß im Hals',
-    'Leere',
     'Tränen',
     'Müdigkeit',
   ];

@@ -7,12 +7,59 @@ import '../../core/constants/system_reaction_types.dart';
 import '../../core/constants/tipping_point_awareness.dart';
 import '../../core/constants/trigger_as_last_drop.dart';
 
+class SituationEventContextData {
+  const SituationEventContextData({
+    required this.description,
+    required this.context,
+    required this.timestamp,
+    this.involvedEntities,
+  });
+
+  final String description;
+  final ContextType context;
+  final DateTime timestamp;
+  final String? involvedEntities;
+
+  SituationEventContextData copyWith({
+    String? description,
+    ContextType? context,
+    DateTime? timestamp,
+    String? involvedEntities,
+  }) {
+    return SituationEventContextData(
+      description: description ?? this.description,
+      context: context ?? this.context,
+      timestamp: timestamp ?? this.timestamp,
+      involvedEntities: involvedEntities ?? this.involvedEntities,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is SituationEventContextData &&
+        other.description == description &&
+        other.context == context &&
+        other.timestamp == timestamp &&
+        other.involvedEntities == involvedEntities;
+  }
+
+  @override
+  int get hashCode =>
+      description.hashCode ^
+      context.hashCode ^
+      timestamp.hashCode ^
+      involvedEntities.hashCode;
+}
+
 class SituationEventData {
   const SituationEventData({
     required this.description,
     required this.preTriggerPreoccupation,
     this.problemTiming,
     required this.trigger,
+    required this.preTriggerLoad,
     required this.context,
     required this.timestamp,
     this.involvedEntities,
@@ -22,6 +69,7 @@ class SituationEventData {
   final String preTriggerPreoccupation;
   final ProblemTiming? problemTiming;
   final String trigger;
+  final int preTriggerLoad;
   final ContextType context;
   final DateTime timestamp;
   final String? involvedEntities;
@@ -31,6 +79,7 @@ class SituationEventData {
     String? preTriggerPreoccupation,
     ProblemTiming? problemTiming,
     String? trigger,
+    int? preTriggerLoad,
     ContextType? context,
     DateTime? timestamp,
     String? involvedEntities,
@@ -41,6 +90,7 @@ class SituationEventData {
           preTriggerPreoccupation ?? this.preTriggerPreoccupation,
       problemTiming: problemTiming ?? this.problemTiming,
       trigger: trigger ?? this.trigger,
+      preTriggerLoad: preTriggerLoad ?? this.preTriggerLoad,
       context: context ?? this.context,
       timestamp: timestamp ?? this.timestamp,
       involvedEntities: involvedEntities ?? this.involvedEntities,
@@ -56,6 +106,7 @@ class SituationEventData {
         other.preTriggerPreoccupation == preTriggerPreoccupation &&
         other.problemTiming == problemTiming &&
         other.trigger == trigger &&
+        other.preTriggerLoad == preTriggerLoad &&
         other.context == context &&
         other.timestamp == timestamp &&
         other.involvedEntities == involvedEntities;
@@ -67,6 +118,7 @@ class SituationEventData {
       preTriggerPreoccupation.hashCode ^
       (problemTiming?.hashCode ?? 0) ^
       trigger.hashCode ^
+      preTriggerLoad.hashCode ^
       context.hashCode ^
       timestamp.hashCode ^
       involvedEntities.hashCode;
@@ -74,7 +126,6 @@ class SituationEventData {
 
 class SituationEmotionData {
   const SituationEmotionData({
-    required this.preTriggerLoad,
     required this.intensity,
     required this.bodyTension,
     required this.primaryEmotion,
@@ -82,7 +133,6 @@ class SituationEmotionData {
     this.initialBodyReactions = const [],
   });
 
-  final int preTriggerLoad;
   final int intensity;
   final int bodyTension;
   final EmotionType primaryEmotion;
@@ -90,7 +140,6 @@ class SituationEmotionData {
   final List<String> initialBodyReactions;
 
   SituationEmotionData copyWith({
-    int? preTriggerLoad,
     int? intensity,
     int? bodyTension,
     EmotionType? primaryEmotion,
@@ -98,7 +147,6 @@ class SituationEmotionData {
     List<String>? initialBodyReactions,
   }) {
     return SituationEmotionData(
-      preTriggerLoad: preTriggerLoad ?? this.preTriggerLoad,
       intensity: intensity ?? this.intensity,
       bodyTension: bodyTension ?? this.bodyTension,
       primaryEmotion: primaryEmotion ?? this.primaryEmotion,
@@ -112,7 +160,6 @@ class SituationEmotionData {
     if (identical(this, other)) return true;
 
     return other is SituationEmotionData &&
-        other.preTriggerLoad == preTriggerLoad &&
         other.intensity == intensity &&
         other.bodyTension == bodyTension &&
         other.primaryEmotion == primaryEmotion &&
@@ -122,7 +169,6 @@ class SituationEmotionData {
 
   @override
   int get hashCode =>
-      preTriggerLoad.hashCode ^
       intensity.hashCode ^
       bodyTension.hashCode ^
       primaryEmotion.hashCode ^
@@ -302,47 +348,63 @@ class ValidationResult {
       errorMessages.isNotEmpty ? errorMessages.first : null;
 }
 
+enum NewSituationCapturePath {
+  full,
+  reduced,
+}
+
 class NewSituationFlowState {
   const NewSituationFlowState({
+    this.eventContextData,
     this.eventData,
     this.emotionData,
     this.thoughtImpulseData,
     this.reflectionData,
+    this.capturePath = NewSituationCapturePath.full,
     this.isSaving = false,
   });
 
+  final SituationEventContextData? eventContextData;
   final SituationEventData? eventData;
   final SituationEmotionData? emotionData;
   final SituationThoughtImpulseData? thoughtImpulseData;
   final SituationReflectionData? reflectionData;
+  final NewSituationCapturePath capturePath;
   final bool isSaving;
 
   int get currentStep {
-    if (reflectionData != null) return 4;
-    if (thoughtImpulseData != null) return 3;
-    if (emotionData != null) return 2;
-    if (eventData != null) return 1;
+    if (reflectionData != null) return 5;
+    if (thoughtImpulseData != null) return 4;
+    if (emotionData != null) return 3;
+    if (eventData != null) return 2;
+    if (eventContextData != null) return 1;
     return 0;
   }
+
+  bool get requiresReflection => capturePath == NewSituationCapturePath.full;
 
   bool get isComplete =>
       eventData != null &&
       emotionData != null &&
       thoughtImpulseData != null &&
-      reflectionData != null;
+      (!requiresReflection || reflectionData != null);
 
   NewSituationFlowState copyWith({
+    SituationEventContextData? eventContextData,
     SituationEventData? eventData,
     SituationEmotionData? emotionData,
     SituationThoughtImpulseData? thoughtImpulseData,
     SituationReflectionData? reflectionData,
+    NewSituationCapturePath? capturePath,
     bool? isSaving,
   }) {
     return NewSituationFlowState(
+      eventContextData: eventContextData ?? this.eventContextData,
       eventData: eventData ?? this.eventData,
       emotionData: emotionData ?? this.emotionData,
       thoughtImpulseData: thoughtImpulseData ?? this.thoughtImpulseData,
       reflectionData: reflectionData ?? this.reflectionData,
+      capturePath: capturePath ?? this.capturePath,
       isSaving: isSaving ?? this.isSaving,
     );
   }

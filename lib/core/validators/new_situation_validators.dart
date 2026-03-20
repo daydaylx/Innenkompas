@@ -38,6 +38,16 @@ class NewSituationValidators {
     );
   }
 
+  static ValidationResult validatePreTriggerLoad(int value) {
+    if (value < AppConstants.minIntensityRating ||
+        value > AppConstants.maxIntensityRating) {
+      return ValidationResult.errors([
+        'Die Vorbelastung muss zwischen ${AppConstants.minIntensityRating} und ${AppConstants.maxIntensityRating} liegen.',
+      ]);
+    }
+    return const ValidationResult.valid();
+  }
+
   static ValidationResult validateIntensity(int value) {
     if (value < AppConstants.minIntensityRating ||
         value > AppConstants.maxIntensityRating) {
@@ -162,6 +172,21 @@ class NewSituationValidators {
     );
   }
 
+  static ValidationResult validateEventContextData(
+    SituationEventContextData data,
+  ) {
+    final errors = <String>[];
+
+    final descriptionResult = validateDescription(data.description);
+    if (!descriptionResult.isValid) {
+      errors.addAll(descriptionResult.errorMessages);
+    }
+
+    return errors.isEmpty
+        ? const ValidationResult.valid()
+        : ValidationResult.errors(errors);
+  }
+
   static ValidationResult validateEventData(SituationEventData data) {
     final errors = <String>[];
 
@@ -181,6 +206,11 @@ class NewSituationValidators {
       errors.addAll(triggerResult.errorMessages);
     }
 
+    final preTriggerLoadResult = validatePreTriggerLoad(data.preTriggerLoad);
+    if (!preTriggerLoadResult.isValid) {
+      errors.addAll(preTriggerLoadResult.errorMessages);
+    }
+
     return errors.isEmpty
         ? const ValidationResult.valid()
         : ValidationResult.errors(errors);
@@ -188,11 +218,6 @@ class NewSituationValidators {
 
   static ValidationResult validateEmotionData(SituationEmotionData data) {
     final errors = <String>[];
-
-    final preTriggerLoadResult = validateIntensity(data.preTriggerLoad);
-    if (!preTriggerLoadResult.isValid) {
-      errors.addAll(preTriggerLoadResult.errorMessages);
-    }
 
     final intensityResult = validateIntensity(data.intensity);
     if (!intensityResult.isValid) {

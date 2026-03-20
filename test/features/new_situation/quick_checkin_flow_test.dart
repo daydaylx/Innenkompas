@@ -90,7 +90,7 @@ void main() {
       }
 
       Finder elevatedButtonTarget(String label) {
-        return find.widgetWithText(ElevatedButton, label).first;
+        return find.widgetWithText(ElevatedButton, label).last;
       }
 
       Future<void> tapVisible(Finder finder) async {
@@ -123,17 +123,22 @@ void main() {
       await tester.pump();
       await tester.pumpAndSettle();
 
-      expect(find.text('Situation und Vorlauf'), findsOneWidget);
+      expect(find.text('Situation und Kontext'), findsOneWidget);
 
       await tester.enterText(
         textFieldByHint(
-          'Zum Beispiel: Im Gespräch fiel ein Satz, der mich sofort hochgefahren hat.',
+          'Zum Beispiel: Das Gespräch im Meeting wurde plötzlich scharf.',
         ),
         'Das Meeting wurde scharf.',
       );
+      await tapVisible(gestureTarget('Arbeit'));
+      await tapVisible(elevatedButtonTarget('Weiter'));
+
+      expect(find.text('Vorlauf und Auslöser'), findsOneWidget);
+
       await tester.enterText(
         textFieldByHint(
-          'Zum Beispiel: Ich war schon erschöpft, habe über Arbeit nachgedacht oder innerlich Druck gemacht.',
+          'Zum Beispiel: Ich war schon erschöpft, habe innerlich Druck gemacht oder hing noch an einem anderen Thema.',
         ),
         'Ich war schon innerlich angespannt.',
       );
@@ -143,7 +148,6 @@ void main() {
         ),
         'Ein Kommentar vor allen.',
       );
-      await tapVisible(gestureTarget('Arbeit'));
       await tapVisible(elevatedButtonTarget('Weiter'));
 
       expect(find.text('Körper und Gefühle'), findsOneWidget);
@@ -151,7 +155,7 @@ void main() {
 
       await tapVisible(elevatedButtonTarget('Weiter'));
 
-      expect(find.text('Gedanken, Muster und Verhalten'), findsOneWidget);
+      expect(find.text('Gedanken und Verhalten'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   });

@@ -39,13 +39,13 @@ void main() {
           preTriggerPreoccupation: 'Ich war schon angespannt und müde.',
           problemTiming: ProblemTiming.partly,
           trigger: 'Ein Satz vor allen anderen.',
+          preTriggerLoad: 6,
           context: ContextType.work,
           timestamp: DateTime(2026, 3, 17, 9, 30),
         ),
       );
       controller.updateEmotionData(
         const SituationEmotionData(
-          preTriggerLoad: 6,
           intensity: 8,
           bodyTension: 7,
           primaryEmotion: EmotionType.anger,
@@ -129,13 +129,13 @@ void main() {
           preTriggerPreoccupation: 'Ich war schon völlig überladen.',
           problemTiming: ProblemTiming.alreadyThere,
           trigger: 'Noch ein harter Satz.',
+          preTriggerLoad: 8,
           context: ContextType.family,
           timestamp: DateTime(2026, 3, 17, 23, 15),
         ),
       );
       controller.updateEmotionData(
         const SituationEmotionData(
-          preTriggerLoad: 8,
           intensity: 9,
           bodyTension: 9,
           primaryEmotion: EmotionType.fear,

@@ -332,7 +332,6 @@ class _QuickCheckinScreenState extends ConsumerState<QuickCheckinScreen> {
                 flowController.reset();
                 flowController.updateEmotionData(
                   SituationEmotionData(
-                    preTriggerLoad: 0,
                     intensity: _intensity,
                     bodyTension: 0,
                     primaryEmotion: emotion,

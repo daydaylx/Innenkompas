@@ -28,7 +28,6 @@ class SituationEmotionScreen extends ConsumerStatefulWidget {
 
 class _SituationEmotionScreenState
     extends ConsumerState<SituationEmotionScreen> {
-  int _preTriggerLoad = 0;
   int _intensity = 0;
   int _bodyTension = 0;
   EmotionType? _primaryEmotion;
@@ -40,7 +39,6 @@ class _SituationEmotionScreenState
     super.initState();
     final existingData = ref.read(emotionDataProvider);
     if (existingData != null) {
-      _preTriggerLoad = existingData.preTriggerLoad;
       _intensity = existingData.intensity;
       _bodyTension = existingData.bodyTension;
       _primaryEmotion = existingData.primaryEmotion;
@@ -55,7 +53,6 @@ class _SituationEmotionScreenState
     if (_primaryEmotion == null) return false;
     return NewSituationValidators.validateEmotionData(
       SituationEmotionData(
-        preTriggerLoad: _preTriggerLoad,
         intensity: _intensity,
         bodyTension: _bodyTension,
         primaryEmotion: _primaryEmotion!,
@@ -75,7 +72,6 @@ class _SituationEmotionScreenState
 
     ref.read(newSituationFlowControllerProvider.notifier).updateEmotionData(
           SituationEmotionData(
-            preTriggerLoad: _preTriggerLoad,
             intensity: _intensity,
             bodyTension: _bodyTension,
             primaryEmotion: _primaryEmotion!,
@@ -87,6 +83,9 @@ class _SituationEmotionScreenState
     if (_intensity >= 8 || _bodyTension >= 7) {
       _showHighIntensityDialog();
     } else {
+      ref
+          .read(newSituationFlowControllerProvider.notifier)
+          .setCapturePath(NewSituationCapturePath.full);
       context.push(AppRoutes.newSituationThoughtImpulse);
     }
   }
@@ -98,13 +97,16 @@ class _SituationEmotionScreenState
         title: const Text('Dein System ist gerade sehr aktiviert'),
         content: const Text(
           'Bei hoher Aktivierung fällt Reflexion oft schwerer. '
-          'Möchtest du dich erst kurz stabilisieren? '
-          'Danach kannst du die Erfassung mit etwas mehr Abstand fortsetzen.',
+          'Möchtest du dich erst kurz stabilisieren und danach nur die wichtigsten Punkte sichern? '
+          'Die ausführlichere Einordnung kann später folgen.',
         ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
+              ref
+                  .read(newSituationFlowControllerProvider.notifier)
+                  .setCapturePath(NewSituationCapturePath.full);
               context.push(AppRoutes.newSituationThoughtImpulse);
             },
             child: const Text('Weiter erfassen'),
@@ -112,11 +114,15 @@ class _SituationEmotionScreenState
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
+              ref
+                  .read(newSituationFlowControllerProvider.notifier)
+                  .setCapturePath(NewSituationCapturePath.reduced);
               context.push(
                 AppRoutes.intervention,
                 extra: {
                   'interventionId': 'regulation_4_6_breathing',
-                  'completionRoute': AppRoutes.newSituationThoughtImpulse,
+                  'completionRoute':
+                      AppRoutes.newSituationThoughtImpulseReduced,
                 },
               );
             },
@@ -153,8 +159,8 @@ class _SituationEmotionScreenState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const FlowProgressIndicator(
-              currentStep: 2,
-              totalSteps: 4,
+              currentStep: 3,
+              totalSteps: 5,
             ),
             const SizedBox(height: AppConstants.spacingLarge),
             AppCard(
@@ -164,7 +170,7 @@ class _SituationEmotionScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Wie geladen war dein System?',
+                    'Wie stark war die Reaktion in Körper und Gefühlen?',
                     style: theme.textTheme.headlineMedium?.copyWith(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
@@ -172,7 +178,7 @@ class _SituationEmotionScreenState
                   ),
                   const SizedBox(height: AppConstants.spacingSmall),
                   Text(
-                    'Wir trennen hier Vorbelastung, Momentbelastung und Körperreaktion, damit später klarer wird, was schon vorher da war.',
+                    'Benenn zuerst das stärkste Gefühl und schätze dann Intensität und Körperspannung grob ein.',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -216,14 +222,8 @@ class _SituationEmotionScreenState
             ),
             AppCard(
               child: IntensitySlider(
-                preTriggerLoad: _preTriggerLoad,
                 intensity: _intensity,
                 bodyTension: _bodyTension,
-                onPreTriggerLoadChanged: (value) {
-                  setState(() {
-                    _preTriggerLoad = value;
-                  });
-                },
                 onIntensityChanged: (value) {
                   setState(() {
                     _intensity = value;

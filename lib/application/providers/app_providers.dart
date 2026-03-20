@@ -8,6 +8,7 @@ import '../../features/home/screens/home_screen.dart';
 import '../../features/splash/screens/splash_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/new_situation/screens/situation_event_screen.dart';
+import '../../features/new_situation/screens/situation_prelude_screen.dart';
 import '../../features/new_situation/screens/situation_emotion_screen.dart';
 import '../../features/new_situation/screens/situation_thought_impulse_screen.dart';
 import '../../features/new_situation/screens/situation_reflection_screen.dart';
@@ -62,10 +63,15 @@ final routerProvider = Provider<GoRouter>((ref) {
     settingsScreen: (context) => const SettingsScreen(),
     lockScreen: (context) => const LockScreen(),
     newSituationEventScreen: (context, state) => const SituationEventScreen(),
+    newSituationPreludeScreen: (context, state) =>
+        const SituationPreludeScreen(),
     newSituationEmotionScreen: (context, state) =>
         const SituationEmotionScreen(),
     newSituationThoughtImpulseScreen: (context, state) =>
-        const SituationThoughtImpulseScreen(),
+        SituationThoughtImpulseScreen(
+          reducedCapture:
+              state.matchedLocation == AppRoutes.newSituationThoughtImpulseReduced,
+        ),
     newSituationReflectionScreen: (context, state) =>
         const SituationReflectionScreen(),
     interventionScreen: (context, state) {

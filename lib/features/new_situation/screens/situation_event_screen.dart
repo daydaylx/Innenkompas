@@ -27,23 +27,27 @@ class SituationEventScreen extends ConsumerStatefulWidget {
 
 class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
   String _description = '';
-  String _preTriggerPreoccupation = '';
-  String _trigger = '';
   ContextType? _selectedContext;
   DateTime _timestamp = DateTime.now();
   String _involvedEntities = '';
   String? _descriptionError;
-  String? _preoccupationError;
-  String? _triggerError;
 
   @override
   void initState() {
     super.initState();
-    final existingData = ref.read(eventDataProvider);
+    final contextData = ref.read(eventContextDataProvider);
+    final eventData = ref.read(eventDataProvider);
+    final existingData = contextData ??
+        (eventData == null
+            ? null
+            : SituationEventContextData(
+                description: eventData.description,
+                context: eventData.context,
+                timestamp: eventData.timestamp,
+                involvedEntities: eventData.involvedEntities,
+              ));
     if (existingData != null) {
       _description = existingData.description;
-      _preTriggerPreoccupation = existingData.preTriggerPreoccupation;
-      _trigger = existingData.trigger;
       _selectedContext = existingData.context;
       _timestamp = existingData.timestamp;
       _involvedEntities = existingData.involvedEntities ?? '';
@@ -55,11 +59,9 @@ class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
       return false;
     }
 
-    return NewSituationValidators.validateEventData(
-      SituationEventData(
+    return NewSituationValidators.validateEventContextData(
+      SituationEventContextData(
         description: _description,
-        preTriggerPreoccupation: _preTriggerPreoccupation,
-        trigger: _trigger,
         context: _selectedContext!,
         timestamp: _timestamp,
         involvedEntities:
@@ -71,22 +73,12 @@ class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
   void _handleNext() {
     final descriptionValidation =
         NewSituationValidators.validateDescription(_description);
-    final preoccupationValidation =
-        NewSituationValidators.validatePreTriggerPreoccupation(
-      _preTriggerPreoccupation,
-    );
-    final triggerValidation =
-        NewSituationValidators.validateTriggerDescription(_trigger);
 
     setState(() {
       _descriptionError = descriptionValidation.firstError;
-      _preoccupationError = preoccupationValidation.firstError;
-      _triggerError = triggerValidation.firstError;
     });
 
-    if (!descriptionValidation.isValid ||
-        !preoccupationValidation.isValid ||
-        !triggerValidation.isValid) {
+    if (!descriptionValidation.isValid) {
       return;
     }
 
@@ -97,11 +89,9 @@ class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
       return;
     }
 
-    ref.read(newSituationFlowControllerProvider.notifier).updateEventData(
-          SituationEventData(
+    ref.read(newSituationFlowControllerProvider.notifier).updateEventContextData(
+          SituationEventContextData(
             description: _description.trim(),
-            preTriggerPreoccupation: _preTriggerPreoccupation.trim(),
-            trigger: _trigger.trim(),
             context: _selectedContext!,
             timestamp: _timestamp,
             involvedEntities: _involvedEntities.trim().isEmpty
@@ -110,7 +100,7 @@ class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
           ),
         );
 
-    context.push(AppRoutes.newSituationEmotion);
+    context.push(AppRoutes.newSituationPrelude);
   }
 
   void _handleCancel() {
@@ -147,7 +137,7 @@ class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
     final theme = Theme.of(context);
 
     return AppScaffold(
-      title: 'Situation und Vorlauf',
+      title: 'Situation und Kontext',
       backgroundVariant: AppBackgroundVariant.focus,
       leading: IconButton(
         icon: const Icon(Icons.close),
@@ -165,7 +155,7 @@ class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
           children: [
             const FlowProgressIndicator(
               currentStep: 1,
-              totalSteps: 4,
+              totalSteps: 5,
             ),
             const SizedBox(height: AppConstants.spacingLarge),
             AppCard(
@@ -175,7 +165,7 @@ class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Was ist passiert und was lief schon vorher?',
+                    'Worum ging die Situation insgesamt?',
                     style: theme.textTheme.headlineMedium?.copyWith(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
@@ -183,7 +173,7 @@ class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
                   ),
                   const SizedBox(height: AppConstants.spacingSmall),
                   Text(
-                    'Hier geht es noch nicht ums perfekte Verstehen, sondern darum, Auslöser und Vorlauf sauber auseinanderzuhalten.',
+                    'Hier reicht der grobe Rahmen: Was ist passiert, in welchem Bereich und wann ungefähr?',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -204,46 +194,10 @@ class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
                 },
                 maxLength: AppConstants.maxSituationDescriptionLength,
                 hintText:
-                    'Zum Beispiel: Im Gespräch fiel ein Satz, der mich sofort hochgefahren hat.',
-                helperText: 'Ein oder zwei klare Sätze reichen.',
+                    'Zum Beispiel: Das Gespräch im Meeting wurde plötzlich scharf.',
+                helperText:
+                    'Beschreibe die Situation als Ganzes, noch nicht nur den Kippmoment.',
                 errorText: _descriptionError,
-              ),
-            ),
-            _buildPromptCard(
-              title:
-                  'Womit war dein Kopf schon beschäftigt, bevor die Situation gekippt ist?',
-              variant: AppCardVariant.soft,
-              child: FormTextArea(
-                initialValue: _preTriggerPreoccupation,
-                onChanged: (value) {
-                  setState(() {
-                    _preTriggerPreoccupation = value;
-                    _preoccupationError = null;
-                  });
-                },
-                maxLength: AppConstants.maxPreoccupationLength,
-                hintText:
-                    'Zum Beispiel: Ich war schon erschöpft, habe über Arbeit nachgedacht oder innerlich Druck gemacht.',
-                helperText: 'Auch Stichworte oder ein kurzer Satz sind okay.',
-                errorText: _preoccupationError,
-              ),
-            ),
-            _buildPromptCard(
-              title: 'Was war der konkrete Auslöser?',
-              variant: AppCardVariant.soft,
-              child: FormTextArea(
-                initialValue: _trigger,
-                onChanged: (value) {
-                  setState(() {
-                    _trigger = value;
-                    _triggerError = null;
-                  });
-                },
-                maxLength: AppConstants.maxTriggerDescriptionLength,
-                hintText:
-                    'Zum Beispiel: Ein bestimmter Satz, Blick, eine Nachricht oder ein kleiner Fehler.',
-                helperText: 'Je konkreter, desto hilfreicher.',
-                errorText: _triggerError,
               ),
             ),
             _buildPromptCard(

@@ -89,5 +89,30 @@ void main() {
       expect(result.learningPointKey, 'learning_decide_earlier');
       expect(result.suggestedNextActionKey, 'honor_early_signal');
     });
+
+    test('falls back gracefully when reduced capture has no reflection fields',
+        () {
+      final result = EvaluationEngine.evaluate(
+        systemState: SystemState.acuteActivation,
+        primaryEmotion: EmotionType.fear,
+        preTriggerLoad: 8,
+        intensity: 9,
+        bodyTension: 8,
+        systemReaction: SystemReactionType.freeze,
+        context: ContextType.work,
+        factInterpretation: FactInterpretationResult.mixed,
+        thoughtPatterns: const [],
+        actualBehaviorTags: const ['zurückgezogen'],
+        tippingPointAwareness: TippingPointAwareness.afterwards,
+        triggerAsLastDrop: null,
+        touchedThemes: const [],
+        neededSupports: const [],
+      );
+
+      expect(result.whatStandsOutKey, 'small_trigger_big_load');
+      expect(result.whatMayBeBehindItKey, 'background_pressure_already_high');
+      expect(result.helpfulNowKey, 'helpful_stabilize_body');
+      expect(result.suggestedTipIds, contains('notice_load_before_trigger'));
+    });
   });
 }

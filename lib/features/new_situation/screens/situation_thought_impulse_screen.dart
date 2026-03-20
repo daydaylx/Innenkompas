@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/router.dart';
 import '../../../app/theme/colors.dart';
+import '../../../application/providers/evaluation_providers.dart';
+import '../../../application/providers/intervention_providers.dart';
 import '../../../application/providers/new_situation_providers.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/fact_interpretation_results.dart';
@@ -16,12 +18,18 @@ import '../../../shared/widgets/app_scaffold.dart';
 import '../../../shared/widgets/buttons/app_primary_button.dart';
 import '../../../shared/widgets/buttons/app_secondary_button.dart';
 import '../../../shared/widgets/cards/app_card.dart';
+import '../../../shared/widgets/loading/app_loading_indicator.dart';
 import '../widgets/flow_progress_indicator.dart';
 import '../widgets/shared/form_text_area.dart';
 import '../widgets/shared/string_chip_selector.dart';
 
 class SituationThoughtImpulseScreen extends ConsumerStatefulWidget {
-  const SituationThoughtImpulseScreen({super.key});
+  const SituationThoughtImpulseScreen({
+    super.key,
+    this.reducedCapture = false,
+  });
+
+  final bool reducedCapture;
 
   @override
   ConsumerState<SituationThoughtImpulseScreen> createState() =>
@@ -57,39 +65,37 @@ class _SituationThoughtImpulseScreenState
       _actualBehaviorNote = existingData.actualBehaviorNote ?? '';
       _tippingPointAwareness = existingData.tippingPointAwareness;
       _fearOrPressurePoint = existingData.fearOrPressurePoint ?? '';
+    } else if (widget.reducedCapture) {
+      _factInterpretation = FactInterpretationResult.mixed;
     }
   }
 
   bool get _isValid {
-    if (_factInterpretation == null ||
-        _systemReaction == null ||
-        _tippingPointAwareness == null) {
+    if (_systemReaction == null || _tippingPointAwareness == null) {
       return false;
     }
 
-    return NewSituationValidators.validateThoughtImpulseData(
-      SituationThoughtImpulseData(
-        thoughtFocus: _thoughtFocus,
-        automaticThought: _automaticThought,
-        factInterpretation: _factInterpretation!,
-        systemReaction: _systemReaction!,
-        thoughtPatterns: _thoughtPatterns,
-        actualBehaviorTags: _actualBehaviorTags,
-        actualBehaviorNote: _actualBehaviorNote.trim().isEmpty
-            ? null
-            : _actualBehaviorNote.trim(),
-        tippingPointAwareness: _tippingPointAwareness!,
-        fearOrPressurePoint: _fearOrPressurePoint.trim().isEmpty
-            ? null
-            : _fearOrPressurePoint.trim(),
-      ),
-    ).isValid;
+    if (!widget.reducedCapture && _factInterpretation == null) {
+      return false;
+    }
+
+    final thoughtValidation = widget.reducedCapture
+        ? const ValidationResult.valid()
+        : NewSituationValidators.validateThoughtFocus(_thoughtFocus);
+    final automaticThoughtValidation =
+        NewSituationValidators.validateAutomaticThought(_automaticThought);
+    final behaviorValidation = NewSituationValidators.validateActualBehavior(
+      behaviorTags: _actualBehaviorTags,
+      note: _actualBehaviorNote,
+    );
+
+    return thoughtValidation.isValid &&
+        automaticThoughtValidation.isValid &&
+        behaviorValidation.isValid;
   }
 
-  void _handleNext() {
-    if (_factInterpretation == null ||
-        _systemReaction == null ||
-        _tippingPointAwareness == null) {
+  void _handleNext() async {
+    if (_systemReaction == null || _tippingPointAwareness == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Bitte vervollständige die Einordnung der Reaktion.'),
@@ -98,61 +104,90 @@ class _SituationThoughtImpulseScreenState
       return;
     }
 
-    final validation = NewSituationValidators.validateThoughtImpulseData(
-      SituationThoughtImpulseData(
-        thoughtFocus: _thoughtFocus,
-        automaticThought: _automaticThought,
-        factInterpretation: _factInterpretation!,
-        systemReaction: _systemReaction!,
-        thoughtPatterns: _thoughtPatterns,
-        actualBehaviorTags: _actualBehaviorTags,
-        actualBehaviorNote: _actualBehaviorNote.trim().isEmpty
-            ? null
-            : _actualBehaviorNote.trim(),
-        tippingPointAwareness: _tippingPointAwareness!,
-        fearOrPressurePoint: _fearOrPressurePoint.trim().isEmpty
-            ? null
-            : _fearOrPressurePoint.trim(),
-      ),
+    if (!widget.reducedCapture && _factInterpretation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Bitte ordne kurz ein, was eher Fakt und was Deutung war.'),
+        ),
+      );
+      return;
+    }
+
+    final thoughtValidation = widget.reducedCapture
+        ? const ValidationResult.valid()
+        : NewSituationValidators.validateThoughtFocus(_thoughtFocus);
+    final automaticThoughtValidation =
+        NewSituationValidators.validateAutomaticThought(_automaticThought);
+    final behaviorValidation = NewSituationValidators.validateActualBehavior(
+      behaviorTags: _actualBehaviorTags,
+      note: _actualBehaviorNote,
     );
 
     setState(() {
-      _thoughtFocusError =
-          NewSituationValidators.validateThoughtFocus(_thoughtFocus).firstError;
-      _thoughtError =
-          NewSituationValidators.validateAutomaticThought(_automaticThought)
-              .firstError;
-      _behaviorError = NewSituationValidators.validateActualBehavior(
-        behaviorTags: _actualBehaviorTags,
-        note: _actualBehaviorNote,
-      ).firstError;
+      _thoughtFocusError = thoughtValidation.firstError;
+      _thoughtError = automaticThoughtValidation.firstError;
+      _behaviorError = behaviorValidation.firstError;
     });
 
-    if (!validation.isValid) {
+    if (!thoughtValidation.isValid ||
+        !automaticThoughtValidation.isValid ||
+        !behaviorValidation.isValid) {
       return;
     }
 
     ref
         .read(newSituationFlowControllerProvider.notifier)
-        .updateThoughtImpulseData(
-          SituationThoughtImpulseData(
-            thoughtFocus: _thoughtFocus.trim(),
-            automaticThought: _automaticThought.trim(),
-            factInterpretation: _factInterpretation!,
-            systemReaction: _systemReaction!,
-            thoughtPatterns: _thoughtPatterns,
-            actualBehaviorTags: _actualBehaviorTags,
-            actualBehaviorNote: _actualBehaviorNote.trim().isEmpty
-                ? null
-                : _actualBehaviorNote.trim(),
-            tippingPointAwareness: _tippingPointAwareness!,
-            fearOrPressurePoint: _fearOrPressurePoint.trim().isEmpty
-                ? null
-                : _fearOrPressurePoint.trim(),
-          ),
-        );
+        .updateThoughtImpulseData(_buildThoughtData());
 
-    context.push(AppRoutes.newSituationReflection);
+    if (!widget.reducedCapture) {
+      ref
+          .read(newSituationFlowControllerProvider.notifier)
+          .setCapturePath(NewSituationCapturePath.full);
+      context.push(AppRoutes.newSituationReflection);
+      return;
+    }
+
+    final savedId =
+        await ref.read(newSituationFlowControllerProvider.notifier).saveEntry();
+
+    if (!mounted) return;
+
+    if (savedId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Fehler beim Speichern. Bitte versuche es erneut.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    ref.invalidate(patternSummaryProvider);
+    ref.invalidate(contextCorrelationsProvider);
+    ref.invalidate(trendSlopeProvider);
+    ref.invalidate(burnoutRiskProvider);
+    ref.invalidate(narrativeInsightsProvider);
+
+    context.go(
+      AppRoutes.entryEvaluation.replaceFirst(':id', '$savedId'),
+    );
+  }
+
+  SituationThoughtImpulseData _buildThoughtData() {
+    return SituationThoughtImpulseData(
+      thoughtFocus: _thoughtFocus.trim(),
+      automaticThought: _automaticThought.trim(),
+      factInterpretation:
+          _factInterpretation ?? FactInterpretationResult.mixed,
+      systemReaction: _systemReaction!,
+      thoughtPatterns: widget.reducedCapture ? const [] : _thoughtPatterns,
+      actualBehaviorTags: _actualBehaviorTags,
+      actualBehaviorNote:
+          _actualBehaviorNote.trim().isEmpty ? null : _actualBehaviorNote.trim(),
+      tippingPointAwareness: _tippingPointAwareness!,
+      fearOrPressurePoint:
+          _fearOrPressurePoint.trim().isEmpty ? null : _fearOrPressurePoint.trim(),
+    );
   }
 
   void _handleBack() {
@@ -191,9 +226,12 @@ class _SituationThoughtImpulseScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isSaving = ref.watch(isFlowSavingProvider);
 
     return AppScaffold(
-      title: 'Gedanken, Muster und Verhalten',
+      title: widget.reducedCapture
+          ? 'Kernspur sichern'
+          : 'Gedanken und Verhalten',
       backgroundVariant: AppBackgroundVariant.focus,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
@@ -215,9 +253,9 @@ class _SituationThoughtImpulseScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const FlowProgressIndicator(
-              currentStep: 3,
-              totalSteps: 4,
+            FlowProgressIndicator(
+              currentStep: 4,
+              totalSteps: widget.reducedCapture ? 4 : 5,
             ),
             const SizedBox(height: AppConstants.spacingLarge),
             AppCard(
@@ -227,7 +265,9 @@ class _SituationThoughtImpulseScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Was lief gedanklich und im Verhalten ab?',
+                    widget.reducedCapture
+                        ? 'Halte nur die wichtigste Spur fest'
+                        : 'Was lief gedanklich und im Verhalten ab?',
                     style: theme.textTheme.headlineMedium?.copyWith(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
@@ -235,7 +275,9 @@ class _SituationThoughtImpulseScreenState
                   ),
                   const SizedBox(height: AppConstants.spacingSmall),
                   Text(
-                    'Hier trennen wir Gedankenspur, erste Systemreaktion, Muster und das, was du tatsächlich gemacht hast.',
+                    widget.reducedCapture
+                        ? 'Nach der Stabilisierung reicht hier das Wesentliche: erster Gedanke, Reaktionsimpuls, tatsächliches Verhalten und ob du den Kipppunkt bemerkt hast.'
+                        : 'Wir trennen hier bewusst Gedankenspur und Verhaltensspur, damit klarer bleibt, was innerlich lief und was dann tatsächlich nach außen ging.',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -244,27 +286,36 @@ class _SituationThoughtImpulseScreenState
               ),
             ),
             const SizedBox(height: AppConstants.spacingLarge),
-            _buildPromptCard(
-              title:
-                  'Worin warst du gedanklich vertieft, als die Situation aufkam?',
-              child: FormTextArea(
-                initialValue: _thoughtFocus,
-                onChanged: (value) {
-                  setState(() {
-                    _thoughtFocus = value;
-                    _thoughtFocusError = null;
-                  });
-                },
-                maxLength: AppConstants.maxThoughtFocusLength,
-                hintText:
-                    'Zum Beispiel: Ich war schon bei den nächsten Problemen oder habe innerlich etwas durchgespielt.',
-                helperText: 'Kurz reicht, Hauptsache konkret.',
-                errorText: _thoughtFocusError,
+            if (!widget.reducedCapture) ...[
+              _buildSectionIntro(
+                title: 'Gedankenspur',
+                helper:
+                    'Was war schon im Kopf, welcher Satz schoss zuerst durch und wie stark war das schon Bewertung statt Beobachtung?',
               ),
-            ),
+              _buildPromptCard(
+                title:
+                    'Worin warst du gedanklich vertieft, als die Situation aufkam?',
+                child: FormTextArea(
+                  initialValue: _thoughtFocus,
+                  onChanged: (value) {
+                    setState(() {
+                      _thoughtFocus = value;
+                      _thoughtFocusError = null;
+                    });
+                  },
+                  maxLength: AppConstants.maxThoughtFocusLength,
+                  hintText:
+                      'Zum Beispiel: Ich war schon bei den nächsten Problemen oder habe innerlich etwas durchgespielt.',
+                  helperText: 'Kurz reicht, Hauptsache konkret.',
+                  errorText: _thoughtFocusError,
+                ),
+              ),
+            ],
             _buildPromptCard(
               title: 'Was schoss dir als Erstes durch den Kopf?',
-              variant: AppCardVariant.soft,
+              variant: widget.reducedCapture
+                  ? AppCardVariant.focus
+                  : AppCardVariant.soft,
               child: FormTextArea(
                 initialValue: _automaticThought,
                 onChanged: (value) {
@@ -276,114 +327,76 @@ class _SituationThoughtImpulseScreenState
                 maxLength: AppConstants.maxThoughtDescriptionLength,
                 maxLines: 3,
                 hintText:
-                    '"Das ist wieder typisch" oder "Ich bin zu blöd dafür"',
+                    '"Das ist wieder typisch" oder "Ich werde jetzt sicher falsch verstanden."',
                 helperText:
                     'Nimm den ersten rohen Gedanken, nicht die spätere Erklärung.',
                 errorText: _thoughtError,
               ),
             ),
-            AppCard(
-              variant: AppCardVariant.soft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Was davon war eher Fakt, was eher Deutung?',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.spacingSmall),
-                  Wrap(
-                    spacing: AppConstants.spacingSmall,
-                    runSpacing: AppConstants.spacingSmall,
-                    children: FactInterpretationResult.values.map((value) {
-                      return ChoiceChip(
-                        selected: _factInterpretation == value,
-                        label: Text(value.label),
-                        onSelected: (_) {
-                          setState(() {
-                            _factInterpretation = value;
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  if (_factInterpretation != null) ...[
-                    const SizedBox(height: AppConstants.spacingSmall),
-                    Text(
-                      _factInterpretation!.description,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ],
+            if (!widget.reducedCapture) ...[
+              _buildChoiceCard(
+                title: 'Was davon war eher Fakt, was eher Deutung?',
+                helper:
+                    'Fakt heißt beobachtbar. Deutung heißt: deine Schlussfolgerung oder Bewertung dazu.',
+                child: Wrap(
+                  spacing: AppConstants.spacingSmall,
+                  runSpacing: AppConstants.spacingSmall,
+                  children:
+                      FactInterpretationResult.values.map((value) {
+                    return ChoiceChip(
+                      selected: _factInterpretation == value,
+                      label: Text(value.label),
+                      onSelected: (_) {
+                        setState(() {
+                          _factInterpretation = value;
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+                selectedDescription: _factInterpretation?.description,
               ),
-            ),
-            AppCard(
-              variant: AppCardVariant.soft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Was wolltest du in dem Moment am liebsten tun?',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.spacingSmall),
-                  Wrap(
-                    spacing: AppConstants.spacingSmall,
-                    runSpacing: AppConstants.spacingSmall,
-                    children: SystemReactionType.values.map((value) {
-                      return ChoiceChip(
-                        selected: _systemReaction == value,
-                        label: Text(value.label),
-                        onSelected: (_) {
-                          setState(() {
-                            _systemReaction = value;
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  if (_systemReaction != null) ...[
-                    const SizedBox(height: AppConstants.spacingSmall),
-                    Text(
-                      _systemReaction!.description,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ],
+              _buildChoiceCard(
+                title: 'Optionaler Zusatz: In welches Gedankenmuster bist du gerutscht? Max. 2',
+                helper:
+                    'Nur wenn es sich klar anfühlt. Wenn nicht, lass es weg.',
+                child: StringChipSelector(
+                  options: NewSituationOptionLists.thoughtPatterns,
+                  selectedValues: _thoughtPatterns,
+                  maxSelected: 2,
+                  onChanged: (values) {
+                    setState(() {
+                      _thoughtPatterns = values;
+                    });
+                  },
+                ),
               ),
+            ],
+            _buildSectionIntro(
+              title: 'Verhaltensspur',
+              helper:
+                  'Hier geht es darum, was du am liebsten getan hättest, was du dann wirklich getan hast und wann du das Kippen bemerkt hast.',
             ),
-            AppCard(
-              variant: AppCardVariant.soft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'In welches Gedankenmuster bist du gerutscht? Optional, max. 2',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.spacingSmall),
-                  StringChipSelector(
-                    options: NewSituationOptionLists.thoughtPatterns,
-                    selectedValues: _thoughtPatterns,
-                    maxSelected: 2,
-                    onChanged: (values) {
+            _buildChoiceCard(
+              title: 'Was wolltest du in dem Moment am liebsten tun?',
+              helper:
+                  'Das meint den ersten inneren Reaktionsimpuls, noch bevor du alles kontrolliert oder erklärt hast.',
+              child: Wrap(
+                spacing: AppConstants.spacingSmall,
+                runSpacing: AppConstants.spacingSmall,
+                children: SystemReactionType.values.map((value) {
+                  return ChoiceChip(
+                    selected: _systemReaction == value,
+                    label: Text(value.label),
+                    onSelected: (_) {
                       setState(() {
-                        _thoughtPatterns = values;
+                        _systemReaction = value;
                       });
                     },
-                  ),
-                ],
+                  );
+                }).toList(),
               ),
+              selectedDescription: _systemReaction?.description,
             ),
             AppCard(
               variant: AppCardVariant.soft,
@@ -397,6 +410,13 @@ class _SituationThoughtImpulseScreenState
                     ),
                   ),
                   const SizedBox(height: AppConstants.spacingSmall),
+                  Text(
+                    'Halte fest, was nach außen sichtbar wurde. Die Chips reichen oft schon.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppConstants.spacingMedium),
                   StringChipSelector(
                     options: NewSituationOptionLists.actualBehaviorOptions,
                     selectedValues: _actualBehaviorTags,
@@ -425,51 +445,25 @@ class _SituationThoughtImpulseScreenState
                 ],
               ),
             ),
-            AppCard(
-              variant: AppCardVariant.soft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Gab es einen Moment, an dem du kurz gemerkt hast, dass es kippt?',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.spacingSmall),
-                  Wrap(
-                    spacing: AppConstants.spacingSmall,
-                    runSpacing: AppConstants.spacingSmall,
-                    children: TippingPointAwareness.values.map((value) {
-                      return ChoiceChip(
-                        selected: _tippingPointAwareness == value,
-                        label: Text(value.label),
-                        onSelected: (_) {
-                          setState(() {
-                            _tippingPointAwareness = value;
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
-            _buildPromptCard(
+            _buildChoiceCard(
               title:
-                  'Was hat dir in dem Moment am meisten Angst gemacht oder Druck gemacht? Optional',
-              variant: AppCardVariant.soft,
-              child: FormTextArea(
-                initialValue: _fearOrPressurePoint,
-                onChanged: (value) {
-                  setState(() {
-                    _fearOrPressurePoint = value;
-                  });
-                },
-                maxLength: AppConstants.maxFearPressurePointLength,
-                maxLines: 3,
-                hintText:
-                    'Zum Beispiel: Kontrolle zu verlieren, lächerlich zu wirken oder nicht ernst genommen zu werden.',
+                  'Gab es einen Moment, an dem du kurz gemerkt hast, dass es kippt?',
+              helper:
+                  'Das ist die Rückschau auf den Ablauf: früh bemerkt, spät bemerkt oder erst im Nachhinein.',
+              child: Wrap(
+                spacing: AppConstants.spacingSmall,
+                runSpacing: AppConstants.spacingSmall,
+                children: TippingPointAwareness.values.map((value) {
+                  return ChoiceChip(
+                    selected: _tippingPointAwareness == value,
+                    label: Text(value.label),
+                    onSelected: (_) {
+                      setState(() {
+                        _tippingPointAwareness = value;
+                      });
+                    },
+                  );
+                }).toList(),
               ),
             ),
             const SizedBox(height: AppConstants.spacingXLarge),
@@ -483,15 +477,45 @@ class _SituationThoughtImpulseScreenState
                 ),
                 const SizedBox(width: AppConstants.spacingMedium),
                 Expanded(
-                  child: AppPrimaryButton(
-                    label: 'Weiter',
-                    onPressed: _isValid ? _handleNext : null,
-                  ),
+                  child: isSaving
+                      ? const AppLoadingIndicator()
+                      : AppPrimaryButton(
+                          label: widget.reducedCapture ? 'Speichern' : 'Weiter',
+                          onPressed: _isValid ? _handleNext : null,
+                        ),
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionIntro({
+    required String title,
+    required String helper,
+  }) {
+    return AppCard(
+      variant: AppCardVariant.soft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: AppConstants.spacingSmall),
+          Text(
+            helper,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+          ),
+        ],
       ),
     );
   }
@@ -515,6 +539,46 @@ class _SituationThoughtImpulseScreenState
           ),
           const SizedBox(height: AppConstants.spacingSmall),
           child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChoiceCard({
+    required String title,
+    required String helper,
+    required Widget child,
+    String? selectedDescription,
+  }) {
+    return AppCard(
+      variant: AppCardVariant.soft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: AppConstants.spacingSmall),
+          Text(
+            helper,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+          ),
+          const SizedBox(height: AppConstants.spacingMedium),
+          child,
+          if (selectedDescription != null) ...[
+            const SizedBox(height: AppConstants.spacingSmall),
+            Text(
+              selectedDescription,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+          ],
         ],
       ),
     );

@@ -3,7 +3,6 @@ import 'package:drift/native.dart';
 import 'package:innenkompass/core/constants/context_types.dart';
 import 'package:innenkompass/core/constants/emotion_types.dart';
 import 'package:innenkompass/core/constants/fact_interpretation_results.dart';
-import 'package:innenkompass/core/constants/pattern_familiarity.dart';
 import 'package:innenkompass/core/constants/problem_timing.dart';
 import 'package:innenkompass/core/constants/system_reaction_types.dart';
 import 'package:innenkompass/core/constants/tipping_point_awareness.dart';
@@ -20,11 +19,11 @@ void main() {
       preTriggerPreoccupation: 'Ich war schon angespannt wegen des Meetings.',
       problemTiming: ProblemTiming.partly,
       trigger: 'Ein abwertender Kommentar.',
+      preTriggerLoad: 5,
       context: ContextType.work,
       timestamp: DateTime(2026, 3, 16, 9, 30),
     );
     const emotionData = SituationEmotionData(
-      preTriggerLoad: 5,
       intensity: 7,
       bodyTension: 6,
       primaryEmotion: EmotionType.fear,
@@ -45,7 +44,6 @@ void main() {
       triggerAsLastDrop: TriggerAsLastDrop.partly,
       backgroundTheme: 'Nicht ernst genommen werden.',
       nextStep: 'Ich sammle mich kurz und formuliere dann meine Rückfrage.',
-      patternFamiliarity: PatternFamiliarity.sometimes,
     );
 
     test('is not complete before reflection data exists', () {
@@ -55,7 +53,7 @@ void main() {
         thoughtImpulseData: thoughtData,
       );
 
-      expect(state.currentStep, 3);
+      expect(state.currentStep, 4);
       expect(state.isComplete, isFalse);
     });
 
@@ -67,7 +65,20 @@ void main() {
         reflectionData: reflectionData,
       );
 
+      expect(state.currentStep, 5);
+      expect(state.isComplete, isTrue);
+    });
+
+    test('reduced capture path becomes complete without reflection data', () {
+      final state = NewSituationFlowState(
+        eventData: eventData,
+        emotionData: emotionData,
+        thoughtImpulseData: thoughtData,
+        capturePath: NewSituationCapturePath.reduced,
+      );
+
       expect(state.currentStep, 4);
+      expect(state.requiresReflection, isFalse);
       expect(state.isComplete, isTrue);
     });
   });
@@ -77,9 +88,7 @@ void main() {
       const reflectionData = SituationReflectionData(
         touchedThemes: ['Sicherheit'],
         neededSupports: ['Klarheit'],
-        realisticAlternative: 'Ich hätte erst kurz stoppen können.',
         triggerAsLastDrop: TriggerAsLastDrop.partly,
-        backgroundTheme: 'Ich hatte schon vorher Druck im Kopf.',
         nextStep: 'Ich atme durch und spreche das heute Abend ruhig an.',
       );
 
@@ -118,13 +127,13 @@ void main() {
           preTriggerPreoccupation: 'Ich war vorher schon angespannt.',
           problemTiming: ProblemTiming.partly,
           trigger: 'Ein scharfer Kommentar im Meeting.',
+          preTriggerLoad: 4,
           context: ContextType.work,
           timestamp: DateTime(2026, 3, 20, 11, 0),
         ),
       );
       controller.updateEmotionData(
         const SituationEmotionData(
-          preTriggerLoad: 4,
           intensity: 5,
           bodyTension: 5,
           primaryEmotion: EmotionType.fear,
@@ -144,10 +153,7 @@ void main() {
         const SituationReflectionData(
           touchedThemes: ['Respekt'],
           neededSupports: ['Klarheit'],
-          realisticAlternative:
-              'Ich kann erst die Fakten sortieren und später antworten.',
           triggerAsLastDrop: TriggerAsLastDrop.partly,
-          backgroundTheme: 'Ich habe Angst, falsch bewertet zu werden.',
           nextStep: 'Ich notiere erst, was wirklich gesagt wurde.',
         ),
       );
@@ -158,6 +164,51 @@ void main() {
       expect(entry, isNotNull);
       expect(entry!.interventionType, 'factCheck');
       expect(entry.interventionId, 'fact_check_basic');
+    });
+
+    test('persists reduced capture entries without reflection data', () async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+
+      final controller = NewSituationFlowController(database);
+
+      controller.updateEventData(
+        SituationEventData(
+          description: 'Das Gespräch ist mir plötzlich entglitten.',
+          preTriggerPreoccupation: 'Ich war schon seit Stunden angespannt.',
+          trigger: 'Ein kurzer Satz hat mich sofort hochgefahren.',
+          preTriggerLoad: 8,
+          context: ContextType.work,
+          timestamp: DateTime(2026, 3, 20, 14, 30),
+        ),
+      );
+      controller.updateEmotionData(
+        const SituationEmotionData(
+          intensity: 9,
+          bodyTension: 8,
+          primaryEmotion: EmotionType.anger,
+        ),
+      );
+      controller.setCapturePath(NewSituationCapturePath.reduced);
+      controller.updateThoughtImpulseData(
+        const SituationThoughtImpulseData(
+          thoughtFocus: '',
+          automaticThought: 'Ich halte das gerade nicht gut aus.',
+          factInterpretation: FactInterpretationResult.mixed,
+          systemReaction: SystemReactionType.attack,
+          actualBehaviorTags: ['laut geworden'],
+          tippingPointAwareness: TippingPointAwareness.afterwards,
+        ),
+      );
+
+      final entryId = await controller.saveEntry();
+      final entry = await database.getSituationEntryById(entryId!);
+
+      expect(entry, isNotNull);
+      expect(entry!.touchedThemes, isNull);
+      expect(entry.neededSupports, isNull);
+      expect(entry.triggerAsLastDrop, isNull);
+      expect(entry.evaluationHelpfulNowKey, isNotNull);
     });
   });
 }

@@ -15,9 +15,12 @@ class AppRoutes {
   static const String home = '/home';
   static const String newSituation = '/new-situation';
   static const String newSituationEvent = '/new-situation/event';
+  static const String newSituationPrelude = '/new-situation/prelude';
   static const String newSituationEmotion = '/new-situation/emotion';
   static const String newSituationThoughtImpulse =
       '/new-situation/thought-impulse';
+  static const String newSituationThoughtImpulseReduced =
+      '/new-situation/thought-impulse/reduced';
   static const String newSituationReflection = '/new-situation/reflection';
   static const String intervention = '/intervention';
   static const String postEvaluation = '/post-evaluation';
@@ -55,6 +58,8 @@ class AppRouter {
     required Widget Function(BuildContext) lockScreen,
     required Widget Function(BuildContext, GoRouterState)
         newSituationEventScreen,
+    required Widget Function(BuildContext, GoRouterState)
+        newSituationPreludeScreen,
     required Widget Function(BuildContext, GoRouterState)
         newSituationEmotionScreen,
     required Widget Function(BuildContext, GoRouterState)
@@ -146,6 +151,13 @@ class AppRouter {
           ),
         ),
         GoRoute(
+          path: AppRoutes.newSituationPrelude,
+          pageBuilder: (context, state) => MaterialPage(
+            key: state.pageKey,
+            child: newSituationPreludeScreen(context, state),
+          ),
+        ),
+        GoRoute(
           path: AppRoutes.newSituationEmotion,
           pageBuilder: (context, state) => MaterialPage(
             key: state.pageKey,
@@ -154,6 +166,13 @@ class AppRouter {
         ),
         GoRoute(
           path: AppRoutes.newSituationThoughtImpulse,
+          pageBuilder: (context, state) => MaterialPage(
+            key: state.pageKey,
+            child: newSituationThoughtImpulseScreen(context, state),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.newSituationThoughtImpulseReduced,
           pageBuilder: (context, state) => MaterialPage(
             key: state.pageKey,
             child: newSituationThoughtImpulseScreen(context, state),

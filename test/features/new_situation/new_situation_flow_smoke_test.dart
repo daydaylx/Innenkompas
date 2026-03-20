@@ -53,7 +53,7 @@ void main() {
       }
 
       Finder elevatedButtonTarget(String label) {
-        return find.widgetWithText(ElevatedButton, label).first;
+        return find.widgetWithText(ElevatedButton, label).last;
       }
 
       Finder textFieldByHint(String hintText) {
@@ -67,17 +67,22 @@ void main() {
       await tester.pump();
       await tester.pumpAndSettle();
 
-      expect(find.text('Situation und Vorlauf'), findsOneWidget);
+      expect(find.text('Situation und Kontext'), findsOneWidget);
 
       await tester.enterText(
         textFieldByHint(
-          'Zum Beispiel: Im Gespräch fiel ein Satz, der mich sofort hochgefahren hat.',
+          'Zum Beispiel: Das Gespräch im Meeting wurde plötzlich scharf.',
         ),
         'Das Gespräch im Meeting wurde plötzlich angespannt.',
       );
+      await tapVisible(gestureTarget('Arbeit'));
+      await tapVisible(elevatedButtonTarget('Weiter'));
+
+      expect(find.text('Vorlauf und Auslöser'), findsOneWidget);
+
       await tester.enterText(
         textFieldByHint(
-          'Zum Beispiel: Ich war schon erschöpft, habe über Arbeit nachgedacht oder innerlich Druck gemacht.',
+          'Zum Beispiel: Ich war schon erschöpft, habe innerlich Druck gemacht oder hing noch an einem anderen Thema.',
         ),
         'Ich war schon vorher unter Druck und gedanklich bei dem Termin.',
       );
@@ -87,23 +92,14 @@ void main() {
         ),
         'Ein scharfer Kommentar vor allen anderen.',
       );
-      await tapVisible(gestureTarget('Arbeit'));
-      expect(
-        tester.widget<ElevatedButton>(elevatedButtonTarget('Weiter')).onPressed,
-        isNotNull,
-      );
       await tapVisible(elevatedButtonTarget('Weiter'));
 
       expect(find.text('Körper und Gefühle'), findsOneWidget);
 
       await tapVisible(gestureTarget('Angst'));
-      expect(
-        tester.widget<ElevatedButton>(elevatedButtonTarget('Weiter')).onPressed,
-        isNotNull,
-      );
       await tapVisible(elevatedButtonTarget('Weiter'));
 
-      expect(find.text('Gedanken, Muster und Verhalten'), findsOneWidget);
+      expect(find.text('Gedanken und Verhalten'), findsOneWidget);
 
       await tester.enterText(
         textFieldByHint(
@@ -113,7 +109,7 @@ void main() {
       );
       await tester.enterText(
         textFieldByHint(
-          '"Das ist wieder typisch" oder "Ich bin zu blöd dafür"',
+          '"Das ist wieder typisch" oder "Ich werde jetzt sicher falsch verstanden."',
         ),
         'Ich werde jetzt sicher falsch verstanden.',
       );
@@ -132,18 +128,12 @@ void main() {
       );
       await tapVisible(elevatedButtonTarget('Weiter'));
 
-      expect(find.text('Einordnen und weitergehen'), findsOneWidget);
+      expect(find.text('Kurz einordnen'), findsOneWidget);
 
       await tapVisible(choiceChipTarget('Ja, ziemlich sicher'));
       await tapVisible(filterChipTarget('Respekt'));
       await tapVisible(filterChipTarget('Klarheit'));
 
-      expect(
-        tester
-            .widget<ElevatedButton>(elevatedButtonTarget('Speichern'))
-            .onPressed,
-        isNotNull,
-      );
       await tapVisible(elevatedButtonTarget('Speichern'));
 
       expect(find.text('Deine Auswertung'), findsOneWidget);
