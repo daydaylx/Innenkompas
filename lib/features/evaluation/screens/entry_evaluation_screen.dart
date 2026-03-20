@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,14 +10,13 @@ import 'package:innenkompass/application/providers/intervention_providers.dart';
 import 'package:innenkompass/application/providers/new_situation_providers.dart';
 import 'package:innenkompass/core/config/ai_evaluation_config.dart';
 import 'package:innenkompass/core/constants/app_constants.dart';
-import 'package:innenkompass/core/constants/intervention_types.dart';
 import 'package:innenkompass/core/constants/system_states.dart';
 import 'package:innenkompass/data/db/app_database.dart';
 import 'package:innenkompass/domain/models/ai_reflection.dart';
 import 'package:innenkompass/domain/models/ai_evaluation.dart';
 import 'package:innenkompass/domain/services/ai_reflection_policy.dart';
-import 'package:innenkompass/domain/models/intervention_library.dart';
 import 'package:innenkompass/domain/services/ai_evaluation_service.dart';
+import 'package:innenkompass/domain/services/intervention_resolver.dart';
 import 'package:innenkompass/domain/services/pattern_analyzer.dart';
 import 'package:innenkompass/shared/widgets/app_scaffold.dart';
 import 'package:innenkompass/shared/widgets/ai/ai_reflection_result_card.dart';
@@ -55,6 +53,8 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
   @override
   Widget build(BuildContext context) {
     final entryAsync = ref.watch(evaluationEntryProvider(widget.entryId));
+    final patternHintAsync =
+        ref.watch(evaluationPatternHintProvider(widget.entryId));
     final contentAsync = ref.watch(evaluationContentProvider);
     final aiConfig = ref.watch(aiEvaluationConfigProvider);
     final hasAiService = ref.watch(aiEvaluationServiceProvider) != null;
@@ -97,8 +97,8 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
               final selectedActionKey = _selectedActionKey ??
                   entry.selectedNextActionKey ??
                   entry.suggestedNextActionKey;
-
-              final hasIntervention = entry.interventionType != null;
+              final resolvedIntervention = _resolveInterventionForEntry(entry);
+              final hasIntervention = resolvedIntervention != null;
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(
@@ -110,6 +110,17 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    patternHintAsync.maybeWhen(
+                      data: (hint) => (hint == null || hint.trim().isEmpty)
+                          ? const SizedBox.shrink()
+                          : Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: AppConstants.spacingMedium,
+                              ),
+                              child: _PatternHintCard(text: hint),
+                            ),
+                      orElse: () => const SizedBox.shrink(),
+                    ),
                     if (statusKeys.isNotEmpty) ...[
                       Wrap(
                         spacing: AppConstants.spacingSmall,
@@ -229,7 +240,8 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
                             ? null
                             : () => _startIntervention(
                                   selectedActionKey,
-                                  entry.interventionType!,
+                                  entry,
+                                  resolvedIntervention!,
                                 ),
                         label: 'Passende Übung starten',
                         isLoading: _isSavingAction,
@@ -287,31 +299,23 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
 
   Future<void> _startIntervention(
     String? actionKey,
-    String interventionTypeRaw,
+    SituationEntryData entry,
+    ResolvedInterventionRecommendation recommendation,
   ) async {
     _detachAiRequest();
     await _persistSelectedAction(actionKey);
     if (!mounted) return;
 
-    final interventionType = InterventionType.values
-        .where((type) => type.name == interventionTypeRaw)
-        .firstOrNull;
-    if (interventionType == null) {
-      await _finishWithoutIntervention();
-      return;
-    }
+    await _persistResolvedInterventionReference(entry, recommendation);
+    if (!mounted) return;
 
-    final intervention =
-        InterventionLibrary.getByType(interventionType).firstOrNull;
-    if (intervention == null) {
-      await _finishWithoutIntervention();
-      return;
-    }
-
-    ref
-        .read(interventionFlowStateProvider.notifier)
-        .startIntervention(intervention, entryId: widget.entryId);
-    context.push(AppRoutes.intervention);
+    ref.read(interventionFlowStateProvider.notifier).startIntervention(
+        recommendation.intervention,
+        entryId: widget.entryId);
+    context.push(
+      AppRoutes.intervention,
+      extra: {'interventionId': recommendation.interventionId},
+    );
   }
 
   Future<void> _finishWithoutIntervention() async {
@@ -321,6 +325,44 @@ class _EntryEvaluationScreenState extends ConsumerState<EntryEvaluationScreen> {
     ref.read(newSituationFlowControllerProvider.notifier).reset();
     if (!mounted) return;
     context.go(AppRoutes.home);
+  }
+
+  ResolvedInterventionRecommendation? _resolveInterventionForEntry(
+    SituationEntryData entry,
+  ) {
+    return InterventionResolver.resolveForStoredEntry(
+      storedInterventionId: entry.interventionId,
+      storedInterventionTypeRaw: entry.interventionType,
+      systemStateRaw: entry.systemState,
+      primaryEmotionRaw: entry.primaryEmotion,
+      intensity: entry.intensity,
+    );
+  }
+
+  Future<void> _persistResolvedInterventionReference(
+    SituationEntryData entry,
+    ResolvedInterventionRecommendation recommendation,
+  ) async {
+    final storedType = InterventionResolver.typeForStoredReference(
+      interventionId: entry.interventionId,
+      interventionTypeRaw: entry.interventionType,
+    );
+    final hasMatchingReference =
+        entry.interventionId == recommendation.interventionId &&
+            storedType == recommendation.interventionType;
+    if (hasMatchingReference) {
+      return;
+    }
+
+    final db = ref.read(databaseProvider);
+    await db.updateInterventionReference(
+      entryId: widget.entryId,
+      interventionId: recommendation.interventionId,
+      interventionType: recommendation.interventionType.name,
+    );
+    ref.invalidate(evaluationEntryProvider(widget.entryId));
+    ref.invalidate(interventionEntryProvider(widget.entryId));
+    ref.invalidate(narrativeInsightsProvider);
   }
 
   Widget _buildAiReflectionSection({
@@ -1078,6 +1120,41 @@ class _SectionCard extends StatelessWidget {
             child,
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _PatternHintCard extends StatelessWidget {
+  const _PatternHintCard({
+    required this.text,
+  });
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppConstants.spacingMedium),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 2),
+            child: Icon(Icons.repeat_rounded, size: 18),
+          ),
+          const SizedBox(width: AppConstants.spacingSmall),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ],
       ),
     );
   }

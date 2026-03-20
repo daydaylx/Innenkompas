@@ -116,7 +116,7 @@ class CrisisScreen extends ConsumerWidget {
                           color: AppColors.primary,
                           onTap: () {
                             context.push(AppRoutes.intervention, extra: {
-                              'type': 'regulation_4_6_breathing',
+                              'interventionId': 'regulation_4_6_breathing',
                             });
                           },
                         ),
@@ -130,7 +130,7 @@ class CrisisScreen extends ConsumerWidget {
                           color: AppColors.success,
                           onTap: () {
                             context.push(AppRoutes.intervention, extra: {
-                              'type': 'grounding_5_4_3_2_1',
+                              'interventionId': 'grounding_5_4_3_2_1',
                             });
                           },
                         ),

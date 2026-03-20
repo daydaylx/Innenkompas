@@ -18,6 +18,7 @@ import 'package:innenkompass/core/constants/intervention_types.dart';
 import 'package:innenkompass/core/constants/system_states.dart';
 import 'package:innenkompass/data/db/app_database.dart';
 import 'package:innenkompass/domain/models/evaluation.dart';
+import 'package:innenkompass/domain/services/intervention_resolver.dart';
 
 class TestAppHarness {
   TestAppHarness({
@@ -146,12 +147,27 @@ Future<int> insertSituationEntry(
   ],
   String suggestedNextActionKey = 'choose_one_step',
   String? selectedNextActionKey,
-  String? interventionType,
+  String interventionType = 'regulation',
+  String? interventionId,
+  bool includeIntervention = true,
+  bool includeConcreteInterventionId = true,
   String? aiEvaluationStatus,
   DateTime? aiEvaluationRequestedAt,
   bool aiEvaluationConsentGiven = false,
 }) {
   final now = timestamp ?? DateTime(2026, 3, 19, 10, 0);
+  final resolvedInterventionId = !includeIntervention
+      ? null
+      : interventionId ??
+          (includeConcreteInterventionId
+              ? InterventionResolver.resolveForStoredEntry(
+                  storedInterventionId: null,
+                  storedInterventionTypeRaw: interventionType,
+                  systemStateRaw: systemState,
+                  primaryEmotionRaw: primaryEmotion,
+                  intensity: intensity,
+                )?.interventionId
+              : null);
 
   return database.createSituationEntry(
     SituationEntriesCompanion.insert(
@@ -177,9 +193,11 @@ Future<int> insertSituationEntry(
       suggestedTipIds: Value(jsonEncode(suggestedTipIds)),
       suggestedNextActionKey: Value(suggestedNextActionKey),
       selectedNextActionKey: Value(selectedNextActionKey),
-      interventionType: Value(
-        interventionType ?? InterventionType.regulation.name,
-      ),
+      interventionType:
+          includeIntervention ? Value(interventionType) : const Value.absent(),
+      interventionId: includeIntervention && resolvedInterventionId != null
+          ? Value(resolvedInterventionId)
+          : const Value.absent(),
       aiEvaluationStatus: Value(aiEvaluationStatus),
       aiEvaluationRequestedAt: Value(aiEvaluationRequestedAt),
       aiEvaluationConsentGiven: Value(aiEvaluationConsentGiven),

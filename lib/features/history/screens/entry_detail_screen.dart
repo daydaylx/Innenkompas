@@ -23,6 +23,7 @@ import 'package:innenkompass/core/constants/trigger_as_last_drop.dart';
 import 'package:innenkompass/data/db/app_database.dart';
 import 'package:innenkompass/domain/models/ai_reflection.dart';
 import 'package:innenkompass/domain/models/ai_evaluation.dart';
+import 'package:innenkompass/domain/services/intervention_resolver.dart';
 import 'package:innenkompass/shared/widgets/app_scaffold.dart';
 import 'package:innenkompass/shared/widgets/ai/ai_reflection_result_card.dart';
 
@@ -470,7 +471,8 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
                     child: _buildAiEvaluationSection(entry),
                   ),
                 ],
-                if (entry.interventionType != null) ...[
+                if ((entry.interventionType?.trim().isNotEmpty ?? false) ||
+                    (entry.interventionId?.trim().isNotEmpty ?? false)) ...[
                   const SizedBox(height: AppConstants.spacingMedium),
                   _buildCard(
                     title: 'Intervention',
@@ -479,7 +481,10 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _getInterventionLabel(entry.interventionType!),
+                          _getInterventionLabel(
+                            interventionId: entry.interventionId,
+                            interventionTypeRaw: entry.interventionType,
+                          ),
                           style:
                               Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
@@ -846,17 +851,14 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
     return (entry.needOrWoundedPoint ?? '').trim();
   }
 
-  String _getInterventionLabel(String typeStr) {
-    final labels = {
-      'regulation': 'Regulation',
-      'factCheck': 'Fakt vs. Deutung',
-      'impulsePause': 'Impulspause',
-      'ruminationStop': 'Grübelstopp',
-      'communication': 'Kommunikationshilfe',
-      'overwhelmStructure': 'Überforderungsstruktur',
-      'selfValueCheck': 'Selbstabwertungscheck',
-    };
-    return labels[typeStr] ?? typeStr;
+  String _getInterventionLabel({
+    required String? interventionId,
+    required String? interventionTypeRaw,
+  }) {
+    return InterventionResolver.labelForStoredReference(
+      interventionId: interventionId,
+      interventionTypeRaw: interventionTypeRaw,
+    );
   }
 
   String _involvedLabel(SituationEntryData entry) {

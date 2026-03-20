@@ -10,6 +10,7 @@ import '../../core/validators/new_situation_validators.dart';
 import '../../data/db/app_database.dart';
 import '../../domain/models/situation_draft.dart';
 import '../../domain/services/classification_service.dart';
+import '../../domain/services/intervention_resolver.dart';
 import 'database_provider.dart';
 
 /// StateNotifier for managing the new situation flow.
@@ -103,7 +104,7 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
       final normalizedBehaviorTags = ActualBehaviorTypes.normalizeAll(
         thoughtData.actualBehaviorTags,
       );
-      final legacyImpulse = _mapSystemReactionToLegacyImpulse(
+      final legacyImpulse = _mapReactionToImpulse(
         thoughtData.systemReaction,
       );
       final secondaryEmotion = emotionData.additionalEmotions.isNotEmpty
@@ -143,11 +144,19 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
         tippingPointAwareness: thoughtData.tippingPointAwareness,
         triggerAsLastDrop: reflectionData.triggerAsLastDrop,
         touchedThemes: reflectionData.touchedThemes,
+        neededSupports: reflectionData.neededSupports,
+        needOrWoundedPoint: needSummary,
+        backgroundTheme: reflectionData.backgroundTheme,
       );
 
       final systemState = classification.systemState.name;
       final isCrisis = classification.isCrisis;
-      final interventionType = classification.primaryIntervention?.name;
+      final interventionId = classification.primaryInterventionId;
+      final interventionType = interventionId == null
+          ? classification.primaryIntervention?.name
+          : InterventionResolver.resolveById(interventionId)
+              ?.interventionType
+              .name;
 
       // Create the entry with classification results
       final id = await _db.createSituationEntry(
@@ -162,7 +171,9 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
               ? Value(eventData.involvedEntities)
               : const Value.absent(),
           preTriggerPreoccupation: Value(eventData.preTriggerPreoccupation),
-          problemTiming: Value(eventData.problemTiming.name),
+          problemTiming: eventData.problemTiming != null
+              ? Value(eventData.problemTiming!.name)
+              : const Value.absent(),
           triggerDescription: Value(eventData.trigger),
           preTriggerLoad: Value(emotionData.preTriggerLoad),
           intensity: emotionData.intensity,
@@ -228,6 +239,9 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
           interventionType: interventionType != null
               ? Value(interventionType)
               : const Value.absent(),
+          interventionId: interventionId != null
+              ? Value(interventionId)
+              : const Value.absent(),
           isDraft: const Value(false),
         ),
       );
@@ -252,25 +266,6 @@ class NewSituationFlowController extends StateNotifier<NewSituationFlowState> {
 
   String _encodeList(List<String> values) {
     return jsonEncode(values);
-  }
-
-  ImpulseType _mapSystemReactionToLegacyImpulse(SystemReactionType reaction) {
-    switch (reaction) {
-      case SystemReactionType.attack:
-        return ImpulseType.counter;
-      case SystemReactionType.withdrawal:
-        return ImpulseType.withdraw;
-      case SystemReactionType.flight:
-        return ImpulseType.flee;
-      case SystemReactionType.freeze:
-        return ImpulseType.freeze;
-      case SystemReactionType.appease:
-        return ImpulseType.comply;
-      case SystemReactionType.control:
-        return ImpulseType.control;
-      case SystemReactionType.unknown:
-        return ImpulseType.unknown;
-    }
   }
 
   String? _mergeBehaviorSummary(List<String> tags, String? note) {

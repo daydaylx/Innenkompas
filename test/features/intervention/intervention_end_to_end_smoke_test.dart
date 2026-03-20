@@ -53,11 +53,11 @@ void main() {
           ),
           GoRoute(
             path: AppRoutes.intervention,
-            builder: (context, state) => Consumer(
-              builder: (context, ref, _) => InterventionScreen(
-                interventionId:
-                    ref.watch(interventionFlowStateProvider).intervention?.id,
-              ),
+            builder: (context, state) => InterventionScreen(
+              interventionId: (state.extra is Map<String, dynamic>)
+                  ? (state.extra as Map<String, dynamic>)['interventionId']
+                      as String?
+                  : null,
             ),
           ),
         ],
@@ -94,6 +94,148 @@ void main() {
       final updatedEntry = await database.getSituationEntryById(entryId);
       expect(updatedEntry, isNotNull);
       expect(updatedEntry!.selectedNextActionKey, 'choose_one_step');
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+        'starts the stored concrete intervention instead of guessing by type',
+        (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+
+      final entryId = await insertSituationEntry(
+        database,
+        interventionType: InterventionType.regulation.name,
+        interventionId: 'grounding_5_4_3_2_1',
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(database),
+          evaluationContentProvider.overrideWith(
+            (ref) async => EvaluationContentBundle.fallback,
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final router = GoRouter(
+        initialLocation: '/eval',
+        routes: [
+          GoRoute(
+            path: '/eval',
+            builder: (context, state) =>
+                EntryEvaluationScreen(entryId: entryId),
+          ),
+          GoRoute(
+            path: AppRoutes.intervention,
+            builder: (context, state) => InterventionScreen(
+              interventionId: (state.extra is Map<String, dynamic>)
+                  ? (state.extra as Map<String, dynamic>)['interventionId']
+                      as String?
+                  : null,
+            ),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Passende Übung starten'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Passende Übung starten'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(
+        container.read(interventionFlowStateProvider).intervention?.id,
+        'grounding_5_4_3_2_1',
+      );
+      expect(find.text('5-4-3-2-1 Erdung'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+        'legacy entries without interventionId get a robust persisted fallback',
+        (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+
+      final entryId = await insertSituationEntry(
+        database,
+        interventionType: InterventionType.abc3.name,
+        includeConcreteInterventionId: false,
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(database),
+          evaluationContentProvider.overrideWith(
+            (ref) async => EvaluationContentBundle.fallback,
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final router = GoRouter(
+        initialLocation: '/eval',
+        routes: [
+          GoRoute(
+            path: '/eval',
+            builder: (context, state) =>
+                EntryEvaluationScreen(entryId: entryId),
+          ),
+          GoRoute(
+            path: AppRoutes.intervention,
+            builder: (context, state) => InterventionScreen(
+              interventionId: (state.extra is Map<String, dynamic>)
+                  ? (state.extra as Map<String, dynamic>)['interventionId']
+                      as String?
+                  : null,
+            ),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Passende Übung starten'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Passende Übung starten'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      final updatedEntry = await database.getSituationEntryById(entryId);
+      expect(updatedEntry, isNotNull);
+      expect(updatedEntry!.interventionType, InterventionType.abc3.name);
+      expect(updatedEntry.interventionId, 'abc3_protocol');
+      expect(
+        container.read(interventionFlowStateProvider).intervention?.id,
+        'abc3_protocol',
+      );
+      expect(find.text('ABC-3 Kurzprotokoll'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

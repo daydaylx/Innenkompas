@@ -343,6 +343,20 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  Future<void> updateInterventionReference({
+    required int entryId,
+    required String interventionId,
+    required String interventionType,
+  }) async {
+    await (update(situationEntries)..where((e) => e.id.equals(entryId))).write(
+      SituationEntriesCompanion(
+        interventionId: Value(interventionId),
+        interventionType: Value(interventionType),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   /// Marks a saved entry as opted-in and currently waiting for AI output.
   Future<void> markAiEvaluationPending({
     required int entryId,

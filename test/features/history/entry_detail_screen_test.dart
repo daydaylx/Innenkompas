@@ -107,5 +107,25 @@ void main() {
       expect(find.text('Merksatz'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('prefers the concrete intervention label over a stale type',
+        (WidgetTester tester) async {
+      final harness = await pumpTestApp(tester);
+
+      final entryId = await insertSituationEntry(
+        harness.database,
+        interventionType: 'factCheck',
+        interventionId: 'rsa_abcde_v1',
+      );
+
+      await harness.goTo(
+        tester,
+        AppRoutes.entryDetail.replaceFirst(':id', '$entryId'),
+      );
+
+      expect(find.text('Intervention'), findsOneWidget);
+      expect(find.text('Rationale Selbstanalyse (RSA)'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
   });
 }

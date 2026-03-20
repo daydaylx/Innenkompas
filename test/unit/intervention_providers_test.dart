@@ -78,8 +78,12 @@ void main() {
       expect(classification, isNotNull);
       expect(interventions, isNotEmpty);
       expect(
+        interventions.map((intervention) => intervention.id),
+        classification!.recommendedInterventionIds,
+      );
+      expect(
         interventions.map((intervention) => intervention.type),
-        classification!.recommendedInterventions,
+        classification.recommendedInterventions,
       );
     });
 
@@ -171,7 +175,9 @@ void main() {
         classification.recommendedInterventions,
         isNot(contains(InterventionType.factCheck)),
       );
+      expect(classification.primaryInterventionId, 'acute_regulation');
       expect(interventions, isNotEmpty);
+      expect(interventions.first.id, 'acute_regulation');
       expect(interventions.first.type, InterventionType.regulation);
     });
   });

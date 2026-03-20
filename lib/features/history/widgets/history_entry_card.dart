@@ -161,7 +161,8 @@ class HistoryEntryCard extends StatelessWidget {
               const Spacer(),
 
               // Intervention-Indicator
-              if (entry.interventionType != null)
+              if ((entry.interventionType?.trim().isNotEmpty ?? false) ||
+                  (entry.interventionId?.trim().isNotEmpty ?? false))
                 Icon(
                   Icons.self_improvement,
                   size: 20,

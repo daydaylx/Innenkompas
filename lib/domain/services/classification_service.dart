@@ -7,6 +7,7 @@ import '../../core/constants/intervention_types.dart';
 import '../rules/state_classifier.dart';
 import '../rules/crisis_detector.dart';
 import '../rules/intervention_selector.dart';
+import 'intervention_resolver.dart';
 
 /// Classification service that combines all classification components.
 ///
@@ -75,6 +76,11 @@ class ClassificationService {
       primaryEmotion: primaryEmotion,
       intensity: intensity,
     );
+    final concreteRecommendations = InterventionResolver.resolveRecommendations(
+      systemState: effectiveSystemState,
+      primaryEmotion: primaryEmotion,
+      intensity: intensity,
+    );
 
     return CompleteClassificationResult(
       systemState: effectiveSystemState,
@@ -82,8 +88,14 @@ class ClassificationService {
       crisisIndicators: crisisResult.indicators,
       crisisSeverity: crisisResult.severity,
       recommendedInterventions: interventions,
+      recommendedInterventionIds: concreteRecommendations
+          .map((recommendation) => recommendation.interventionId)
+          .toList(growable: false),
       primaryIntervention:
           interventions.isNotEmpty ? interventions.first : null,
+      primaryInterventionId: concreteRecommendations.isNotEmpty
+          ? concreteRecommendations.first.interventionId
+          : null,
     );
   }
 
@@ -183,7 +195,9 @@ class CompleteClassificationResult {
     required this.crisisIndicators,
     required this.crisisSeverity,
     required this.recommendedInterventions,
+    required this.recommendedInterventionIds,
     required this.primaryIntervention,
+    required this.primaryInterventionId,
   });
 
   /// The determined system state.
@@ -201,8 +215,14 @@ class CompleteClassificationResult {
   /// Ordered list of recommended interventions.
   final List<InterventionType> recommendedInterventions;
 
+  /// Ordered list of concrete intervention IDs.
+  final List<String> recommendedInterventionIds;
+
   /// The primary intervention to use first.
   final InterventionType? primaryIntervention;
+
+  /// The concrete intervention ID to use first.
+  final String? primaryInterventionId;
 
   /// Check if this result requires immediate crisis support.
   bool get requiresImmediateCrisisSupport {

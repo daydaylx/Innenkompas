@@ -9,6 +9,7 @@ import 'package:innenkompass/data/db/app_database.dart';
 import 'package:innenkompass/domain/models/intervention.dart'
     show InterventionEffectiveness;
 import 'package:innenkompass/domain/models/pattern_summary.dart';
+import 'package:innenkompass/domain/services/intervention_resolver.dart';
 
 /// Burnout-Risiko basierend auf aufeinanderfolgenden Tagen mit hoher Intensität
 enum BurnoutRisk { low, medium, high }
@@ -39,6 +40,59 @@ class ContextCorrelation {
 
 /// Service zur Analyse von Mustern in Situationseinträgen
 class PatternAnalyzer {
+  static String? buildEntryPatternHint({
+    required SituationEntryData entry,
+    required List<SituationEntryData> entries,
+    int minMatches = 3,
+  }) {
+    final context = ContextType.fromRaw(entry.context);
+    if (context == null) {
+      return null;
+    }
+
+    final otherEntries = entries
+        .where((candidate) => candidate.id != entry.id)
+        .where((candidate) => candidate.context == entry.context)
+        .toList(growable: false);
+    if (otherEntries.length < minMatches) {
+      return null;
+    }
+
+    final matchingStateEntries = otherEntries
+        .where((candidate) => candidate.systemState == entry.systemState)
+        .toList(growable: false);
+    if (matchingStateEntries.length >= minMatches) {
+      final state = SystemState.values
+          .firstWhereOrNull((value) => value.name == entry.systemState);
+      final stateLabel = state?.label.toLowerCase() ?? 'aehnlicher Belastung';
+      return 'Dieses Muster taucht bei dir wiederholt in ${context.label} mit $stateLabel auf.';
+    }
+
+    final matchingEmotionEntries = otherEntries
+        .where((candidate) => candidate.primaryEmotion == entry.primaryEmotion)
+        .toList(growable: false);
+    if (matchingEmotionEntries.length >= minMatches) {
+      final emotion = EmotionType.values
+          .firstWhereOrNull((value) => value.name == entry.primaryEmotion);
+      final emotionLabel =
+          emotion?.label.toLowerCase() ?? 'aehnlicher Reaktion';
+      return 'Dieses Muster taucht bei dir wiederholt in ${context.label} mit $emotionLabel auf.';
+    }
+
+    final currentHighTension = entry.intensity >= 7 || entry.bodyTension >= 7;
+    final highTensionEntries = currentHighTension
+        ? otherEntries
+            .where((candidate) =>
+                candidate.intensity >= 7 || candidate.bodyTension >= 7)
+            .toList(growable: false)
+        : const <SituationEntryData>[];
+    if (highTensionEntries.length >= minMatches) {
+      return 'Dieses Muster taucht bei dir wiederholt in ${context.label} mit hoher Anspannung auf.';
+    }
+
+    return null;
+  }
+
   /// Analysiert alle Einträge und gibt eine Zusammenfassung der Muster zurück
   static Future<PatternSummary> analyzePatterns(
     List<SituationEntryData> entries,
@@ -198,16 +252,17 @@ class PatternAnalyzer {
 
     if (withIntervention.isEmpty) return [];
 
-    // Gruppiere nach Interventionstyp
+    // Gruppiere bevorzugt nach konkreter Intervention, sonst nach Legacy-Typ.
     final grouped = <String, List<SituationEntryData>>{};
     for (final entry in withIntervention) {
-      final type = entry.interventionType ?? 'unknown';
-      grouped[type] = [...grouped[type] ?? [], entry];
+      final key = _interventionKey(entry);
+      grouped[key] = [...grouped[key] ?? [], entry];
     }
 
-    // Berechne Effektivität pro Typ
+    // Berechne Effektivität pro Intervention
     final effectiveness = grouped.entries.map((e) {
       final typeEntries = e.value;
+      final sampleEntry = typeEntries.first;
       final improvements = <double>[];
       final tensionImprovements = <double>[];
       final clarityGains = <double>[];
@@ -224,8 +279,8 @@ class PatternAnalyzer {
 
       return InterventionEffectiveness(
         interventionId: e.key,
-        title: _getInterventionTitle(e.key),
-        type: _getInterventionType(e.key),
+        title: _getInterventionTitle(sampleEntry),
+        type: _getInterventionType(sampleEntry),
         usageCount: typeEntries.length,
         avgImprovement:
             improvements.reduce((a, b) => a + b) / improvements.length,
@@ -438,31 +493,34 @@ class PatternAnalyzer {
   }
 
   /// Hilfsfunktion: Titel einer Intervention
-  static String _getInterventionTitle(String typeId) {
-    final titleMap = {
-      'regulation': 'Regulation',
-      'factCheck': 'Fakt vs. Deutung',
-      'impulsePause': 'Impulspause',
-      'ruminationStop': 'Grübelstopp',
-      'communication': 'Kommunikationshilfe',
-      'overwhelmStructure': 'Überforderungsstruktur',
-      'selfValueCheck': 'Selbstabwertungscheck',
-    };
-    return titleMap[typeId] ?? typeId;
+  static String _getInterventionTitle(SituationEntryData entry) {
+    return InterventionResolver.labelForStoredReference(
+      interventionId: entry.interventionId,
+      interventionTypeRaw: entry.interventionType,
+    );
   }
 
   /// Hilfsfunktion: InterventionType aus String
-  static InterventionType _getInterventionType(String typeId) {
-    final typeMap = {
-      'regulation': InterventionType.regulation,
-      'factCheck': InterventionType.factCheck,
-      'impulsePause': InterventionType.impulsePause,
-      'ruminationStop': InterventionType.ruminationStop,
-      'communication': InterventionType.communication,
-      'overwhelmStructure': InterventionType.overwhelmStructure,
-      'selfValueCheck': InterventionType.selfValueCheck,
-    };
-    return typeMap[typeId] ?? InterventionType.regulation;
+  static InterventionType _getInterventionType(SituationEntryData entry) {
+    return InterventionResolver.typeForStoredReference(
+          interventionId: entry.interventionId,
+          interventionTypeRaw: entry.interventionType,
+        ) ??
+        InterventionType.regulation;
+  }
+
+  static String _interventionKey(SituationEntryData entry) {
+    final interventionId = entry.interventionId?.trim();
+    if (interventionId != null && interventionId.isNotEmpty) {
+      return interventionId;
+    }
+
+    final interventionType = entry.interventionType?.trim();
+    if (interventionType != null && interventionType.isNotEmpty) {
+      return interventionType;
+    }
+
+    return 'unknown';
   }
 
   /// Filtert Einträge basierend auf Filter-Kriterien
@@ -510,7 +568,13 @@ class PatternAnalyzer {
 
     // Nur mit Intervention
     if (filter.withInterventionOnly == true) {
-      filtered = filtered.where((e) => e.interventionType != null).toList();
+      filtered = filtered
+          .where(
+            (e) =>
+                (e.interventionType?.trim().isNotEmpty ?? false) ||
+                (e.interventionId?.trim().isNotEmpty ?? false),
+          )
+          .toList();
     }
 
     // Nur Krisen-Einträge

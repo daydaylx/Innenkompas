@@ -10,6 +10,7 @@ import 'package:innenkompass/domain/models/intervention.dart';
 import 'package:innenkompass/domain/models/intervention_library.dart';
 import 'package:innenkompass/domain/models/intervention_step.dart';
 import 'package:innenkompass/domain/models/pattern_summary.dart';
+import 'package:innenkompass/domain/services/intervention_resolver.dart';
 import 'package:innenkompass/domain/services/pattern_analyzer.dart';
 import 'database_provider.dart';
 import 'new_situation_providers.dart';
@@ -193,8 +194,9 @@ extension InterventionFlowDataExtension on InterventionFlowData {
 List<Intervention> recommendedInterventions(Ref ref) {
   final classification = ref.watch(classificationResultProvider);
   if (classification != null) {
-    return classification.recommendedInterventions
-        .expand((type) => InterventionLibrary.getByType(type).take(1))
+    return classification.recommendedInterventionIds
+        .map(InterventionLibrary.getById)
+        .whereType<Intervention>()
         .toList(growable: false);
   }
 
@@ -213,6 +215,12 @@ String? currentInterventionId(Ref ref) {
   return ref.watch(interventionFlowStateProvider).intervention?.id;
 }
 
+final interventionEntryProvider =
+    FutureProvider.family<SituationEntryData?, int>((ref, entryId) async {
+  final db = ref.watch(databaseProvider);
+  return db.getSituationEntryById(entryId);
+});
+
 /// Factory-Methode um empfohlene Interventionen zu erhalten
 List<Intervention> getRecommendedInterventions({
   required SystemState systemState,
@@ -220,12 +228,29 @@ List<Intervention> getRecommendedInterventions({
   required int intensity,
   List<InterventionType>? preferredTypes,
 }) {
-  return InterventionLibrary.getRecommended(
-    systemState: systemState,
-    emotion: primaryEmotion,
-    intensity: intensity,
-    preferredTypes: preferredTypes,
-  );
+  final resolved = preferredTypes == null || preferredTypes.isEmpty
+      ? InterventionResolver.resolveRecommendations(
+          systemState: systemState,
+          primaryEmotion: primaryEmotion,
+          intensity: intensity,
+        )
+      : preferredTypes
+          .map(
+            (type) => InterventionResolver.resolveForContext(
+              systemState: systemState,
+              primaryEmotion: primaryEmotion,
+              intensity: intensity,
+              preferredType: type,
+            ),
+          )
+          .whereType<ResolvedInterventionRecommendation>()
+          .toList(growable: false);
+
+  final seenIds = <String>{};
+  return resolved
+      .where((recommendation) => seenIds.add(recommendation.interventionId))
+      .map((recommendation) => recommendation.intervention)
+      .toList(growable: false);
 }
 
 /// State für die Nachbewertung
