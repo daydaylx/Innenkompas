@@ -289,22 +289,6 @@ class NewSituationValidators {
       errors.add('Bitte wähle höchstens zwei benötigte Dinge aus.');
     }
 
-    final alternativeResult =
-        validateRealisticAlternative(data.realisticAlternative);
-    if (!alternativeResult.isValid) {
-      errors.addAll(alternativeResult.errorMessages);
-    }
-
-    final backgroundThemeResult = validateBackgroundTheme(data.backgroundTheme);
-    if (!backgroundThemeResult.isValid) {
-      errors.addAll(backgroundThemeResult.errorMessages);
-    }
-
-    final nextStepResult = validateNextStep(data.nextStep);
-    if (!nextStepResult.isValid) {
-      errors.addAll(nextStepResult.errorMessages);
-    }
-
     if (data.preEscalationRelief != null &&
         data.preEscalationRelief!.trim().length >
             AppConstants.maxPreEscalationReliefLength) {

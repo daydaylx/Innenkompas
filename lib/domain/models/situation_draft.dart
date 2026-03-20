@@ -11,7 +11,7 @@ class SituationEventData {
   const SituationEventData({
     required this.description,
     required this.preTriggerPreoccupation,
-    required this.problemTiming,
+    this.problemTiming,
     required this.trigger,
     required this.context,
     required this.timestamp,
@@ -20,7 +20,7 @@ class SituationEventData {
 
   final String description;
   final String preTriggerPreoccupation;
-  final ProblemTiming problemTiming;
+  final ProblemTiming? problemTiming;
   final String trigger;
   final ContextType context;
   final DateTime timestamp;
@@ -65,7 +65,7 @@ class SituationEventData {
   int get hashCode =>
       description.hashCode ^
       preTriggerPreoccupation.hashCode ^
-      problemTiming.hashCode ^
+      (problemTiming?.hashCode ?? 0) ^
       trigger.hashCode ^
       context.hashCode ^
       timestamp.hashCode ^
@@ -215,28 +215,28 @@ class SituationReflectionData {
   const SituationReflectionData({
     required this.touchedThemes,
     required this.neededSupports,
-    required this.realisticAlternative,
     required this.triggerAsLastDrop,
-    required this.backgroundTheme,
-    required this.nextStep,
+    this.realisticAlternative,
+    this.backgroundTheme,
+    this.nextStep,
     this.preEscalationRelief,
     this.patternFamiliarity,
   });
 
   final List<String> touchedThemes;
   final List<String> neededSupports;
-  final String realisticAlternative;
   final TriggerAsLastDrop triggerAsLastDrop;
-  final String backgroundTheme;
-  final String nextStep;
+  final String? realisticAlternative;
+  final String? backgroundTheme;
+  final String? nextStep;
   final String? preEscalationRelief;
   final PatternFamiliarity? patternFamiliarity;
 
   SituationReflectionData copyWith({
     List<String>? touchedThemes,
     List<String>? neededSupports,
-    String? realisticAlternative,
     TriggerAsLastDrop? triggerAsLastDrop,
+    String? realisticAlternative,
     String? backgroundTheme,
     String? nextStep,
     String? preEscalationRelief,
@@ -245,8 +245,8 @@ class SituationReflectionData {
     return SituationReflectionData(
       touchedThemes: touchedThemes ?? this.touchedThemes,
       neededSupports: neededSupports ?? this.neededSupports,
-      realisticAlternative: realisticAlternative ?? this.realisticAlternative,
       triggerAsLastDrop: triggerAsLastDrop ?? this.triggerAsLastDrop,
+      realisticAlternative: realisticAlternative ?? this.realisticAlternative,
       backgroundTheme: backgroundTheme ?? this.backgroundTheme,
       nextStep: nextStep ?? this.nextStep,
       preEscalationRelief: preEscalationRelief ?? this.preEscalationRelief,
@@ -261,8 +261,8 @@ class SituationReflectionData {
     return other is SituationReflectionData &&
         _listEquals(other.touchedThemes, touchedThemes) &&
         _listEquals(other.neededSupports, neededSupports) &&
-        other.realisticAlternative == realisticAlternative &&
         other.triggerAsLastDrop == triggerAsLastDrop &&
+        other.realisticAlternative == realisticAlternative &&
         other.backgroundTheme == backgroundTheme &&
         other.nextStep == nextStep &&
         other.preEscalationRelief == preEscalationRelief &&
@@ -273,10 +273,10 @@ class SituationReflectionData {
   int get hashCode =>
       touchedThemes.hashCode ^
       neededSupports.hashCode ^
-      realisticAlternative.hashCode ^
       triggerAsLastDrop.hashCode ^
-      backgroundTheme.hashCode ^
-      nextStep.hashCode ^
+      (realisticAlternative?.hashCode ?? 0) ^
+      (backgroundTheme?.hashCode ?? 0) ^
+      (nextStep?.hashCode ?? 0) ^
       preEscalationRelief.hashCode ^
       patternFamiliarity.hashCode;
 }

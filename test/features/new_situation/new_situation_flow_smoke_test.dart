@@ -81,7 +81,6 @@ void main() {
         ),
         'Ich war schon vorher unter Druck und gedanklich bei dem Termin.',
       );
-      await tapVisible(choiceChipTarget('Teilweise'));
       await tester.enterText(
         textFieldByHint(
           'Zum Beispiel: Ein bestimmter Satz, Blick, eine Nachricht oder ein kleiner Fehler.',
@@ -114,7 +113,7 @@ void main() {
       );
       await tester.enterText(
         textFieldByHint(
-          'Zum Beispiel: Jetzt reicht’s. Oder: Ich mache alles schlimmer.',
+          '"Das ist wieder typisch" oder "Ich bin zu blöd dafür"',
         ),
         'Ich werde jetzt sicher falsch verstanden.',
       );
@@ -135,32 +134,9 @@ void main() {
 
       expect(find.text('Einordnen und weitergehen'), findsOneWidget);
 
+      await tapVisible(choiceChipTarget('Ja, ziemlich sicher'));
       await tapVisible(filterChipTarget('Respekt'));
       await tapVisible(filterChipTarget('Klarheit'));
-      await tester.enterText(
-        textFieldByHint(
-          'Zum Beispiel: Ich hätte kurz stoppen und sagen können, dass ich später antworte.',
-        ),
-        'Ich hätte kurz stoppen und sagen können, dass ich später antworte.',
-      );
-      await tester.drag(
-        find.byType(SingleChildScrollView),
-        const Offset(0, -500),
-      );
-      await tester.pumpAndSettle();
-      await tapVisible(choiceChipTarget('Ja, ziemlich sicher'));
-      await tester.enterText(
-        textFieldByHint(
-          'Zum Beispiel: Nicht ernst genommen werden, Leistungsdruck, alte Kränkung oder Kontrollverlust.',
-        ),
-        'Nicht ernst genommen werden.',
-      );
-      await tester.enterText(
-        textFieldByHint(
-          'Zum Beispiel: Erst runterkommen, dann das Thema heute Abend sachlich notieren.',
-        ),
-        'Ich schreibe mir zuerst die Fakten auf.',
-      );
 
       expect(
         tester

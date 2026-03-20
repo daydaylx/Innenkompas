@@ -7,7 +7,6 @@ import '../../../app/theme/colors.dart';
 import '../../../application/providers/new_situation_providers.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/context_types.dart';
-import '../../../core/constants/problem_timing.dart';
 import '../../../core/validators/new_situation_validators.dart';
 import '../../../domain/models/situation_draft.dart';
 import '../../../shared/widgets/app_scaffold.dart';
@@ -29,7 +28,6 @@ class SituationEventScreen extends ConsumerStatefulWidget {
 class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
   String _description = '';
   String _preTriggerPreoccupation = '';
-  ProblemTiming? _problemTiming;
   String _trigger = '';
   ContextType? _selectedContext;
   DateTime _timestamp = DateTime.now();
@@ -45,7 +43,6 @@ class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
     if (existingData != null) {
       _description = existingData.description;
       _preTriggerPreoccupation = existingData.preTriggerPreoccupation;
-      _problemTiming = existingData.problemTiming;
       _trigger = existingData.trigger;
       _selectedContext = existingData.context;
       _timestamp = existingData.timestamp;
@@ -54,7 +51,7 @@ class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
   }
 
   bool get _isValid {
-    if (_selectedContext == null || _problemTiming == null) {
+    if (_selectedContext == null) {
       return false;
     }
 
@@ -62,7 +59,6 @@ class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
       SituationEventData(
         description: _description,
         preTriggerPreoccupation: _preTriggerPreoccupation,
-        problemTiming: _problemTiming!,
         trigger: _trigger,
         context: _selectedContext!,
         timestamp: _timestamp,
@@ -101,21 +97,10 @@ class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
       return;
     }
 
-    if (_problemTiming == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content:
-              Text('Bitte ordne kurz ein, ob das Problem schon vorher da war.'),
-        ),
-      );
-      return;
-    }
-
     ref.read(newSituationFlowControllerProvider.notifier).updateEventData(
           SituationEventData(
             description: _description.trim(),
             preTriggerPreoccupation: _preTriggerPreoccupation.trim(),
-            problemTiming: _problemTiming!,
             trigger: _trigger.trim(),
             context: _selectedContext!,
             timestamp: _timestamp,
@@ -241,45 +226,6 @@ class _SituationEventScreenState extends ConsumerState<SituationEventScreen> {
                     'Zum Beispiel: Ich war schon erschöpft, habe über Arbeit nachgedacht oder innerlich Druck gemacht.',
                 helperText: 'Auch Stichworte oder ein kurzer Satz sind okay.',
                 errorText: _preoccupationError,
-              ),
-            ),
-            AppCard(
-              variant: AppCardVariant.soft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'War das eigentliche Problem schon vorher da?',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.spacingSmall),
-                  Wrap(
-                    spacing: AppConstants.spacingSmall,
-                    runSpacing: AppConstants.spacingSmall,
-                    children: ProblemTiming.values.map((value) {
-                      return ChoiceChip(
-                        selected: _problemTiming == value,
-                        label: Text(value.label),
-                        onSelected: (_) {
-                          setState(() {
-                            _problemTiming = value;
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  if (_problemTiming != null) ...[
-                    const SizedBox(height: AppConstants.spacingSmall),
-                    Text(
-                      _problemTiming!.description,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ],
               ),
             ),
             _buildPromptCard(

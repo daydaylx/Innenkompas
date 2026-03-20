@@ -41,7 +41,7 @@ void main() {
 
       expect(find.text('Eintragdetails'), findsOneWidget);
       expect(find.text('Situation'), findsOneWidget);
-      expect(find.text('Gedanken & Impulse'), findsOneWidget);
+      expect(find.text('Gedanken & Muster'), findsOneWidget);
       expect(find.text('Ich will ernst genommen werden.'), findsOneWidget);
       expect(tester.takeException(), isNull);
 

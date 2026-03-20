@@ -263,7 +263,7 @@ class _SituationThoughtImpulseScreenState
               ),
             ),
             _buildPromptCard(
-              title: 'Was war dein erster automatischer Gedanke?',
+              title: 'Was schoss dir als Erstes durch den Kopf?',
               variant: AppCardVariant.soft,
               child: FormTextArea(
                 initialValue: _automaticThought,
@@ -276,7 +276,7 @@ class _SituationThoughtImpulseScreenState
                 maxLength: AppConstants.maxThoughtDescriptionLength,
                 maxLines: 3,
                 hintText:
-                    'Zum Beispiel: Jetzt reicht’s. Oder: Ich mache alles schlimmer.',
+                    '"Das ist wieder typisch" oder "Ich bin zu blöd dafür"',
                 helperText:
                     'Nimm den ersten rohen Gedanken, nicht die spätere Erklärung.',
                 errorText: _thoughtError,
@@ -327,7 +327,7 @@ class _SituationThoughtImpulseScreenState
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Wie hat dein System zuerst reagiert?',
+                    'Was wolltest du in dem Moment am liebsten tun?',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),

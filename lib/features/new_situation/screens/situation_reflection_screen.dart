@@ -40,9 +40,6 @@ class _SituationReflectionScreenState
   String _nextStep = '';
   String _preEscalationRelief = '';
   PatternFamiliarity? _patternFamiliarity;
-  String? _alternativeError;
-  String? _backgroundThemeError;
-  String? _nextStepError;
   String? _touchedThemesError;
   String? _neededSupportsError;
 
@@ -53,10 +50,10 @@ class _SituationReflectionScreenState
     if (existingData != null) {
       _touchedThemes = List<String>.from(existingData.touchedThemes);
       _neededSupports = List<String>.from(existingData.neededSupports);
-      _realisticAlternative = existingData.realisticAlternative;
+      _realisticAlternative = existingData.realisticAlternative ?? '';
       _triggerAsLastDrop = existingData.triggerAsLastDrop;
-      _backgroundTheme = existingData.backgroundTheme;
-      _nextStep = existingData.nextStep;
+      _backgroundTheme = existingData.backgroundTheme ?? '';
+      _nextStep = existingData.nextStep ?? '';
       _preEscalationRelief = existingData.preEscalationRelief ?? '';
       _patternFamiliarity = existingData.patternFamiliarity;
     }
@@ -77,10 +74,14 @@ class _SituationReflectionScreenState
       SituationReflectionData(
         touchedThemes: _touchedThemes,
         neededSupports: _neededSupports,
-        realisticAlternative: _realisticAlternative,
         triggerAsLastDrop: _triggerAsLastDrop!,
-        backgroundTheme: _backgroundTheme,
-        nextStep: _nextStep,
+        realisticAlternative: _realisticAlternative.trim().isEmpty
+            ? null
+            : _realisticAlternative.trim(),
+        backgroundTheme: _backgroundTheme.trim().isEmpty
+            ? null
+            : _backgroundTheme.trim(),
+        nextStep: _nextStep.trim().isEmpty ? null : _nextStep.trim(),
         preEscalationRelief: _preEscalationRelief.trim().isEmpty
             ? null
             : _preEscalationRelief.trim(),
@@ -95,14 +96,6 @@ class _SituationReflectionScreenState
       _neededSupportsError = _neededSupports.isEmpty
           ? 'Bitte wähle, was du gebraucht hättest.'
           : null;
-      _alternativeError = NewSituationValidators.validateRealisticAlternative(
-        _realisticAlternative,
-      ).firstError;
-      _backgroundThemeError =
-          NewSituationValidators.validateBackgroundTheme(_backgroundTheme)
-              .firstError;
-      _nextStepError =
-          NewSituationValidators.validateNextStep(_nextStep).firstError;
     });
 
     if (!validation.isValid) {
@@ -113,10 +106,14 @@ class _SituationReflectionScreenState
           SituationReflectionData(
             touchedThemes: _touchedThemes,
             neededSupports: _neededSupports,
-            realisticAlternative: _realisticAlternative.trim(),
             triggerAsLastDrop: _triggerAsLastDrop!,
-            backgroundTheme: _backgroundTheme.trim(),
-            nextStep: _nextStep.trim(),
+            realisticAlternative: _realisticAlternative.trim().isEmpty
+                ? null
+                : _realisticAlternative.trim(),
+            backgroundTheme: _backgroundTheme.trim().isEmpty
+                ? null
+                : _backgroundTheme.trim(),
+            nextStep: _nextStep.trim().isEmpty ? null : _nextStep.trim(),
             preEscalationRelief: _preEscalationRelief.trim().isEmpty
                 ? null
                 : _preEscalationRelief.trim(),
@@ -206,79 +203,6 @@ class _SituationReflectionScreenState
               ),
             ),
             const SizedBox(height: AppConstants.spacingLarge),
-            _buildSelectorCard(
-              title: 'Was wurde in dir getroffen? Max. 2',
-              errorText: _touchedThemesError,
-              child: StringChipSelector(
-                options: NewSituationOptionLists.touchedThemes,
-                selectedValues: _touchedThemes,
-                maxSelected: 2,
-                onChanged: (values) {
-                  setState(() {
-                    _touchedThemes = values;
-                    _touchedThemesError = null;
-                  });
-                },
-              ),
-            ),
-            _buildSelectorCard(
-              title:
-                  'Was hättest du in dem Moment eigentlich gebraucht? Max. 2',
-              variant: AppCardVariant.soft,
-              errorText: _neededSupportsError,
-              child: StringChipSelector(
-                options: NewSituationOptionLists.neededSupports,
-                selectedValues: _neededSupports,
-                maxSelected: 2,
-                onChanged: (values) {
-                  setState(() {
-                    _neededSupports = values;
-                    _neededSupportsError = null;
-                  });
-                },
-              ),
-            ),
-            _buildPromptCard(
-              title:
-                  'Was wäre in genau diesem Moment ein realistischer anderer Schritt gewesen?',
-              variant: AppCardVariant.soft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  StringChipSelector(
-                    options:
-                        NewSituationOptionLists.realisticAlternativeOptions,
-                    selectedValues: const [],
-                    maxSelected: 1,
-                    onChanged: (values) {
-                      if (values.isEmpty) return;
-                      final selection = values.first;
-                      setState(() {
-                        _realisticAlternative = _realisticAlternative.isEmpty
-                            ? selection
-                            : '$_realisticAlternative, $selection';
-                        _alternativeError = null;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: AppConstants.spacingMedium),
-                  FormTextArea(
-                    initialValue: _realisticAlternative,
-                    onChanged: (value) {
-                      setState(() {
-                        _realisticAlternative = value;
-                        _alternativeError = null;
-                      });
-                    },
-                    maxLength: AppConstants.maxAlternativeStepLength,
-                    maxLines: 3,
-                    hintText:
-                        'Zum Beispiel: Ich hätte kurz stoppen und sagen können, dass ich später antworte.',
-                    errorText: _alternativeError,
-                  ),
-                ],
-              ),
-            ),
             if (thoughtData != null)
               AppCard(
                 variant: AppCardVariant.soft,
@@ -345,21 +269,127 @@ class _SituationReflectionScreenState
                 ],
               ),
             ),
+            _buildSelectorCard(
+              title: 'Was wurde in dir getroffen? Max. 2',
+              errorText: _touchedThemesError,
+              child: StringChipSelector(
+                options: NewSituationOptionLists.touchedThemes,
+                selectedValues: _touchedThemes,
+                maxSelected: 2,
+                onChanged: (values) {
+                  setState(() {
+                    _touchedThemes = values;
+                    _touchedThemesError = null;
+                  });
+                },
+              ),
+            ),
+            _buildSelectorCard(
+              title:
+                  'Was hättest du in dem Moment eigentlich gebraucht? Max. 2',
+              variant: AppCardVariant.soft,
+              errorText: _neededSupportsError,
+              child: StringChipSelector(
+                options: NewSituationOptionLists.neededSupports,
+                selectedValues: _neededSupports,
+                maxSelected: 2,
+                onChanged: (values) {
+                  setState(() {
+                    _neededSupports = values;
+                    _neededSupportsError = null;
+                  });
+                },
+              ),
+            ),
             _buildPromptCard(
-              title: 'Was war wahrscheinlich das eigentliche Thema dahinter?',
+              title:
+                  'Was war wahrscheinlich das eigentliche Thema dahinter? Optional',
               variant: AppCardVariant.soft,
               child: FormTextArea(
                 initialValue: _backgroundTheme,
                 onChanged: (value) {
                   setState(() {
                     _backgroundTheme = value;
-                    _backgroundThemeError = null;
                   });
                 },
                 maxLength: AppConstants.maxBackgroundThemeLength,
                 hintText:
                     'Zum Beispiel: Nicht ernst genommen werden, Leistungsdruck, alte Kränkung oder Kontrollverlust.',
-                errorText: _backgroundThemeError,
+              ),
+            ),
+            _buildPromptCard(
+              title:
+                  'Was ist der kleinste sinnvolle nächste Schritt nach diesem Eintrag? (empfohlen)',
+              variant: AppCardVariant.soft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  StringChipSelector(
+                    options: NewSituationOptionLists.nextStepOptions,
+                    selectedValues: const [],
+                    maxSelected: 1,
+                    onChanged: (values) {
+                      if (values.isEmpty) return;
+                      final selection = values.first;
+                      setState(() {
+                        _nextStep = _nextStep.isEmpty
+                            ? selection
+                            : '$_nextStep, $selection';
+                      });
+                    },
+                  ),
+                  const SizedBox(height: AppConstants.spacingMedium),
+                  FormTextArea(
+                    initialValue: _nextStep,
+                    onChanged: (value) {
+                      setState(() {
+                        _nextStep = value;
+                      });
+                    },
+                    maxLength: AppConstants.maxNextStepLength,
+                    maxLines: 3,
+                    hintText:
+                        'Zum Beispiel: Erst runterkommen, dann das Thema heute Abend sachlich notieren.',
+                  ),
+                ],
+              ),
+            ),
+            _buildPromptCard(
+              title:
+                  'Was wäre in genau diesem Moment ein realistischer anderer Schritt gewesen? Optional',
+              variant: AppCardVariant.soft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  StringChipSelector(
+                    options:
+                        NewSituationOptionLists.realisticAlternativeOptions,
+                    selectedValues: const [],
+                    maxSelected: 1,
+                    onChanged: (values) {
+                      if (values.isEmpty) return;
+                      final selection = values.first;
+                      setState(() {
+                        _realisticAlternative = _realisticAlternative.isEmpty
+                            ? selection
+                            : '$_realisticAlternative, $selection';
+                      });
+                    },
+                  ),
+                  const SizedBox(height: AppConstants.spacingMedium),
+                  FormTextArea(
+                    initialValue: _realisticAlternative,
+                    onChanged: (value) {
+                      setState(() {
+                        _realisticAlternative = value;
+                      });
+                    },
+                    maxLength: AppConstants.maxAlternativeStepLength,
+                    maxLines: 3,
+                    hintText:
+                        'Zum Beispiel: Ich hätte kurz stoppen und sagen können, dass ich später antworte.',
+                  ),
+                ],
               ),
             ),
             _buildPromptCard(
@@ -406,46 +436,6 @@ class _SituationReflectionScreenState
                         },
                       );
                     }).toList(),
-                  ),
-                ],
-              ),
-            ),
-            _buildPromptCard(
-              title:
-                  'Was ist der kleinste sinnvolle nächste Schritt nach diesem Eintrag?',
-              variant: AppCardVariant.soft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  StringChipSelector(
-                    options: NewSituationOptionLists.nextStepOptions,
-                    selectedValues: const [],
-                    maxSelected: 1,
-                    onChanged: (values) {
-                      if (values.isEmpty) return;
-                      final selection = values.first;
-                      setState(() {
-                        _nextStep = _nextStep.isEmpty
-                            ? selection
-                            : '$_nextStep, $selection';
-                        _nextStepError = null;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: AppConstants.spacingMedium),
-                  FormTextArea(
-                    initialValue: _nextStep,
-                    onChanged: (value) {
-                      setState(() {
-                        _nextStep = value;
-                        _nextStepError = null;
-                      });
-                    },
-                    maxLength: AppConstants.maxNextStepLength,
-                    maxLines: 3,
-                    hintText:
-                        'Zum Beispiel: Erst runterkommen, dann das Thema heute Abend sachlich notieren.',
-                    errorText: _nextStepError,
                   ),
                 ],
               ),

@@ -142,28 +142,6 @@ class _SituationEmotionScreenState
             ),
             const SizedBox(height: AppConstants.spacingLarge),
             AppCard(
-              child: IntensitySlider(
-                preTriggerLoad: _preTriggerLoad,
-                intensity: _intensity,
-                bodyTension: _bodyTension,
-                onPreTriggerLoadChanged: (value) {
-                  setState(() {
-                    _preTriggerLoad = value;
-                  });
-                },
-                onIntensityChanged: (value) {
-                  setState(() {
-                    _intensity = value;
-                  });
-                },
-                onBodyTensionChanged: (value) {
-                  setState(() {
-                    _bodyTension = value;
-                  });
-                },
-              ),
-            ),
-            AppCard(
               variant: AppCardVariant.soft,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -194,6 +172,28 @@ class _SituationEmotionScreenState
                     },
                   ),
                 ],
+              ),
+            ),
+            AppCard(
+              child: IntensitySlider(
+                preTriggerLoad: _preTriggerLoad,
+                intensity: _intensity,
+                bodyTension: _bodyTension,
+                onPreTriggerLoadChanged: (value) {
+                  setState(() {
+                    _preTriggerLoad = value;
+                  });
+                },
+                onIntensityChanged: (value) {
+                  setState(() {
+                    _intensity = value;
+                  });
+                },
+                onBodyTensionChanged: (value) {
+                  setState(() {
+                    _bodyTension = value;
+                  });
+                },
               ),
             ),
             AppCard(

@@ -27,24 +27,24 @@ class IntensitySlider extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _SegmentSection(
-          label: 'Wie belastet warst du schon vor dem Auslöser?',
-          helper: '0 heißt kaum belastet, 10 heißt schon vorher maximal voll.',
-          value: preTriggerLoad,
-          onChanged: onPreTriggerLoadChanged,
-        ),
-        const SizedBox(height: AppConstants.spacingLarge),
-        _SegmentSection(
-          label: 'Wie stark war die Belastung im Moment?',
+          label: 'Wie stark war die Belastung in dem Moment?',
           helper: 'Es reicht eine grobe Einschätzung.',
           value: intensity,
           onChanged: onIntensityChanged,
         ),
         const SizedBox(height: AppConstants.spacingLarge),
         _SegmentSection(
-          label: 'Wie stark war die körperliche Anspannung?',
+          label: 'Wie angespannt war dein Körper?',
           helper: 'Auch hier reicht eine schnelle grobe Zahl.',
           value: bodyTension,
           onChanged: onBodyTensionChanged,
+        ),
+        const SizedBox(height: AppConstants.spacingLarge),
+        _SegmentSection(
+          label: 'Wie voll war dein Tank schon davor?',
+          helper: '0 heißt kaum belastet, 10 heißt schon vorher maximal voll.',
+          value: preTriggerLoad,
+          onChanged: onPreTriggerLoadChanged,
         ),
       ],
     );

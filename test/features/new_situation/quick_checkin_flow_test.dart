@@ -80,15 +80,6 @@ void main() {
         );
       }
 
-      Finder choiceChipTarget(String label) {
-        return find
-            .ancestor(
-              of: find.text(label),
-              matching: find.byType(ChoiceChip),
-            )
-            .first;
-      }
-
       Finder gestureTarget(String label) {
         return find
             .ancestor(
@@ -146,7 +137,6 @@ void main() {
         ),
         'Ich war schon innerlich angespannt.',
       );
-      await tapVisible(choiceChipTarget('Teilweise'));
       await tester.enterText(
         textFieldByHint(
           'Zum Beispiel: Ein bestimmter Satz, Blick, eine Nachricht oder ein kleiner Fehler.',
